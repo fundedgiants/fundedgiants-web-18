@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @tailwind base;
 @tailwind components;
@@ -209,3 +208,136 @@
     font-size: 1rem;
   }
 }
+
+/* Enhanced pricing table container */
+.pricing-table-container {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  box-shadow: 0 25px 50px -12px rgba(34, 197, 94, 0.25);
+  border: 2px solid rgba(34, 197, 94, 0.3);
+}
+
+.pricing-table-grid {
+  display: grid;
+}
+
+.table-cell {
+  position: relative;
+  padding: 0;
+}
+
+.header-cell {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.95) 0%, rgba(16, 185, 129, 0.95) 100%);
+  font-weight: 900;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.data-cell {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.data-cell:hover {
+  background-color: rgba(34, 197, 94, 0.05) !important;
+  transform: scale(1.02);
+  z-index: 10;
+  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.15);
+}
+
+.table-body .pricing-table-grid:hover {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(16, 185, 129, 0.05) 100%);
+  box-shadow: 0 8px 30px rgba(34, 197, 94, 0.2);
+  transform: translateY(-2px);
+  z-index: 20;
+  border-radius: 8px;
+  margin: 2px;
+}
+
+.table-body .pricing-table-grid:nth-child(even) {
+  background: linear-gradient(135deg, rgba(120, 25, 15, 0.05) 0%, rgba(120, 30, 18, 0.03) 100%);
+}
+
+.table-body .pricing-table-grid:nth-child(odd) {
+  background: linear-gradient(135deg, rgba(8, 20, 8, 0.6) 0%, rgba(16, 30, 16, 0.4) 100%);
+}
+
+/* Account size styling */
+.account-size {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+  border-radius: 8px;
+  padding: 8px 16px;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.025em;
+}
+
+/* Fee styling */
+.fee {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%);
+  border-radius: 6px;
+  padding: 6px 12px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* Split styling */
+.split {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(16, 185, 129, 0.1) 100%);
+  border-radius: 8px;
+  padding: 8px 12px;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  font-size: 1rem;
+  font-weight: 800;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced responsive design */
+@media (max-width: 768px) {
+  .pricing-table-grid {
+    font-size: 0.75rem;
+  }
+  
+  .account-size {
+    font-size: 0.9rem;
+    padding: 6px 10px;
+  }
+  
+  .fee {
+    font-size: 0.85rem;
+    padding: 4px 8px;
+  }
+  
+  .split {
+    font-size: 0.85rem;
+    padding: 6px 8px;
+  }
+  
+  .header-cell div {
+    font-size: 0.7rem !important;
+  }
+}
+
+/* Subtle animation for table rows */
+@keyframes tableRowSlide {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.table-body .pricing-table-grid {
+  animation: tableRowSlide 0.5s ease-out forwards;
+}
+
+.table-body .pricing-table-grid:nth-child(1) { animation-delay: 0.1s; }
+.table-body .pricing-table-grid:nth-child(2) { animation-delay: 0.2s; }
+.table-body .pricing-table-grid:nth-child(3) { animation-delay: 0.3s; }
+.table-body .pricing-table-grid:nth-child(4) { animation-delay: 0.4s; }
+.table-body .pricing-table-grid:nth-child(5) { animation-delay: 0.5s; }
+.table-body .pricing-table-grid:nth-child(6) { animation-delay: 0.6s; }

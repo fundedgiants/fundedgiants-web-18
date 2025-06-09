@@ -13,16 +13,16 @@ const TradingPrograms = () => {
       subtitle: 'Instant Divine Power',
       icon: '⚡',
       description: 'Harness the strength of Heracles with instant access to funded accounts. No trials, just pure divine trading power.',
-      features: ['⚡ Instant funding', '🚫 No evaluation required', '💰 50:50 to 70:30 profit split', '♾️ Unlimited trading days', '🛡️ Divine protection'],
+      features: ['⚡ Instant funding', '🚫 No evaluation required', '💰 Up to 70:30 profit split', '♾️ Unlimited trading days', '🛡️ Divine protection'],
       accounts: [
-        { size: '$2,500', fee: '$129', phase1: '$250 (10%)', phase2: '$125 (5%)', phase3: '$125 (5%)', dailyDD: '$100 (4%)', maxDD: '$175 (7%)', split: '50%' },
-        { size: '$5,000', fee: '$239', phase1: '$500 (10%)', phase2: '$250 (5%)', phase3: '$250 (5%)', dailyDD: '$200 (4%)', maxDD: '$350 (7%)', split: '50%' },
-        { size: '$10,000', fee: '$449', phase1: '$1,000 (10%)', phase2: '$500 (5%)', phase3: '$500 (5%)', dailyDD: '$400 (4%)', maxDD: '$700 (7%)', split: '60%' },
+        { size: '$2,500', fee: '$129', phase1: '$250 (10%)', phase2: '$125 (5%)', phase3: '$125 (5%)', dailyDD: '$100 (4%)', maxDD: '$175 (7%)', split: '70%' },
+        { size: '$5,000', fee: '$239', phase1: '$500 (10%)', phase2: '$250 (5%)', phase3: '$250 (5%)', dailyDD: '$200 (4%)', maxDD: '$350 (7%)', split: '70%' },
+        { size: '$10,000', fee: '$449', phase1: '$1,000 (10%)', phase2: '$500 (5%)', phase3: '$500 (5%)', dailyDD: '$400 (4%)', maxDD: '$700 (7%)', split: '70%' },
         { size: '$25,000', fee: '$1,149', phase1: '$2,500 (10%)', phase2: '$1,250 (5%)', phase3: '$1,250 (5%)', dailyDD: '$1,000 (4%)', maxDD: '$1,750 (7%)', split: '70%' },
         { size: '$50,000', fee: '$2,299', phase1: '$5,000 (10%)', phase2: '$2,500 (5%)', phase3: '$2,500 (5%)', dailyDD: '$2,000 (4%)', maxDD: '$3,500 (7%)', split: '70%' },
         { size: '$100,000', fee: '$4,599', phase1: '$10,000 (10%)', phase2: '$5,000 (5%)', phase3: '$5,000 (5%)', dailyDD: '$4,000 (4%)', maxDD: '$7,000 (7%)', split: '70%' }
       ],
-      popular: false,
+      popular: true,
       color: 'from-yellow-500/20 to-orange-500/20'
     },
     {
@@ -31,7 +31,7 @@ const TradingPrograms = () => {
       subtitle: 'Celestial One-Step Ascension',
       icon: '🎯',
       description: 'Follow the constellation of Orion through a single celestial challenge to reach trading immortality.',
-      features: ['🎯 One divine evaluation', '💎 70:30 cosmic profit split', '♾️ Unlimited trading epochs', '💸 Refundable assessment fee', '⭐ Stellar performance tracking'],
+      features: ['🎯 One divine evaluation', '💎 Up to 70:30 cosmic profit split', '♾️ Unlimited trading epochs', '💸 Refundable assessment fee', '⭐ Stellar performance tracking'],
       accounts: [
         { size: '$2,500', fee: '$59', target: '$250 (10%)', dailyDD: '$100 (4%)', maxDD: '$200 (8%)', payout: '$125 (5%)', split: '70%' },
         { size: '$5,000', fee: '$89', target: '$500 (10%)', dailyDD: '$200 (4%)', maxDD: '$400 (8%)', payout: '$250 (5%)', split: '70%' },
@@ -40,7 +40,7 @@ const TradingPrograms = () => {
         { size: '$50,000', fee: '$449', target: '$5,000 (10%)', dailyDD: '$2,000 (4%)', maxDD: '$4,000 (8%)', payout: '$2,500 (5%)', split: '70%' },
         { size: '$100,000', fee: '$749', target: '$10,000 (10%)', dailyDD: '$4,000 (4%)', maxDD: '$8,000 (8%)', payout: '$5,000 (5%)', split: '70%' }
       ],
-      popular: true,
+      popular: false,
       color: 'from-primary/20 to-accent/20'
     },
     {
@@ -49,7 +49,7 @@ const TradingPrograms = () => {
       subtitle: 'Supreme Two-Phase Dominion',
       icon: '⚡',
       description: 'Channel the supreme power of Zeus through two divine phases to achieve ultimate trading sovereignty.',
-      features: ['⚡ Two thunderous evaluations', '👑 70:30 supreme profit split', '♾️ Unlimited divine trading', '💰 Lowest assessment fees', '🏛️ Olympian trader status'],
+      features: ['⚡ Two thunderous evaluations', '👑 Up to 70:30 supreme profit split', '♾️ Unlimited divine trading', '💰 Lowest assessment fees', '🏛️ Olympian trader status'],
       accounts: [
         { size: '$2,500', fee: '$27', phase1: '$250 (10%)', phase2: '$125 (5%)', dailyDD: '$100 (4%)', maxDD: '$200 (8%)', payout: '$125 (5%)', split: '70%' },
         { size: '$5,000', fee: '$47', phase1: '$500 (10%)', phase2: '$250 (5%)', dailyDD: '$200 (4%)', maxDD: '$400 (8%)', payout: '$250 (5%)', split: '70%' },
@@ -63,7 +63,7 @@ const TradingPrograms = () => {
     }
   ]);
 
-  const [selectedProgram, setSelectedProgram] = useState('orion');
+  const [selectedProgram, setSelectedProgram] = useState('heracles');
 
   const currentProgram = programs.find(p => p.id === selectedProgram);
 
@@ -128,72 +128,125 @@ const TradingPrograms = () => {
                 </div>
 
                 {/* Enhanced Pricing Table */}
-                <div className="overflow-hidden rounded-2xl border-2 border-primary/40 shadow-2xl bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-lg">
+                <div className="pricing-table-container overflow-hidden rounded-3xl border border-primary/30 shadow-2xl bg-gradient-to-br from-card/95 to-card/85 backdrop-blur-lg">
                   {/* Table Header */}
-                  <div className="bg-gradient-to-r from-primary via-accent to-primary text-primary-foreground">
-                    <div className="grid grid-cols-7 md:grid-cols-8 gap-2 p-4 font-bold text-xs md:text-sm font-['Inter',sans-serif]">
-                      <div className="text-center font-black text-sm md:text-base">💎 Account</div>
-                      <div className="text-center font-black text-sm md:text-base">💰 Fee</div>
-                      <div className="text-center font-black text-xs md:text-sm">
-                        {currentProgram.id === 'heracles' ? '⚡ Phase 1' : '🎯 Target'}
+                  <div className="table-header bg-gradient-to-r from-primary via-accent to-primary text-primary-foreground p-1">
+                    <div className={`grid gap-0 pricing-table-grid ${
+                      currentProgram.id === 'heracles' ? 'grid-cols-8' : 
+                      currentProgram.id === 'zeus' ? 'grid-cols-8' : 'grid-cols-7'
+                    }`}>
+                      <div className="table-cell header-cell border-r border-primary-foreground/20 last:border-r-0 flex items-center justify-center min-h-[60px]">
+                        <div className="text-center font-black text-sm md:text-base">💎 Account</div>
+                      </div>
+                      <div className="table-cell header-cell border-r border-primary-foreground/20 last:border-r-0 flex items-center justify-center min-h-[60px]">
+                        <div className="text-center font-black text-sm md:text-base">💰 Fee</div>
+                      </div>
+                      <div className="table-cell header-cell border-r border-primary-foreground/20 last:border-r-0 flex items-center justify-center min-h-[60px]">
+                        <div className="text-center font-black text-xs md:text-sm">
+                          {currentProgram.id === 'heracles' ? '⚡ Phase 1' : '🎯 Target'}
+                        </div>
                       </div>
                       {currentProgram.id === 'heracles' && (
                         <>
-                          <div className="text-center font-black text-xs md:text-sm">⚡ Phase 2</div>
-                          <div className="text-center font-black text-xs md:text-sm">⚡ Phase 3</div>
+                          <div className="table-cell header-cell border-r border-primary-foreground/20 last:border-r-0 flex items-center justify-center min-h-[60px]">
+                            <div className="text-center font-black text-xs md:text-sm">⚡ Phase 2</div>
+                          </div>
+                          <div className="table-cell header-cell border-r border-primary-foreground/20 last:border-r-0 flex items-center justify-center min-h-[60px]">
+                            <div className="text-center font-black text-xs md:text-sm">⚡ Phase 3</div>
+                          </div>
                         </>
                       )}
-                      {currentProgram.id === 'zeus' && <div className="text-center font-black text-xs md:text-sm">⚡ Phase 2</div>}
-                      <div className="text-center font-black text-xs md:text-sm">📉 Daily DD</div>
-                      <div className="text-center font-black text-xs md:text-sm">📊 Max DD</div>
-                      {(currentProgram.id === 'orion' || currentProgram.id === 'zeus') && (
-                        <div className="text-center font-black text-xs md:text-sm">💸 Payout</div>
+                      {currentProgram.id === 'zeus' && (
+                        <div className="table-cell header-cell border-r border-primary-foreground/20 last:border-r-0 flex items-center justify-center min-h-[60px]">
+                          <div className="text-center font-black text-xs md:text-sm">⚡ Phase 2</div>
+                        </div>
                       )}
-                      <div className="text-center font-black text-sm md:text-base">🏆 Split</div>
+                      <div className="table-cell header-cell border-r border-primary-foreground/20 last:border-r-0 flex items-center justify-center min-h-[60px]">
+                        <div className="text-center font-black text-xs md:text-sm">📉 Daily DD</div>
+                      </div>
+                      <div className="table-cell header-cell border-r border-primary-foreground/20 last:border-r-0 flex items-center justify-center min-h-[60px]">
+                        <div className="text-center font-black text-xs md:text-sm">📊 Max DD</div>
+                      </div>
+                      {(currentProgram.id === 'orion' || currentProgram.id === 'zeus') && (
+                        <div className="table-cell header-cell border-r border-primary-foreground/20 last:border-r-0 flex items-center justify-center min-h-[60px]">
+                          <div className="text-center font-black text-xs md:text-sm">💸 Payout</div>
+                        </div>
+                      )}
+                      <div className="table-cell header-cell border-r border-primary-foreground/20 last:border-r-0 flex items-center justify-center min-h-[60px]">
+                        <div className="text-center font-black text-sm md:text-base">🏆 Split</div>
+                      </div>
                     </div>
                   </div>
 
                   {/* Table Body */}
-                  <div className="divide-y-2 divide-primary/20">
+                  <div className="table-body">
                     {currentProgram.accounts.map((account, index) => (
-                      <div key={index} className={`grid grid-cols-7 md:grid-cols-8 gap-2 p-4 text-xs md:text-sm transition-all duration-300 hover:bg-primary/10 hover:scale-[1.02] ${
-                        index % 2 === 0 ? 'bg-background/60' : 'bg-muted/30'
-                      }`}>
-                        <div className="text-center font-bold text-primary text-sm md:text-lg font-['Inter',sans-serif] flex items-center justify-center">
-                          {account.size}
+                      <div key={index} className={`grid gap-0 pricing-table-grid border-b border-primary/10 last:border-b-0 transition-all duration-300 hover:bg-primary/5 hover:shadow-lg ${
+                        currentProgram.id === 'heracles' ? 'grid-cols-8' : 
+                        currentProgram.id === 'zeus' ? 'grid-cols-8' : 'grid-cols-7'
+                      } ${index % 2 === 0 ? 'bg-background/60' : 'bg-muted/20'}`}>
+                        
+                        <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
+                          <div className="account-size text-center font-bold text-primary text-sm md:text-lg">
+                            {account.size}
+                          </div>
                         </div>
-                        <div className="text-center font-bold text-accent text-sm md:text-base font-['Inter',sans-serif] flex items-center justify-center">
-                          {account.fee}
+                        
+                        <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
+                          <div className="fee text-center font-bold text-accent text-sm md:text-base">
+                            {account.fee}
+                          </div>
                         </div>
                         
                         {currentProgram.id === 'heracles' && (
                           <>
-                            <div className="text-center text-foreground font-medium flex items-center justify-center text-xs md:text-sm">{account.phase1}</div>
-                            <div className="text-center text-foreground font-medium flex items-center justify-center text-xs md:text-sm">{account.phase2}</div>
-                            <div className="text-center text-foreground font-medium flex items-center justify-center text-xs md:text-sm">{account.phase3}</div>
+                            <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
+                              <div className="text-center text-foreground font-medium text-xs md:text-sm">{account.phase1}</div>
+                            </div>
+                            <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
+                              <div className="text-center text-foreground font-medium text-xs md:text-sm">{account.phase2}</div>
+                            </div>
+                            <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
+                              <div className="text-center text-foreground font-medium text-xs md:text-sm">{account.phase3}</div>
+                            </div>
                           </>
                         )}
                         
                         {currentProgram.id === 'orion' && (
-                          <div className="text-center text-foreground font-medium flex items-center justify-center text-xs md:text-sm">{account.target}</div>
+                          <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
+                            <div className="text-center text-foreground font-medium text-xs md:text-sm">{account.target}</div>
+                          </div>
                         )}
                         
                         {currentProgram.id === 'zeus' && (
                           <>
-                            <div className="text-center text-foreground font-medium flex items-center justify-center text-xs md:text-sm">{account.phase1}</div>
-                            <div className="text-center text-foreground font-medium flex items-center justify-center text-xs md:text-sm">{account.phase2}</div>
+                            <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
+                              <div className="text-center text-foreground font-medium text-xs md:text-sm">{account.phase1}</div>
+                            </div>
+                            <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
+                              <div className="text-center text-foreground font-medium text-xs md:text-sm">{account.phase2}</div>
+                            </div>
                           </>
                         )}
                         
-                        <div className="text-center text-destructive font-semibold flex items-center justify-center text-xs md:text-sm">{account.dailyDD}</div>
-                        <div className="text-center text-destructive font-semibold flex items-center justify-center text-xs md:text-sm">{account.maxDD}</div>
+                        <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
+                          <div className="text-center text-destructive font-semibold text-xs md:text-sm">{account.dailyDD}</div>
+                        </div>
+                        
+                        <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
+                          <div className="text-center text-destructive font-semibold text-xs md:text-sm">{account.maxDD}</div>
+                        </div>
                         
                         {(currentProgram.id === 'orion' || currentProgram.id === 'zeus') && (
-                          <div className="text-center text-accent font-semibold flex items-center justify-center text-xs md:text-sm">{account.payout}</div>
+                          <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
+                            <div className="text-center text-accent font-semibold text-xs md:text-sm">{account.payout}</div>
+                          </div>
                         )}
                         
-                        <div className="text-center font-bold text-primary text-sm md:text-base font-['Inter',sans-serif] flex items-center justify-center">
-                          {account.split}
+                        <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
+                          <div className="split text-center font-bold text-primary text-sm md:text-base">
+                            {account.split}
+                          </div>
                         </div>
                       </div>
                     ))}
