@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button';
 
 const Statistics = () => {
   const [stats, setStats] = useState([
-    { number: "10K+", label: "Funded Traders", suffix: "" },
-    { number: "50M", label: "Total Funding", suffix: "+" },
-    { number: "2.5M", label: "Payouts Made", suffix: "+" },
-    { number: "95", label: "Success Rate", suffix: "%" }
+    { number: "4K", label: "Funded Traders", suffix: "+" },
+    { number: "200K", label: "Max Funding", suffix: "" },
+    { number: "239K", label: "Total Payouts", suffix: "" },
+    { number: "24", label: "Hours Max Payout", suffix: "" }
   ]);
 
   const [isEditing, setIsEditing] = useState(false);
@@ -75,7 +75,7 @@ const Statistics = () => {
                 ) : (
                   <>
                     <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
-                      ${stat.number}{stat.suffix}
+                      {index === 1 ? '$' : ''}{stat.number}{stat.suffix}
                     </div>
                     <div className="text-muted-foreground">{stat.label}</div>
                   </>

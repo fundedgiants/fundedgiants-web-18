@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, TrendingUp, Shield, Zap } from 'lucide-react';
@@ -7,7 +6,7 @@ const Hero = () => {
   const [heroContent, setHeroContent] = useState({
     title: "Trade with FundedGiants",
     subtitle: "Elite Mythic Trading Realm",
-    description: "Ascend to the pantheon of elite traders. Harness the power of the giants with funding up to $100,000 and keep up to 80% of your cosmic profits. No hidden fees, transparent divine rules, and instant payouts from the realm of giants.",
+    description: "Ascend to the pantheon of elite traders. Harness the power of the giants with funding up to $200,000 and keep up to 70% of your cosmic profits. No hidden fees, transparent divine rules, and instant payouts from the realm of giants.",
     primaryCTA: "Begin Your Ascension",
     secondaryCTA: "Explore Divine Programs"
   });
@@ -108,7 +107,7 @@ const Hero = () => {
               <div className="flex items-center justify-center gap-4 p-8 rounded-2xl bg-card/30 backdrop-blur-sm border border-primary/20 hover:bg-card/50 hover:border-primary/40 transition-all duration-300 group">
                 <TrendingUp className="h-10 w-10 text-primary group-hover:scale-110 transition-transform" />
                 <div className="text-left">
-                  <h3 className="font-bold text-lg text-foreground">⚡ Up to $100K Divine Funding</h3>
+                  <h3 className="font-bold text-lg text-foreground">⚡ Up to $200K Divine Funding</h3>
                   <p className="text-sm text-muted-foreground">Trade with the power of giants</p>
                 </div>
               </div>
@@ -116,7 +115,7 @@ const Hero = () => {
               <div className="flex items-center justify-center gap-4 p-8 rounded-2xl bg-card/30 backdrop-blur-sm border border-primary/20 hover:bg-card/50 hover:border-primary/40 transition-all duration-300 group">
                 <Shield className="h-10 w-10 text-primary group-hover:scale-110 transition-transform" />
                 <div className="text-left">
-                  <h3 className="font-bold text-lg text-foreground">🛡️ 80% Mythic Profit Split</h3>
+                  <h3 className="font-bold text-lg text-foreground">🛡️ 70% Mythic Profit Split</h3>
                   <p className="text-sm text-muted-foreground">Keep the majority of your cosmic gains</p>
                 </div>
               </div>
@@ -124,8 +123,8 @@ const Hero = () => {
               <div className="flex items-center justify-center gap-4 p-8 rounded-2xl bg-card/30 backdrop-blur-sm border border-primary/20 hover:bg-card/50 hover:border-primary/40 transition-all duration-300 group">
                 <Zap className="h-10 w-10 text-primary group-hover:scale-110 transition-transform" />
                 <div className="text-left">
-                  <h3 className="font-bold text-lg text-foreground">⚡ Instant Cosmic Payouts</h3>
-                  <p className="text-sm text-muted-foreground">Lightning-fast divine withdrawals</p>
+                  <h3 className="font-bold text-lg text-foreground">⚡ 24-Hour Cosmic Payouts</h3>
+                  <p className="text-sm text-muted-foreground">Withdrawals approved within 24 hours max</p>
                 </div>
               </div>
             </div>
