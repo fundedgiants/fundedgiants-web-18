@@ -68,7 +68,7 @@ const TradingPrograms = () => {
   const currentProgram = programs.find(p => p.id === selectedProgram);
 
   return (
-    <section className="py-20 bg-background bg-stars relative">
+    <section id="programs" className="py-20 bg-background bg-stars relative">
       <div className="absolute inset-0 bg-cosmic-gradient"></div>
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-16">
@@ -111,7 +111,7 @@ const TradingPrograms = () => {
             <Card className={`mb-12 border-primary/30 shadow-2xl bg-gradient-to-br ${currentProgram.color} backdrop-blur-sm`}>
               <CardHeader className="text-center pb-8">
                 <div className="text-6xl mb-6 animate-float">{currentProgram.icon}</div>
-                <CardTitle className="text-3xl md:text-4xl mb-4 text-foreground">
+                <CardTitle className="text-3xl md:text-4xl mb-4 text-foreground font-['Inter',sans-serif]">
                   {currentProgram.name}
                   <span className="text-primary ml-3">({currentProgram.subtitle})</span>
                 </CardTitle>
@@ -122,82 +122,86 @@ const TradingPrograms = () => {
                   {currentProgram.features.map((feature, index) => (
                     <div key={index} className="flex items-center gap-3 p-4 rounded-xl bg-card/40 backdrop-blur-sm border border-primary/20 hover:border-primary/40 transition-all duration-300">
                       <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                      <span className="text-sm font-medium text-foreground">{feature}</span>
+                      <span className="text-sm font-medium text-foreground font-['Inter',sans-serif]">{feature}</span>
                     </div>
                   ))}
                 </div>
 
                 {/* Enhanced Pricing Table */}
-                <div className="overflow-x-auto rounded-2xl border border-primary/30 shadow-2xl">
-                  <div className="min-w-full bg-card/20 backdrop-blur-sm">
-                    {/* Table Header */}
-                    <div className="bg-gradient-to-r from-primary to-accent text-primary-foreground">
-                      <div className="grid grid-cols-7 md:grid-cols-8 gap-4 p-6 font-bold text-sm">
-                        <div className="text-center">Account Size</div>
-                        <div className="text-center">Fee</div>
-                        <div className="text-center">
-                          {currentProgram.id === 'heracles' ? 'Phase 1 (10%)' : 'Profit Target'}
+                <div className="overflow-hidden rounded-2xl border-2 border-primary/40 shadow-2xl bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-lg">
+                  {/* Table Header */}
+                  <div className="bg-gradient-to-r from-primary via-accent to-primary text-primary-foreground">
+                    <div className="grid grid-cols-7 md:grid-cols-8 gap-2 p-4 font-bold text-xs md:text-sm font-['Inter',sans-serif]">
+                      <div className="text-center font-black text-sm md:text-base">💎 Account</div>
+                      <div className="text-center font-black text-sm md:text-base">💰 Fee</div>
+                      <div className="text-center font-black text-xs md:text-sm">
+                        {currentProgram.id === 'heracles' ? '⚡ Phase 1' : '🎯 Target'}
+                      </div>
+                      {currentProgram.id === 'heracles' && (
+                        <>
+                          <div className="text-center font-black text-xs md:text-sm">⚡ Phase 2</div>
+                          <div className="text-center font-black text-xs md:text-sm">⚡ Phase 3</div>
+                        </>
+                      )}
+                      {currentProgram.id === 'zeus' && <div className="text-center font-black text-xs md:text-sm">⚡ Phase 2</div>}
+                      <div className="text-center font-black text-xs md:text-sm">📉 Daily DD</div>
+                      <div className="text-center font-black text-xs md:text-sm">📊 Max DD</div>
+                      {(currentProgram.id === 'orion' || currentProgram.id === 'zeus') && (
+                        <div className="text-center font-black text-xs md:text-sm">💸 Payout</div>
+                      )}
+                      <div className="text-center font-black text-sm md:text-base">🏆 Split</div>
+                    </div>
+                  </div>
+
+                  {/* Table Body */}
+                  <div className="divide-y-2 divide-primary/20">
+                    {currentProgram.accounts.map((account, index) => (
+                      <div key={index} className={`grid grid-cols-7 md:grid-cols-8 gap-2 p-4 text-xs md:text-sm transition-all duration-300 hover:bg-primary/10 hover:scale-[1.02] ${
+                        index % 2 === 0 ? 'bg-background/60' : 'bg-muted/30'
+                      }`}>
+                        <div className="text-center font-bold text-primary text-sm md:text-lg font-['Inter',sans-serif] flex items-center justify-center">
+                          {account.size}
                         </div>
+                        <div className="text-center font-bold text-accent text-sm md:text-base font-['Inter',sans-serif] flex items-center justify-center">
+                          {account.fee}
+                        </div>
+                        
                         {currentProgram.id === 'heracles' && (
                           <>
-                            <div className="text-center">Phase 2 (5%)</div>
-                            <div className="text-center">Phase 3 (5%)</div>
+                            <div className="text-center text-foreground font-medium flex items-center justify-center text-xs md:text-sm">{account.phase1}</div>
+                            <div className="text-center text-foreground font-medium flex items-center justify-center text-xs md:text-sm">{account.phase2}</div>
+                            <div className="text-center text-foreground font-medium flex items-center justify-center text-xs md:text-sm">{account.phase3}</div>
                           </>
                         )}
-                        {currentProgram.id === 'zeus' && <div className="text-center">Phase 2 (5%)</div>}
-                        <div className="text-center">Daily DD</div>
-                        <div className="text-center">Max DD</div>
-                        {(currentProgram.id === 'orion' || currentProgram.id === 'zeus') && (
-                          <div className="text-center">First Payout</div>
+                        
+                        {currentProgram.id === 'orion' && (
+                          <div className="text-center text-foreground font-medium flex items-center justify-center text-xs md:text-sm">{account.target}</div>
                         )}
-                        <div className="text-center">Profit Split</div>
-                      </div>
-                    </div>
-
-                    {/* Table Body */}
-                    <div className="divide-y divide-border/20">
-                      {currentProgram.accounts.map((account, index) => (
-                        <div key={index} className={`grid grid-cols-7 md:grid-cols-8 gap-4 p-6 text-sm transition-all duration-300 hover:bg-primary/5 ${
-                          index % 2 === 0 ? 'bg-background/50' : 'bg-muted/20'
-                        }`}>
-                          <div className="text-center font-bold text-primary text-lg">{account.size}</div>
-                          <div className="text-center font-semibold text-accent">{account.fee}</div>
-                          
-                          {currentProgram.id === 'heracles' && (
-                            <>
-                              <div className="text-center text-foreground">{account.phase1}</div>
-                              <div className="text-center text-foreground">{account.phase2}</div>
-                              <div className="text-center text-foreground">{account.phase3}</div>
-                            </>
-                          )}
-                          
-                          {currentProgram.id === 'orion' && (
-                            <div className="text-center text-foreground">{account.target}</div>
-                          )}
-                          
-                          {currentProgram.id === 'zeus' && (
-                            <>
-                              <div className="text-center text-foreground">{account.phase1}</div>
-                              <div className="text-center text-foreground">{account.phase2}</div>
-                            </>
-                          )}
-                          
-                          <div className="text-center text-destructive">{account.dailyDD}</div>
-                          <div className="text-center text-destructive">{account.maxDD}</div>
-                          
-                          {(currentProgram.id === 'orion' || currentProgram.id === 'zeus') && (
-                            <div className="text-center text-accent">{account.payout}</div>
-                          )}
-                          
-                          <div className="text-center font-bold text-primary">{account.split}</div>
+                        
+                        {currentProgram.id === 'zeus' && (
+                          <>
+                            <div className="text-center text-foreground font-medium flex items-center justify-center text-xs md:text-sm">{account.phase1}</div>
+                            <div className="text-center text-foreground font-medium flex items-center justify-center text-xs md:text-sm">{account.phase2}</div>
+                          </>
+                        )}
+                        
+                        <div className="text-center text-destructive font-semibold flex items-center justify-center text-xs md:text-sm">{account.dailyDD}</div>
+                        <div className="text-center text-destructive font-semibold flex items-center justify-center text-xs md:text-sm">{account.maxDD}</div>
+                        
+                        {(currentProgram.id === 'orion' || currentProgram.id === 'zeus') && (
+                          <div className="text-center text-accent font-semibold flex items-center justify-center text-xs md:text-sm">{account.payout}</div>
+                        )}
+                        
+                        <div className="text-center font-bold text-primary text-sm md:text-base font-['Inter',sans-serif] flex items-center justify-center">
+                          {account.split}
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
                 <div className="text-center mt-12">
-                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground px-12 py-4 text-xl font-bold shadow-lg shadow-primary/25">
+                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground px-12 py-4 text-xl font-bold shadow-lg shadow-primary/25 font-['Inter',sans-serif]">
                     🚀 Begin {currentProgram.name}
                   </Button>
                 </div>
