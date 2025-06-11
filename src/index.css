@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @tailwind base;
 @tailwind components;
@@ -7,23 +8,23 @@
 
 @layer base {
   :root {
-    --background: 8 20% 8%;
-    --foreground: 120 15% 92%;
+    --background: 6 15% 4%;
+    --foreground: 120 15% 95%;
 
-    --card: 120 15% 12%;
-    --card-foreground: 120 10% 88%;
+    --card: 120 15% 8%;
+    --card-foreground: 120 10% 92%;
 
-    --popover: 120 15% 12%;
-    --popover-foreground: 120 10% 88%;
+    --popover: 120 15% 8%;
+    --popover-foreground: 120 10% 92%;
 
     --primary: 142 76% 36%;
     --primary-foreground: 120 100% 5%;
 
-    --secondary: 120 25% 15%;
-    --secondary-foreground: 120 15% 85%;
+    --secondary: 120 25% 12%;
+    --secondary-foreground: 120 15% 88%;
 
-    --muted: 120 20% 18%;
-    --muted-foreground: 120 10% 65%;
+    --muted: 120 20% 15%;
+    --muted-foreground: 120 10% 70%;
 
     --accent: 158 64% 52%;
     --accent-foreground: 120 100% 5%;
@@ -31,40 +32,40 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 120 20% 20%;
-    --input: 120 20% 20%;
+    --border: 120 20% 18%;
+    --input: 120 20% 18%;
     --ring: 142 76% 36%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 120 20% 10%;
-    --sidebar-foreground: 120 15% 85%;
+    --sidebar-background: 120 20% 6%;
+    --sidebar-foreground: 120 15% 88%;
     --sidebar-primary: 142 76% 36%;
     --sidebar-primary-foreground: 120 100% 5%;
-    --sidebar-accent: 120 25% 15%;
-    --sidebar-accent-foreground: 120 15% 85%;
-    --sidebar-border: 120 20% 20%;
+    --sidebar-accent: 120 25% 12%;
+    --sidebar-accent-foreground: 120 15% 88%;
+    --sidebar-border: 120 20% 18%;
     --sidebar-ring: 142 76% 36%;
   }
 
   .dark {
-    --background: 8 20% 8%;
-    --foreground: 120 15% 92%;
+    --background: 6 15% 4%;
+    --foreground: 120 15% 95%;
 
-    --card: 120 15% 12%;
-    --card-foreground: 120 10% 88%;
+    --card: 120 15% 8%;
+    --card-foreground: 120 10% 92%;
 
-    --popover: 120 15% 12%;
-    --popover-foreground: 120 10% 88%;
+    --popover: 120 15% 8%;
+    --popover-foreground: 120 10% 92%;
 
     --primary: 142 76% 36%;
     --primary-foreground: 120 100% 5%;
 
-    --secondary: 120 25% 15%;
-    --secondary-foreground: 120 15% 85%;
+    --secondary: 120 25% 12%;
+    --secondary-foreground: 120 15% 88%;
 
-    --muted: 120 20% 18%;
-    --muted-foreground: 120 10% 65%;
+    --muted: 120 20% 15%;
+    --muted-foreground: 120 10% 70%;
 
     --accent: 158 64% 52%;
     --accent-foreground: 120 100% 5%;
@@ -72,16 +73,16 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 120 20% 20%;
-    --input: 120 20% 20%;
+    --border: 120 20% 18%;
+    --input: 120 20% 18%;
     --ring: 142 76% 36%;
-    --sidebar-background: 120 20% 10%;
-    --sidebar-foreground: 120 15% 85%;
+    --sidebar-background: 120 20% 6%;
+    --sidebar-foreground: 120 15% 88%;
     --sidebar-primary: 142 76% 36%;
     --sidebar-primary-foreground: 120 100% 5%;
-    --sidebar-accent: 120 25% 15%;
-    --sidebar-accent-foreground: 120 15% 85%;
-    --sidebar-border: 120 20% 20%;
+    --sidebar-accent: 120 25% 12%;
+    --sidebar-accent-foreground: 120 15% 88%;
+    --sidebar-border: 120 20% 18%;
     --sidebar-ring: 142 76% 36%;
   }
 }
@@ -96,6 +97,8 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     font-weight: 400;
     line-height: 1.6;
+    background: radial-gradient(ellipse at top, rgba(6, 15, 4, 0.9) 0%, rgba(6, 15, 4, 1) 100%);
+    min-height: 100vh;
   }
 
   html {
@@ -109,34 +112,39 @@
   }
 }
 
-/* Custom animations and effects */
+/* Enhanced custom animations and effects */
 @layer utilities {
   .bg-grid-pattern {
     background-image: 
-      radial-gradient(circle at 25% 25%, rgba(34, 197, 94, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 75% 75%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
-      radial-gradient(circle, rgba(34, 197, 94, 0.05) 1px, transparent 1px);
+      radial-gradient(circle at 25% 25%, rgba(34, 197, 94, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, rgba(16, 185, 129, 0.12) 0%, transparent 50%),
+      radial-gradient(circle, rgba(34, 197, 94, 0.08) 1px, transparent 1px);
     background-size: 150px 150px, 200px 200px, 30px 30px;
     background-position: 0 0, 50px 50px, 0 0;
   }
   
   .bg-stars {
     background-image: 
-      radial-gradient(2px 2px at 20px 30px, rgba(34, 197, 94, 0.3), transparent),
-      radial-gradient(2px 2px at 40px 70px, rgba(16, 185, 129, 0.4), transparent),
-      radial-gradient(1px 1px at 90px 40px, rgba(34, 197, 94, 0.5), transparent),
-      radial-gradient(1px 1px at 130px 80px, rgba(16, 185, 129, 0.3), transparent);
+      radial-gradient(2px 2px at 20px 30px, rgba(34, 197, 94, 0.4), transparent),
+      radial-gradient(2px 2px at 40px 70px, rgba(16, 185, 129, 0.5), transparent),
+      radial-gradient(1px 1px at 90px 40px, rgba(34, 197, 94, 0.6), transparent),
+      radial-gradient(1px 1px at 130px 80px, rgba(16, 185, 129, 0.4), transparent),
+      radial-gradient(1px 1px at 160px 20px, rgba(158, 64, 52, 0.3), transparent);
     background-repeat: repeat;
     background-size: 200px 100px;
   }
   
   .bg-cosmic-gradient {
     background: linear-gradient(135deg, 
-      rgba(8, 20, 8, 0.9) 0%, 
-      rgba(16, 30, 16, 0.8) 25%, 
-      rgba(24, 40, 24, 0.7) 50%, 
-      rgba(16, 30, 16, 0.8) 75%, 
-      rgba(8, 20, 8, 0.9) 100%);
+      rgba(6, 15, 4, 0.95) 0%, 
+      rgba(12, 25, 12, 0.85) 25%, 
+      rgba(18, 35, 18, 0.75) 50%, 
+      rgba(12, 25, 12, 0.85) 75%, 
+      rgba(6, 15, 4, 0.95) 100%);
+  }
+
+  .bg-gradient-radial {
+    background: radial-gradient(circle, var(--tw-gradient-stops));
   }
   
   .animate-fade-in {
@@ -144,7 +152,7 @@
   }
   
   .animate-glow {
-    animation: glow 2s ease-in-out infinite alternate;
+    animation: glow 3s ease-in-out infinite alternate;
   }
   
   .animate-float {
@@ -164,10 +172,10 @@
   
   @keyframes glow {
     from {
-      text-shadow: 0 0 10px rgba(34, 197, 94, 0.5), 0 0 20px rgba(34, 197, 94, 0.3);
+      text-shadow: 0 0 15px rgba(34, 197, 94, 0.6), 0 0 25px rgba(34, 197, 94, 0.4);
     }
     to {
-      text-shadow: 0 0 20px rgba(34, 197, 94, 0.8), 0 0 30px rgba(34, 197, 94, 0.5);
+      text-shadow: 0 0 25px rgba(34, 197, 94, 0.9), 0 0 35px rgba(34, 197, 94, 0.6), 0 0 45px rgba(158, 64, 52, 0.4);
     }
   }
   
@@ -177,7 +185,171 @@
   }
 }
 
-/* Enhanced galactic table styling */
+/* Enhanced galactic table styling v2 */
+.galactic-table-container-v2 {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  box-shadow: 0 25px 50px -12px rgba(34, 197, 94, 0.3), 0 0 40px rgba(158, 64, 52, 0.15);
+  border: 2px solid rgba(34, 197, 94, 0.25);
+  position: relative;
+}
+
+.galactic-table-container-v2::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(45deg, rgba(34, 197, 94, 0.2), rgba(158, 64, 52, 0.2), rgba(34, 197, 94, 0.2));
+  border-radius: inherit;
+  z-index: -1;
+  filter: blur(4px);
+}
+
+.galactic-grid-v2 {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 0.8fr repeat(5, 1fr) 1.3fr;
+  gap: 0;
+}
+
+.galactic-grid-v2 .feature-header {
+  grid-column: 1;
+}
+
+.galactic-grid-v2 .large-account {
+  grid-column: 7;
+}
+
+.galactic-header-cell-v2 {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.95) 0%, rgba(16, 185, 129, 0.95) 50%, rgba(158, 64, 52, 0.95) 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70px;
+  position: relative;
+}
+
+.galactic-header-cell-v2::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent, rgba(255, 255, 255, 0.05));
+  pointer-events: none;
+}
+
+.galactic-header-cell-v2:last-child {
+  border-right: none;
+}
+
+.galactic-data-cell-v2 {
+  background: rgba(120, 15, 12, 0.03);
+  border-right: 1px solid rgba(34, 197, 94, 0.08);
+  border-bottom: 1px solid rgba(34, 197, 94, 0.06);
+  display: flex;
+  align-items: center;
+  min-height: 55px;
+  transition: all 0.4s ease;
+  position: relative;
+}
+
+.galactic-data-cell-v2::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.02), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.galactic-data-cell-v2:hover::before {
+  opacity: 1;
+}
+
+.galactic-data-cell-v2:last-child {
+  border-right: none;
+}
+
+.galactic-data-cell-v2:hover {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(158, 64, 52, 0.04) 100%);
+  border-color: rgba(34, 197, 94, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.15);
+}
+
+.galactic-data-cell-v2.feature-label {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, rgba(16, 185, 129, 0.08) 100%);
+  justify-content: flex-start;
+  font-weight: 600;
+  border-right: 2px solid rgba(34, 197, 94, 0.2);
+}
+
+/* Enhanced table row hover effects */
+.table-body .galactic-grid-v2:hover {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.06) 0%, rgba(16, 185, 129, 0.04) 50%, rgba(158, 64, 52, 0.03) 100%);
+  box-shadow: 0 6px 25px rgba(34, 197, 94, 0.2), 0 0 20px rgba(158, 64, 52, 0.1);
+  transform: translateY(-2px);
+  z-index: 10;
+  border-radius: 8px;
+  margin: 2px;
+}
+
+.table-body .galactic-grid-v2:nth-child(even) {
+  background: linear-gradient(135deg, rgba(120, 25, 15, 0.04) 0%, rgba(120, 30, 18, 0.03) 100%);
+}
+
+.table-body .galactic-grid-v2:nth-child(odd) {
+  background: linear-gradient(135deg, rgba(6, 15, 4, 0.6) 0%, rgba(12, 25, 12, 0.4) 100%);
+}
+
+/* Responsive design for new table */
+@media (max-width: 768px) {
+  .galactic-grid-v2 {
+    grid-template-columns: 0.7fr repeat(5, 0.8fr) 1fr;
+    font-size: 0.75rem;
+  }
+  
+  .galactic-header-cell-v2 div {
+    font-size: 0.7rem !important;
+    padding: 2px 4px !important;
+  }
+  
+  .galactic-data-cell-v2 div {
+    padding: 2px 4px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .galactic-grid-v2 {
+    grid-template-columns: 0.6fr repeat(5, 0.7fr) 0.9fr;
+    font-size: 0.7rem;
+  }
+}
+
+/* Enhanced galactic animation for table rows */
+@keyframes galacticSlideV2 {
+  from {
+    opacity: 0;
+    transform: translateX(-20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.table-body .galactic-grid-v2 {
+  animation: galacticSlideV2 0.5s ease-out forwards;
+}
+
+.table-body .galactic-grid-v2:nth-child(1) { animation-delay: 0.05s; }
+.table-body .galactic-grid-v2:nth-child(2) { animation-delay: 0.1s; }
+.table-body .galactic-grid-v2:nth-child(3) { animation-delay: 0.15s; }
+.table-body .galactic-grid-v2:nth-child(4) { animation-delay: 0.2s; }
+.table-body .galactic-grid-v2:nth-child(5) { animation-delay: 0.25s; }
+.table-body .galactic-grid-v2:nth-child(6) { animation-delay: 0.3s; }
+.table-body .galactic-grid-v2:nth-child(7) { animation-delay: 0.35s; }
+
+/* Keep existing legacy table styles for backward compatibility */
 .galactic-table-container {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   box-shadow: 0 25px 50px -12px rgba(34, 197, 94, 0.25);

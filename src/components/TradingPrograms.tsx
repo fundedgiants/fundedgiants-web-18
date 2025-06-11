@@ -99,11 +99,16 @@ const TradingPrograms = () => {
   };
 
   return (
-    <section id="programs" className="py-20 bg-background bg-stars relative">
+    <section id="programs" className="py-20 bg-background bg-stars relative overflow-hidden">
       <div className="absolute inset-0 bg-cosmic-gradient"></div>
+      {/* Galactic particles effect */}
+      <div className="absolute inset-0 bg-gradient-radial from-primary/5 via-transparent to-transparent"></div>
+      <div className="absolute top-10 left-10 w-96 h-96 bg-gradient-radial from-accent/10 to-transparent rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute bottom-10 right-10 w-80 h-80 bg-gradient-radial from-primary/8 to-transparent rounded-full blur-3xl animate-pulse delay-1000"></div>
+      
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+          <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-glow">
             🌌 Giants Trading Programs 🌌
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -118,16 +123,16 @@ const TradingPrograms = () => {
               key={program.id}
               onClick={() => setSelectedProgram(program.id)}
               variant={selectedProgram === program.id ? "default" : "outline"}
-              className={`relative px-8 py-4 text-lg font-semibold transition-all duration-300 ${
+              className={`relative px-8 py-4 text-lg font-semibold transition-all duration-300 backdrop-blur-sm border-2 ${
                 selectedProgram === program.id 
-                  ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-105' 
-                  : 'border-primary/50 text-primary hover:bg-primary/10'
+                  ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg shadow-primary/25 scale-105 border-primary/50' 
+                  : 'border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20'
               }`}
             >
               <span className="mr-3 text-2xl">{program.icon}</span>
               {program.name}
               {program.popular && (
-                <Badge className="absolute -top-3 -right-3 bg-accent text-accent-foreground animate-pulse">
+                <Badge className="absolute -top-3 -right-3 bg-gradient-to-r from-accent to-primary text-primary-foreground animate-pulse border-none">
                   <Crown className="w-3 h-3 mr-1" />
                   Popular
                 </Badge>
@@ -139,7 +144,7 @@ const TradingPrograms = () => {
         {/* Program Details */}
         {currentProgram && (
           <div className="max-w-7xl mx-auto">
-            <Card className={`mb-12 border-primary/30 shadow-2xl bg-gradient-to-br ${currentProgram.color} backdrop-blur-sm`}>
+            <Card className={`mb-12 border-primary/20 shadow-2xl bg-gradient-to-br ${currentProgram.color} backdrop-blur-lg border-2 hover:border-primary/40 transition-all duration-500`}>
               <CardHeader className="text-center pb-8">
                 <div className="text-6xl mb-6 animate-float">{currentProgram.icon}</div>
                 <CardTitle className="text-3xl md:text-4xl mb-4 text-foreground font-['Inter',sans-serif]">
@@ -151,42 +156,44 @@ const TradingPrograms = () => {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-12">
                   {currentProgram.features.map((feature, index) => (
-                    <div key={index} className="flex items-center gap-3 p-4 rounded-xl bg-card/40 backdrop-blur-sm border border-primary/20 hover:border-primary/40 transition-all duration-300">
+                    <div key={index} className="flex items-center gap-3 p-4 rounded-xl bg-card/60 backdrop-blur-sm border border-primary/20 hover:border-primary/40 transition-all duration-300 hover:bg-primary/5 hover:shadow-lg hover:shadow-primary/20">
                       <Check className="h-5 w-5 text-primary flex-shrink-0" />
                       <span className="text-sm font-medium text-foreground font-['Inter',sans-serif]">{feature}</span>
                     </div>
                   ))}
                 </div>
 
-                {/* Enhanced Inverted Pricing Table */}
-                <div className="galactic-table-container overflow-hidden rounded-2xl border border-primary/30 shadow-2xl bg-gradient-to-br from-card/95 to-card/85 backdrop-blur-lg">
+                {/* Enhanced Galactic Pricing Table */}
+                <div className="galactic-table-container-v2 overflow-hidden rounded-2xl border-2 border-primary/30 shadow-2xl bg-gradient-to-br from-card/95 to-background/90 backdrop-blur-lg hover:border-primary/50 transition-all duration-500">
                   {/* Account Sizes Header Row */}
-                  <div className="table-header bg-gradient-to-r from-primary via-accent to-primary text-primary-foreground">
-                    <div className="galactic-grid-inverted">
-                      <div className="galactic-header-cell-inverted">
+                  <div className="table-header bg-gradient-to-r from-primary via-accent to-primary text-primary-foreground shadow-lg">
+                    <div className="galactic-grid-v2">
+                      <div className="galactic-header-cell-v2 feature-header">
                         <div className="text-center font-black text-sm md:text-base px-2 py-4">Features</div>
                       </div>
                       {currentProgram.accounts.map((account, index) => (
-                        <div key={index} className="galactic-header-cell-inverted">
-                          <div className="text-center font-black text-sm md:text-lg px-2 py-4">{account.size}</div>
+                        <div key={index} className={`galactic-header-cell-v2 ${index === currentProgram.accounts.length - 1 ? 'large-account' : ''}`}>
+                          <div className="text-center font-black text-sm md:text-lg px-2 py-4 bg-gradient-to-b from-white/20 to-transparent rounded-lg backdrop-blur-sm">
+                            {account.size}
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   {/* Feature Rows */}
-                  <div className="table-body bg-card/80">
+                  <div className="table-body bg-gradient-to-b from-card/80 to-background/60">
                     {getFeatureRows(currentProgram).map((row, rowIndex) => (
-                      <div key={rowIndex} className={`galactic-grid-inverted border-t border-primary/10 first:border-t-0 transition-all duration-300 hover:bg-primary/5 ${
-                        rowIndex % 2 === 0 ? 'bg-background/40' : 'bg-muted/20'
+                      <div key={rowIndex} className={`galactic-grid-v2 border-t border-primary/10 first:border-t-0 transition-all duration-300 hover:bg-gradient-to-r hover:from-primary/5 hover:to-accent/5 hover:shadow-lg ${
+                        rowIndex % 2 === 0 ? 'bg-gradient-to-r from-background/60 to-card/40' : 'bg-gradient-to-r from-card/40 to-background/60'
                       }`}>
-                        <div className="galactic-data-cell-inverted feature-label">
+                        <div className="galactic-data-cell-v2 feature-label">
                           <div className="px-4 py-4 font-bold text-foreground text-sm md:text-base">
                             {row.label}
                           </div>
                         </div>
                         {currentProgram.accounts.map((account, accountIndex) => (
-                          <div key={accountIndex} className="galactic-data-cell-inverted">
+                          <div key={accountIndex} className={`galactic-data-cell-v2 ${accountIndex === currentProgram.accounts.length - 1 ? 'large-account' : ''}`}>
                             <div className="px-4 py-4 text-foreground font-medium text-xs md:text-sm">
                               {account[row.key]}
                             </div>
@@ -196,14 +203,14 @@ const TradingPrograms = () => {
                     ))}
 
                     {/* Price Row */}
-                    <div className="galactic-grid-inverted border-t border-primary/20 bg-accent/10">
-                      <div className="galactic-data-cell-inverted feature-label">
+                    <div className="galactic-grid-v2 border-t-2 border-primary/30 bg-gradient-to-r from-accent/10 via-primary/10 to-accent/10 backdrop-blur-sm">
+                      <div className="galactic-data-cell-v2 feature-label">
                         <div className="px-4 py-4 font-bold text-primary text-sm md:text-base">
                           💰 Price
                         </div>
                       </div>
                       {currentProgram.accounts.map((account, accountIndex) => (
-                        <div key={accountIndex} className="galactic-data-cell-inverted">
+                        <div key={accountIndex} className={`galactic-data-cell-v2 ${accountIndex === currentProgram.accounts.length - 1 ? 'large-account' : ''}`}>
                           <div className="px-4 py-4 font-bold text-accent text-sm md:text-lg">
                             {account.fee}
                           </div>
@@ -213,13 +220,14 @@ const TradingPrograms = () => {
                   </div>
                 </div>
 
-                {/* Buttons Row */}
-                <div className="galactic-grid-inverted mt-6 gap-4">
-                  <div className="hidden"></div>
+                {/* Buttons Row - Fixed alignment */}
+                <div className="galactic-grid-v2 mt-6 gap-4">
+                  <div className="feature-header"></div>
                   {currentProgram.accounts.map((account, accountIndex) => (
-                    <div key={accountIndex} className="flex justify-center">
-                      <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 text-sm font-bold shadow-lg shadow-primary/25 font-['Inter',sans-serif] w-full">
-                        🚀 Get {account.size}
+                    <div key={accountIndex} className={`flex justify-center ${accountIndex === currentProgram.accounts.length - 1 ? 'large-account' : ''}`}>
+                      <Button size="sm" className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground px-4 py-2 text-sm font-bold shadow-lg shadow-primary/25 font-['Inter',sans-serif] w-full transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-primary/30 border border-primary/30">
+                        <Zap className="w-4 h-4 mr-2" />
+                        Get {account.size}
                       </Button>
                     </div>
                   ))}
