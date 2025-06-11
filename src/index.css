@@ -420,11 +420,19 @@
   background: linear-gradient(135deg, rgba(8, 20, 8, 0.4) 0%, rgba(16, 30, 16, 0.2) 100%);
 }
 
-/* Enhanced inverted galactic table styling */
+/* Enhanced inverted galactic table styling with adjusted columns */
 .galactic-grid-inverted {
   display: grid;
   width: 100%;
   grid-template-columns: 1.5fr repeat(6, 1fr);
+  gap: 0;
+}
+
+/* NEW: Adjusted inverted galactic table for better column distribution */
+.galactic-grid-inverted-adjusted {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1.8fr 1fr 1fr 1fr 1fr 1fr 1.1fr;
   gap: 0;
 }
 
@@ -475,6 +483,11 @@
     font-size: 0.75rem;
   }
   
+  .galactic-grid-inverted-adjusted {
+    grid-template-columns: 1.4fr repeat(6, 0.8fr);
+    font-size: 0.75rem;
+  }
+  
   .galactic-header-cell-inverted div {
     font-size: 0.7rem !important;
     padding: 2px 4px !important;
@@ -488,6 +501,11 @@
 @media (max-width: 640px) {
   .galactic-grid-inverted {
     grid-template-columns: 1fr repeat(6, 0.7fr);
+    font-size: 0.7rem;
+  }
+  
+  .galactic-grid-inverted-adjusted {
+    grid-template-columns: 1.2fr repeat(6, 0.7fr);
     font-size: 0.7rem;
   }
 }

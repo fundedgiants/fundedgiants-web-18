@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -163,16 +162,16 @@ const TradingPrograms = () => {
                   ))}
                 </div>
 
-                {/* Enhanced Galactic Pricing Table */}
-                <div className="galactic-table-container-v2 overflow-hidden rounded-2xl border-2 border-primary/30 shadow-2xl bg-gradient-to-br from-card/95 to-background/90 backdrop-blur-lg hover:border-primary/50 transition-all duration-500">
+                {/* Enhanced Galactic Pricing Table - Inverted */}
+                <div className="galactic-table-container-inverted overflow-hidden rounded-2xl border-2 border-primary/30 shadow-2xl bg-gradient-to-br from-card/95 to-background/90 backdrop-blur-lg hover:border-primary/50 transition-all duration-500">
                   {/* Account Sizes Header Row */}
                   <div className="table-header bg-gradient-to-r from-primary via-accent to-primary text-primary-foreground shadow-lg">
-                    <div className="galactic-grid-v2">
-                      <div className="galactic-header-cell-v2 feature-header">
-                        <div className="text-center font-black text-sm md:text-base px-2 py-4">Features</div>
+                    <div className="galactic-grid-inverted-adjusted">
+                      <div className="galactic-header-cell-inverted feature-header">
+                        <div className="text-center font-black text-sm md:text-base px-2 py-4"></div>
                       </div>
                       {currentProgram.accounts.map((account, index) => (
-                        <div key={index} className={`galactic-header-cell-v2 ${index === currentProgram.accounts.length - 1 ? 'large-account' : ''}`}>
+                        <div key={index} className="galactic-header-cell-inverted">
                           <div className="text-center font-black text-sm md:text-lg px-2 py-4 bg-gradient-to-b from-white/20 to-transparent rounded-lg backdrop-blur-sm">
                             {account.size}
                           </div>
@@ -184,17 +183,17 @@ const TradingPrograms = () => {
                   {/* Feature Rows */}
                   <div className="table-body bg-gradient-to-b from-card/80 to-background/60">
                     {getFeatureRows(currentProgram).map((row, rowIndex) => (
-                      <div key={rowIndex} className={`galactic-grid-v2 border-t border-primary/10 first:border-t-0 transition-all duration-300 hover:bg-gradient-to-r hover:from-primary/5 hover:to-accent/5 hover:shadow-lg ${
+                      <div key={rowIndex} className={`galactic-grid-inverted-adjusted border-t border-primary/10 first:border-t-0 transition-all duration-300 hover:bg-gradient-to-r hover:from-primary/5 hover:to-accent/5 hover:shadow-lg ${
                         rowIndex % 2 === 0 ? 'bg-gradient-to-r from-background/60 to-card/40' : 'bg-gradient-to-r from-card/40 to-background/60'
                       }`}>
-                        <div className="galactic-data-cell-v2 feature-label">
+                        <div className="galactic-data-cell-inverted feature-label">
                           <div className="px-4 py-4 font-bold text-foreground text-sm md:text-base">
                             {row.label}
                           </div>
                         </div>
                         {currentProgram.accounts.map((account, accountIndex) => (
-                          <div key={accountIndex} className={`galactic-data-cell-v2 ${accountIndex === currentProgram.accounts.length - 1 ? 'large-account' : ''}`}>
-                            <div className="px-4 py-4 text-foreground font-medium text-xs md:text-sm">
+                          <div key={accountIndex} className="galactic-data-cell-inverted">
+                            <div className="px-4 py-4 text-foreground font-medium text-xs md:text-sm text-center">
                               {account[row.key]}
                             </div>
                           </div>
@@ -203,15 +202,15 @@ const TradingPrograms = () => {
                     ))}
 
                     {/* Price Row */}
-                    <div className="galactic-grid-v2 border-t-2 border-primary/30 bg-gradient-to-r from-accent/10 via-primary/10 to-accent/10 backdrop-blur-sm">
-                      <div className="galactic-data-cell-v2 feature-label">
+                    <div className="galactic-grid-inverted-adjusted border-t-2 border-primary/30 bg-gradient-to-r from-accent/10 via-primary/10 to-accent/10 backdrop-blur-sm">
+                      <div className="galactic-data-cell-inverted feature-label">
                         <div className="px-4 py-4 font-bold text-primary text-sm md:text-base">
                           💰 Price
                         </div>
                       </div>
                       {currentProgram.accounts.map((account, accountIndex) => (
-                        <div key={accountIndex} className={`galactic-data-cell-v2 ${accountIndex === currentProgram.accounts.length - 1 ? 'large-account' : ''}`}>
-                          <div className="px-4 py-4 font-bold text-accent text-sm md:text-lg">
+                        <div key={accountIndex} className="galactic-data-cell-inverted">
+                          <div className="px-4 py-4 font-bold text-accent text-sm md:text-lg text-center">
                             {account.fee}
                           </div>
                         </div>
@@ -220,13 +219,12 @@ const TradingPrograms = () => {
                   </div>
                 </div>
 
-                {/* Buttons Row - Fixed alignment */}
-                <div className="galactic-grid-v2 mt-6 gap-4">
+                {/* Buttons Row - Fixed alignment and uniform sizing */}
+                <div className="galactic-grid-inverted-adjusted mt-6 gap-0">
                   <div className="feature-header"></div>
                   {currentProgram.accounts.map((account, accountIndex) => (
-                    <div key={accountIndex} className={`flex justify-center ${accountIndex === currentProgram.accounts.length - 1 ? 'large-account' : ''}`}>
-                      <Button size="sm" className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground px-4 py-2 text-sm font-bold shadow-lg shadow-primary/25 font-['Inter',sans-serif] w-full transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-primary/30 border border-primary/30">
-                        <Zap className="w-4 h-4 mr-2" />
+                    <div key={accountIndex} className="flex justify-center px-2">
+                      <Button size="sm" className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground px-2 py-2 text-xs font-bold shadow-lg shadow-primary/25 font-['Inter',sans-serif] w-full transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-primary/30 border border-primary/30">
                         Get {account.size}
                       </Button>
                     </div>
