@@ -67,6 +67,37 @@ const TradingPrograms = () => {
 
   const currentProgram = programs.find(p => p.id === selectedProgram);
 
+  const getFeatureRows = (program) => {
+    if (program.id === 'heracles') {
+      return [
+        { label: '⚡ Phase 1', key: 'phase1' },
+        { label: '⚡ Phase 2', key: 'phase2' },
+        { label: '⚡ Phase 3', key: 'phase3' },
+        { label: '📉 Daily DD', key: 'dailyDD' },
+        { label: '📊 Max DD', key: 'maxDD' },
+        { label: '🏆 Profit Split', key: 'split' }
+      ];
+    } else if (program.id === 'orion') {
+      return [
+        { label: '🎯 Target', key: 'target' },
+        { label: '📉 Daily DD', key: 'dailyDD' },
+        { label: '📊 Max DD', key: 'maxDD' },
+        { label: '💸 Payout', key: 'payout' },
+        { label: '🏆 Profit Split', key: 'split' }
+      ];
+    } else if (program.id === 'zeus') {
+      return [
+        { label: '⚡ Phase 1', key: 'phase1' },
+        { label: '⚡ Phase 2', key: 'phase2' },
+        { label: '📉 Daily DD', key: 'dailyDD' },
+        { label: '📊 Max DD', key: 'maxDD' },
+        { label: '💸 Payout', key: 'payout' },
+        { label: '🏆 Profit Split', key: 'split' }
+      ];
+    }
+    return [];
+  };
+
   return (
     <section id="programs" className="py-20 bg-background bg-stars relative">
       <div className="absolute inset-0 bg-cosmic-gradient"></div>
@@ -127,136 +158,71 @@ const TradingPrograms = () => {
                   ))}
                 </div>
 
-                {/* Enhanced Pricing Table */}
+                {/* Enhanced Inverted Pricing Table */}
                 <div className="galactic-table-container overflow-hidden rounded-2xl border border-primary/30 shadow-2xl bg-gradient-to-br from-card/95 to-card/85 backdrop-blur-lg">
-                  {/* Table Header */}
+                  {/* Account Sizes Header Row */}
                   <div className="table-header bg-gradient-to-r from-primary via-accent to-primary text-primary-foreground">
-                    <div className={`galactic-grid-fixed ${
-                      currentProgram.id === 'heracles' ? 'grid-cols-8' : 
-                      currentProgram.id === 'zeus' ? 'grid-cols-8' : 'grid-cols-7'
-                    }`}>
-                      <div className="galactic-header-cell">
-                        <div className="text-center font-black text-sm md:text-base px-2 py-4">💎 Account Size</div>
+                    <div className="galactic-grid-inverted">
+                      <div className="galactic-header-cell-inverted">
+                        <div className="text-center font-black text-sm md:text-base px-2 py-4">Features</div>
                       </div>
-                      <div className="galactic-header-cell">
-                        <div className="text-center font-black text-sm md:text-base px-2 py-4">💰 Fee</div>
-                      </div>
-                      <div className="galactic-header-cell">
-                        <div className="text-center font-black text-xs md:text-sm px-2 py-4">
-                          {currentProgram.id === 'heracles' ? '⚡ Phase 1' : '🎯 Target'}
+                      {currentProgram.accounts.map((account, index) => (
+                        <div key={index} className="galactic-header-cell-inverted">
+                          <div className="text-center font-black text-sm md:text-lg px-2 py-4">{account.size}</div>
                         </div>
-                      </div>
-                      {currentProgram.id === 'heracles' && (
-                        <>
-                          <div className="galactic-header-cell">
-                            <div className="text-center font-black text-xs md:text-sm px-2 py-4">⚡ Phase 2</div>
-                          </div>
-                          <div className="galactic-header-cell">
-                            <div className="text-center font-black text-xs md:text-sm px-2 py-4">⚡ Phase 3</div>
-                          </div>
-                        </>
-                      )}
-                      {currentProgram.id === 'zeus' && (
-                        <div className="galactic-header-cell">
-                          <div className="text-center font-black text-xs md:text-sm px-2 py-4">⚡ Phase 2</div>
-                        </div>
-                      )}
-                      <div className="galactic-header-cell">
-                        <div className="text-center font-black text-xs md:text-sm px-2 py-4">📉 Daily DD</div>
-                      </div>
-                      <div className="galactic-header-cell">
-                        <div className="text-center font-black text-xs md:text-sm px-2 py-4">📊 Max DD</div>
-                      </div>
-                      {(currentProgram.id === 'orion' || currentProgram.id === 'zeus') && (
-                        <div className="galactic-header-cell">
-                          <div className="text-center font-black text-xs md:text-sm px-2 py-4">💸 Payout</div>
-                        </div>
-                      )}
-                      <div className="galactic-header-cell">
-                        <div className="text-center font-black text-sm md:text-base px-2 py-4">🏆 Profit Split</div>
-                      </div>
+                      ))}
                     </div>
                   </div>
 
-                  {/* Table Body */}
+                  {/* Feature Rows */}
                   <div className="table-body bg-card/80">
-                    {currentProgram.accounts.map((account, index) => (
-                      <div key={index} className={`galactic-grid-fixed border-t border-primary/10 first:border-t-0 transition-all duration-300 hover:bg-primary/5 ${
-                        currentProgram.id === 'heracles' ? 'grid-cols-8' : 
-                        currentProgram.id === 'zeus' ? 'grid-cols-8' : 'grid-cols-7'
-                      } ${index % 2 === 0 ? 'bg-background/40' : 'bg-muted/20'}`}>
-                        
-                        <div className="galactic-data-cell">
-                          <div className="px-4 py-4 font-bold text-primary text-sm md:text-lg">
-                            {account.size}
+                    {getFeatureRows(currentProgram).map((row, rowIndex) => (
+                      <div key={rowIndex} className={`galactic-grid-inverted border-t border-primary/10 first:border-t-0 transition-all duration-300 hover:bg-primary/5 ${
+                        rowIndex % 2 === 0 ? 'bg-background/40' : 'bg-muted/20'
+                      }`}>
+                        <div className="galactic-data-cell-inverted feature-label">
+                          <div className="px-4 py-4 font-bold text-foreground text-sm md:text-base">
+                            {row.label}
                           </div>
                         </div>
-                        
-                        <div className="galactic-data-cell">
-                          <div className="px-4 py-4 font-bold text-accent text-sm md:text-base">
+                        {currentProgram.accounts.map((account, accountIndex) => (
+                          <div key={accountIndex} className="galactic-data-cell-inverted">
+                            <div className="px-4 py-4 text-foreground font-medium text-xs md:text-sm">
+                              {account[row.key]}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+
+                    {/* Price Row */}
+                    <div className="galactic-grid-inverted border-t border-primary/20 bg-accent/10">
+                      <div className="galactic-data-cell-inverted feature-label">
+                        <div className="px-4 py-4 font-bold text-primary text-sm md:text-base">
+                          💰 Price
+                        </div>
+                      </div>
+                      {currentProgram.accounts.map((account, accountIndex) => (
+                        <div key={accountIndex} className="galactic-data-cell-inverted">
+                          <div className="px-4 py-4 font-bold text-accent text-sm md:text-lg">
                             {account.fee}
                           </div>
                         </div>
-                        
-                        {currentProgram.id === 'heracles' && (
-                          <>
-                            <div className="galactic-data-cell">
-                              <div className="px-4 py-4 text-foreground font-medium text-xs md:text-sm">{account.phase1}</div>
-                            </div>
-                            <div className="galactic-data-cell">
-                              <div className="px-4 py-4 text-foreground font-medium text-xs md:text-sm">{account.phase2}</div>
-                            </div>
-                            <div className="galactic-data-cell">
-                              <div className="px-4 py-4 text-foreground font-medium text-xs md:text-sm">{account.phase3}</div>
-                            </div>
-                          </>
-                        )}
-                        
-                        {currentProgram.id === 'orion' && (
-                          <div className="galactic-data-cell">
-                            <div className="px-4 py-4 text-foreground font-medium text-xs md:text-sm">{account.target}</div>
-                          </div>
-                        )}
-                        
-                        {currentProgram.id === 'zeus' && (
-                          <>
-                            <div className="galactic-data-cell">
-                              <div className="px-4 py-4 text-foreground font-medium text-xs md:text-sm">{account.phase1}</div>
-                            </div>
-                            <div className="galactic-data-cell">
-                              <div className="px-4 py-4 text-foreground font-medium text-xs md:text-sm">{account.phase2}</div>
-                            </div>
-                          </>
-                        )}
-                        
-                        <div className="galactic-data-cell">
-                          <div className="px-4 py-4 text-destructive font-semibold text-xs md:text-sm">{account.dailyDD}</div>
-                        </div>
-                        
-                        <div className="galactic-data-cell">
-                          <div className="px-4 py-4 text-destructive font-semibold text-xs md:text-sm">{account.maxDD}</div>
-                        </div>
-                        
-                        {(currentProgram.id === 'orion' || currentProgram.id === 'zeus') && (
-                          <div className="galactic-data-cell">
-                            <div className="px-4 py-4 text-accent font-semibold text-xs md:text-sm">{account.payout}</div>
-                          </div>
-                        )}
-                        
-                        <div className="galactic-data-cell">
-                          <div className="px-4 py-4 font-bold text-primary text-sm md:text-base">
-                            {account.split}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </div>
 
-                <div className="text-center mt-12">
-                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground px-12 py-4 text-xl font-bold shadow-lg shadow-primary/25 font-['Inter',sans-serif]">
-                    🚀 Begin {currentProgram.name}
-                  </Button>
+                {/* Buttons Row */}
+                <div className="galactic-grid-inverted mt-6 gap-4">
+                  <div className="hidden"></div>
+                  {currentProgram.accounts.map((account, accountIndex) => (
+                    <div key={accountIndex} className="flex justify-center">
+                      <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 text-sm font-bold shadow-lg shadow-primary/25 font-['Inter',sans-serif] w-full">
+                        🚀 Get {account.size}
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
