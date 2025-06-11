@@ -10,17 +10,17 @@ const TradingPrograms = () => {
     {
       id: 'heracles',
       name: 'Heracles Trader',
-      subtitle: 'Instant Divine Power',
+      subtitle: 'The Strongest Hero\'s Challenge',
       icon: '⚡',
-      description: 'Harness the strength of Heracles with instant access to funded accounts. No trials, just pure divine trading power.',
-      features: ['⚡ Instant funding', '🚫 No evaluation required', '💰 Up to 70:30 profit split', '♾️ Unlimited trading days', '🛡️ Divine protection'],
+      description: 'Channel the mighty strength of Heracles, hero of twelve labors. Access instant funding like the hero who conquered the Nemean Lion and slayed the Hydra. No trials, just pure heroic trading power.',
+      features: ['⚡ Instant funding like Heracles\' strength', '🚫 No evaluation - direct to greatness', '💰 Up to 70:30 profit split', '♾️ Unlimited trading like endless battles', '🛡️ Protection of the gods'],
       accounts: [
-        { size: '$2,500', fee: '$129', phase1: '$250 (10%)', phase2: '$125 (5%)', phase3: '$125 (5%)', dailyDD: '$100 (4%)', maxDD: '$175 (7%)', split: '70%' },
-        { size: '$5,000', fee: '$239', phase1: '$500 (10%)', phase2: '$250 (5%)', phase3: '$250 (5%)', dailyDD: '$200 (4%)', maxDD: '$350 (7%)', split: '70%' },
-        { size: '$10,000', fee: '$449', phase1: '$1,000 (10%)', phase2: '$500 (5%)', phase3: '$500 (5%)', dailyDD: '$400 (4%)', maxDD: '$700 (7%)', split: '70%' },
-        { size: '$25,000', fee: '$1,149', phase1: '$2,500 (10%)', phase2: '$1,250 (5%)', phase3: '$1,250 (5%)', dailyDD: '$1,000 (4%)', maxDD: '$1,750 (7%)', split: '70%' },
-        { size: '$50,000', fee: '$2,299', phase1: '$5,000 (10%)', phase2: '$2,500 (5%)', phase3: '$2,500 (5%)', dailyDD: '$2,000 (4%)', maxDD: '$3,500 (7%)', split: '70%' },
-        { size: '$100,000', fee: '$4,599', phase1: '$10,000 (10%)', phase2: '$5,000 (5%)', phase3: '$5,000 (5%)', dailyDD: '$4,000 (4%)', maxDD: '$7,000 (7%)', split: '70%' }
+        { size: '$2,500', fee: '$129', phase1: '$250 (10%)', phase2: '$125 (5%)', phase3: '$125 (5%)', dailyDD: '$100 (4%)', maxDD: '$175 (7%)', split: 'Up to 70%' },
+        { size: '$5,000', fee: '$239', phase1: '$500 (10%)', phase2: '$250 (5%)', phase3: '$250 (5%)', dailyDD: '$200 (4%)', maxDD: '$350 (7%)', split: 'Up to 70%' },
+        { size: '$10,000', fee: '$449', phase1: '$1,000 (10%)', phase2: '$500 (5%)', phase3: '$500 (5%)', dailyDD: '$400 (4%)', maxDD: '$700 (7%)', split: 'Up to 70%' },
+        { size: '$25,000', fee: '$1,149', phase1: '$2,500 (10%)', phase2: '$1,250 (5%)', phase3: '$1,250 (5%)', dailyDD: '$1,000 (4%)', maxDD: '$1,750 (7%)', split: 'Up to 70%' },
+        { size: '$50,000', fee: '$2,299', phase1: '$5,000 (10%)', phase2: '$2,500 (5%)', phase3: '$2,500 (5%)', dailyDD: '$2,000 (4%)', maxDD: '$3,500 (7%)', split: 'Up to 70%' },
+        { size: '$100,000', fee: '$4,599', phase1: '$10,000 (10%)', phase2: '$5,000 (5%)', phase3: '$5,000 (5%)', dailyDD: '$4,000 (4%)', maxDD: '$7,000 (7%)', split: 'Up to 70%' }
       ],
       popular: true,
       color: 'from-yellow-500/20 to-orange-500/20'
@@ -28,17 +28,17 @@ const TradingPrograms = () => {
     {
       id: 'orion',
       name: 'Orion Trader Program',
-      subtitle: 'Celestial One-Step Ascension',
+      subtitle: 'The Hunter\'s Single Quest',
       icon: '🎯',
-      description: 'Follow the constellation of Orion through a single celestial challenge to reach trading immortality.',
-      features: ['🎯 One divine evaluation', '💎 Up to 70:30 cosmic profit split', '♾️ Unlimited trading epochs', '💸 Refundable assessment fee', '⭐ Stellar performance tracking'],
+      description: 'Follow the path of Orion, the great hunter among the stars. One stellar challenge to prove your worth, just as Orion proved himself hunting the greatest beasts across the cosmos.',
+      features: ['🎯 One stellar evaluation quest', '💎 Up to 70:30 cosmic profit split', '♾️ Unlimited trading across galaxies', '💸 Refundable quest fee', '⭐ Stellar performance like Orion'],
       accounts: [
-        { size: '$2,500', fee: '$59', target: '$250 (10%)', dailyDD: '$100 (4%)', maxDD: '$200 (8%)', payout: '$125 (5%)', split: '70%' },
-        { size: '$5,000', fee: '$89', target: '$500 (10%)', dailyDD: '$200 (4%)', maxDD: '$400 (8%)', payout: '$250 (5%)', split: '70%' },
-        { size: '$10,000', fee: '$149', target: '$1,000 (10%)', dailyDD: '$400 (4%)', maxDD: '$800 (8%)', payout: '$500 (5%)', split: '70%' },
-        { size: '$25,000', fee: '$249', target: '$2,500 (10%)', dailyDD: '$1,000 (4%)', maxDD: '$2,000 (8%)', payout: '$1,250 (5%)', split: '70%' },
-        { size: '$50,000', fee: '$449', target: '$5,000 (10%)', dailyDD: '$2,000 (4%)', maxDD: '$4,000 (8%)', payout: '$2,500 (5%)', split: '70%' },
-        { size: '$100,000', fee: '$749', target: '$10,000 (10%)', dailyDD: '$4,000 (4%)', maxDD: '$8,000 (8%)', payout: '$5,000 (5%)', split: '70%' }
+        { size: '$2,500', fee: '$59', target: '$250 (10%)', dailyDD: '$100 (4%)', maxDD: '$200 (8%)', payout: '$125 (5%)', split: 'Up to 70%' },
+        { size: '$5,000', fee: '$89', target: '$500 (10%)', dailyDD: '$200 (4%)', maxDD: '$400 (8%)', payout: '$250 (5%)', split: 'Up to 70%' },
+        { size: '$10,000', fee: '$149', target: '$1,000 (10%)', dailyDD: '$400 (4%)', maxDD: '$800 (8%)', payout: '$500 (5%)', split: 'Up to 70%' },
+        { size: '$25,000', fee: '$249', target: '$2,500 (10%)', dailyDD: '$1,000 (4%)', maxDD: '$2,000 (8%)', payout: '$1,250 (5%)', split: 'Up to 70%' },
+        { size: '$50,000', fee: '$449', target: '$5,000 (10%)', dailyDD: '$2,000 (4%)', maxDD: '$4,000 (8%)', payout: '$2,500 (5%)', split: 'Up to 70%' },
+        { size: '$100,000', fee: '$749', target: '$10,000 (10%)', dailyDD: '$4,000 (4%)', maxDD: '$8,000 (8%)', payout: '$5,000 (5%)', split: 'Up to 70%' }
       ],
       popular: false,
       color: 'from-primary/20 to-accent/20'
@@ -46,17 +46,17 @@ const TradingPrograms = () => {
     {
       id: 'zeus',
       name: 'Zeus Trader Program',
-      subtitle: 'Supreme Two-Phase Dominion',
+      subtitle: 'King of Olympus Challenge',
       icon: '⚡',
-      description: 'Channel the supreme power of Zeus through two divine phases to achieve ultimate trading sovereignty.',
-      features: ['⚡ Two thunderous evaluations', '👑 Up to 70:30 supreme profit split', '♾️ Unlimited divine trading', '💰 Lowest assessment fees', '🏛️ Olympian trader status'],
+      description: 'Ascend Mount Olympus with Zeus, king of gods and ruler of the heavens. Face two thunderous trials to earn your place among the trading giants, just as Zeus conquered the Titans.',
+      features: ['⚡ Two thunderous trials like Zeus', '👑 Up to 70:30 royal profit split', '♾️ Unlimited trading dominion', '💰 Lowest fees in the kingdom', '🏛️ Olympian trader status'],
       accounts: [
-        { size: '$2,500', fee: '$27', phase1: '$250 (10%)', phase2: '$125 (5%)', dailyDD: '$100 (4%)', maxDD: '$200 (8%)', payout: '$125 (5%)', split: '70%' },
-        { size: '$5,000', fee: '$47', phase1: '$500 (10%)', phase2: '$250 (5%)', dailyDD: '$200 (4%)', maxDD: '$400 (8%)', payout: '$250 (5%)', split: '70%' },
-        { size: '$10,000', fee: '$87', phase1: '$1,000 (10%)', phase2: '$500 (5%)', dailyDD: '$400 (4%)', maxDD: '$800 (8%)', payout: '$500 (5%)', split: '70%' },
-        { size: '$25,000', fee: '$187', phase1: '$2,500 (10%)', phase2: '$1,250 (5%)', dailyDD: '$1,000 (4%)', maxDD: '$2,000 (8%)', payout: '$1,250 (5%)', split: '70%' },
-        { size: '$50,000', fee: '$367', phase1: '$5,000 (10%)', phase2: '$2,500 (5%)', dailyDD: '$2,000 (4%)', maxDD: '$4,000 (8%)', payout: '$2,500 (5%)', split: '70%' },
-        { size: '$100,000', fee: '$567', phase1: '$10,000 (10%)', phase2: '$5,000 (5%)', dailyDD: '$4,000 (4%)', maxDD: '$8,000 (8%)', payout: '$5,000 (5%)', split: '70%' }
+        { size: '$2,500', fee: '$27', phase1: '$250 (10%)', phase2: '$125 (5%)', dailyDD: '$100 (4%)', maxDD: '$200 (8%)', payout: '$125 (5%)', split: 'Up to 70%' },
+        { size: '$5,000', fee: '$47', phase1: '$500 (10%)', phase2: '$250 (5%)', dailyDD: '$200 (4%)', maxDD: '$400 (8%)', payout: '$250 (5%)', split: 'Up to 70%' },
+        { size: '$10,000', fee: '$87', phase1: '$1,000 (10%)', phase2: '$500 (5%)', dailyDD: '$400 (4%)', maxDD: '$800 (8%)', payout: '$500 (5%)', split: 'Up to 70%' },
+        { size: '$25,000', fee: '$187', phase1: '$2,500 (10%)', phase2: '$1,250 (5%)', dailyDD: '$1,000 (4%)', maxDD: '$2,000 (8%)', payout: '$1,250 (5%)', split: 'Up to 70%' },
+        { size: '$50,000', fee: '$367', phase1: '$5,000 (10%)', phase2: '$2,500 (5%)', dailyDD: '$2,000 (4%)', maxDD: '$4,000 (8%)', payout: '$2,500 (5%)', split: 'Up to 70%' },
+        { size: '$100,000', fee: '$567', phase1: '$10,000 (10%)', phase2: '$5,000 (5%)', dailyDD: '$4,000 (4%)', maxDD: '$8,000 (8%)', payout: '$5,000 (5%)', split: 'Up to 70%' }
       ],
       popular: false,
       color: 'from-blue-500/20 to-purple-500/20'
@@ -73,10 +73,10 @@ const TradingPrograms = () => {
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-            🌌 Divine Trading Programs 🌌
+            🌌 Giants Trading Programs 🌌
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Choose your path to trading godhood. Each program offers a unique journey to cosmic prosperity and divine profits.
+            Choose your path among the giants. Each program channels the power of legendary gods and heroes to achieve cosmic prosperity and stellar profits.
           </p>
         </div>
 
@@ -128,123 +128,123 @@ const TradingPrograms = () => {
                 </div>
 
                 {/* Enhanced Pricing Table */}
-                <div className="pricing-table-container overflow-hidden rounded-3xl border border-primary/30 shadow-2xl bg-gradient-to-br from-card/95 to-card/85 backdrop-blur-lg">
+                <div className="galactic-table-container overflow-hidden rounded-2xl border border-primary/30 shadow-2xl bg-gradient-to-br from-card/95 to-card/85 backdrop-blur-lg">
                   {/* Table Header */}
-                  <div className="table-header bg-gradient-to-r from-primary via-accent to-primary text-primary-foreground p-1">
-                    <div className={`grid gap-0 pricing-table-grid ${
+                  <div className="table-header bg-gradient-to-r from-primary via-accent to-primary text-primary-foreground">
+                    <div className={`grid gap-px galactic-grid ${
                       currentProgram.id === 'heracles' ? 'grid-cols-8' : 
                       currentProgram.id === 'zeus' ? 'grid-cols-8' : 'grid-cols-7'
                     }`}>
-                      <div className="table-cell header-cell border-r border-primary-foreground/20 last:border-r-0 flex items-center justify-center min-h-[60px]">
-                        <div className="text-center font-black text-sm md:text-base">💎 Account</div>
+                      <div className="galactic-header-cell">
+                        <div className="text-center font-black text-sm md:text-base px-3 py-4">💎 Account Size</div>
                       </div>
-                      <div className="table-cell header-cell border-r border-primary-foreground/20 last:border-r-0 flex items-center justify-center min-h-[60px]">
-                        <div className="text-center font-black text-sm md:text-base">💰 Fee</div>
+                      <div className="galactic-header-cell">
+                        <div className="text-center font-black text-sm md:text-base px-3 py-4">💰 Fee</div>
                       </div>
-                      <div className="table-cell header-cell border-r border-primary-foreground/20 last:border-r-0 flex items-center justify-center min-h-[60px]">
-                        <div className="text-center font-black text-xs md:text-sm">
+                      <div className="galactic-header-cell">
+                        <div className="text-center font-black text-xs md:text-sm px-3 py-4">
                           {currentProgram.id === 'heracles' ? '⚡ Phase 1' : '🎯 Target'}
                         </div>
                       </div>
                       {currentProgram.id === 'heracles' && (
                         <>
-                          <div className="table-cell header-cell border-r border-primary-foreground/20 last:border-r-0 flex items-center justify-center min-h-[60px]">
-                            <div className="text-center font-black text-xs md:text-sm">⚡ Phase 2</div>
+                          <div className="galactic-header-cell">
+                            <div className="text-center font-black text-xs md:text-sm px-3 py-4">⚡ Phase 2</div>
                           </div>
-                          <div className="table-cell header-cell border-r border-primary-foreground/20 last:border-r-0 flex items-center justify-center min-h-[60px]">
-                            <div className="text-center font-black text-xs md:text-sm">⚡ Phase 3</div>
+                          <div className="galactic-header-cell">
+                            <div className="text-center font-black text-xs md:text-sm px-3 py-4">⚡ Phase 3</div>
                           </div>
                         </>
                       )}
                       {currentProgram.id === 'zeus' && (
-                        <div className="table-cell header-cell border-r border-primary-foreground/20 last:border-r-0 flex items-center justify-center min-h-[60px]">
-                          <div className="text-center font-black text-xs md:text-sm">⚡ Phase 2</div>
+                        <div className="galactic-header-cell">
+                          <div className="text-center font-black text-xs md:text-sm px-3 py-4">⚡ Phase 2</div>
                         </div>
                       )}
-                      <div className="table-cell header-cell border-r border-primary-foreground/20 last:border-r-0 flex items-center justify-center min-h-[60px]">
-                        <div className="text-center font-black text-xs md:text-sm">📉 Daily DD</div>
+                      <div className="galactic-header-cell">
+                        <div className="text-center font-black text-xs md:text-sm px-3 py-4">📉 Daily DD</div>
                       </div>
-                      <div className="table-cell header-cell border-r border-primary-foreground/20 last:border-r-0 flex items-center justify-center min-h-[60px]">
-                        <div className="text-center font-black text-xs md:text-sm">📊 Max DD</div>
+                      <div className="galactic-header-cell">
+                        <div className="text-center font-black text-xs md:text-sm px-3 py-4">📊 Max DD</div>
                       </div>
                       {(currentProgram.id === 'orion' || currentProgram.id === 'zeus') && (
-                        <div className="table-cell header-cell border-r border-primary-foreground/20 last:border-r-0 flex items-center justify-center min-h-[60px]">
-                          <div className="text-center font-black text-xs md:text-sm">💸 Payout</div>
+                        <div className="galactic-header-cell">
+                          <div className="text-center font-black text-xs md:text-sm px-3 py-4">💸 Payout</div>
                         </div>
                       )}
-                      <div className="table-cell header-cell border-r border-primary-foreground/20 last:border-r-0 flex items-center justify-center min-h-[60px]">
-                        <div className="text-center font-black text-sm md:text-base">🏆 Split</div>
+                      <div className="galactic-header-cell">
+                        <div className="text-center font-black text-sm md:text-base px-3 py-4">🏆 Profit Split</div>
                       </div>
                     </div>
                   </div>
 
                   {/* Table Body */}
-                  <div className="table-body">
+                  <div className="table-body bg-card/80">
                     {currentProgram.accounts.map((account, index) => (
-                      <div key={index} className={`grid gap-0 pricing-table-grid border-b border-primary/10 last:border-b-0 transition-all duration-300 hover:bg-primary/5 hover:shadow-lg ${
+                      <div key={index} className={`grid gap-px galactic-grid border-t border-primary/10 first:border-t-0 transition-all duration-300 hover:bg-primary/5 ${
                         currentProgram.id === 'heracles' ? 'grid-cols-8' : 
                         currentProgram.id === 'zeus' ? 'grid-cols-8' : 'grid-cols-7'
-                      } ${index % 2 === 0 ? 'bg-background/60' : 'bg-muted/20'}`}>
+                      } ${index % 2 === 0 ? 'bg-background/40' : 'bg-muted/20'}`}>
                         
-                        <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
-                          <div className="account-size text-center font-bold text-primary text-sm md:text-lg">
+                        <div className="galactic-data-cell">
+                          <div className="galactic-account-size text-left px-4 py-4 font-bold text-primary text-sm md:text-lg">
                             {account.size}
                           </div>
                         </div>
                         
-                        <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
-                          <div className="fee text-center font-bold text-accent text-sm md:text-base">
+                        <div className="galactic-data-cell">
+                          <div className="galactic-fee text-left px-4 py-4 font-bold text-accent text-sm md:text-base">
                             {account.fee}
                           </div>
                         </div>
                         
                         {currentProgram.id === 'heracles' && (
                           <>
-                            <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
-                              <div className="text-center text-foreground font-medium text-xs md:text-sm">{account.phase1}</div>
+                            <div className="galactic-data-cell">
+                              <div className="text-left px-4 py-4 text-foreground font-medium text-xs md:text-sm">{account.phase1}</div>
                             </div>
-                            <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
-                              <div className="text-center text-foreground font-medium text-xs md:text-sm">{account.phase2}</div>
+                            <div className="galactic-data-cell">
+                              <div className="text-left px-4 py-4 text-foreground font-medium text-xs md:text-sm">{account.phase2}</div>
                             </div>
-                            <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
-                              <div className="text-center text-foreground font-medium text-xs md:text-sm">{account.phase3}</div>
+                            <div className="galactic-data-cell">
+                              <div className="text-left px-4 py-4 text-foreground font-medium text-xs md:text-sm">{account.phase3}</div>
                             </div>
                           </>
                         )}
                         
                         {currentProgram.id === 'orion' && (
-                          <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
-                            <div className="text-center text-foreground font-medium text-xs md:text-sm">{account.target}</div>
+                          <div className="galactic-data-cell">
+                            <div className="text-left px-4 py-4 text-foreground font-medium text-xs md:text-sm">{account.target}</div>
                           </div>
                         )}
                         
                         {currentProgram.id === 'zeus' && (
                           <>
-                            <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
-                              <div className="text-center text-foreground font-medium text-xs md:text-sm">{account.phase1}</div>
+                            <div className="galactic-data-cell">
+                              <div className="text-left px-4 py-4 text-foreground font-medium text-xs md:text-sm">{account.phase1}</div>
                             </div>
-                            <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
-                              <div className="text-center text-foreground font-medium text-xs md:text-sm">{account.phase2}</div>
+                            <div className="galactic-data-cell">
+                              <div className="text-left px-4 py-4 text-foreground font-medium text-xs md:text-sm">{account.phase2}</div>
                             </div>
                           </>
                         )}
                         
-                        <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
-                          <div className="text-center text-destructive font-semibold text-xs md:text-sm">{account.dailyDD}</div>
+                        <div className="galactic-data-cell">
+                          <div className="text-left px-4 py-4 text-destructive font-semibold text-xs md:text-sm">{account.dailyDD}</div>
                         </div>
                         
-                        <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
-                          <div className="text-center text-destructive font-semibold text-xs md:text-sm">{account.maxDD}</div>
+                        <div className="galactic-data-cell">
+                          <div className="text-left px-4 py-4 text-destructive font-semibold text-xs md:text-sm">{account.maxDD}</div>
                         </div>
                         
                         {(currentProgram.id === 'orion' || currentProgram.id === 'zeus') && (
-                          <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
-                            <div className="text-center text-accent font-semibold text-xs md:text-sm">{account.payout}</div>
+                          <div className="galactic-data-cell">
+                            <div className="text-left px-4 py-4 text-accent font-semibold text-xs md:text-sm">{account.payout}</div>
                           </div>
                         )}
                         
-                        <div className="table-cell data-cell border-r border-primary/10 last:border-r-0 flex items-center justify-center min-h-[50px] py-4">
-                          <div className="split text-center font-bold text-primary text-sm md:text-base">
+                        <div className="galactic-data-cell">
+                          <div className="galactic-split text-left px-4 py-4 font-bold text-primary text-sm md:text-base">
                             {account.split}
                           </div>
                         </div>
