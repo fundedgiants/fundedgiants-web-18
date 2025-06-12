@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Menu, X, User, LogIn } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Navigation = () => {
@@ -38,20 +38,14 @@ const Navigation = () => {
             ))}
           </div>
 
-          {/* Auth Buttons */}
+          {/* Auth & CTA Buttons */}
           <div className="hidden lg:flex items-center space-x-4">
-            <Link to="/auth">
-              <Button variant="ghost" className="text-primary hover:bg-primary/10">
-                <LogIn className="h-4 w-4 mr-2" />
-                Login
-              </Button>
-            </Link>
-            <Link to="/auth">
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                <User className="h-4 w-4 mr-2" />
-                Register
-              </Button>
-            </Link>
+            <Button variant="ghost" className="text-primary hover:bg-primary/10">
+              Register/Login
+            </Button>
+            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              Get Funded
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -78,18 +72,12 @@ const Navigation = () => {
                 </Link>
               ))}
               <div className="flex flex-col space-y-2 pt-4 border-t border-primary/20">
-                <Link to="/auth" onClick={() => setIsOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start text-primary hover:bg-primary/10">
-                    <LogIn className="h-4 w-4 mr-2" />
-                    Login
-                  </Button>
-                </Link>
-                <Link to="/auth" onClick={() => setIsOpen(false)}>
-                  <Button className="w-full justify-start bg-primary hover:bg-primary/90 text-primary-foreground">
-                    <User className="h-4 w-4 mr-2" />
-                    Register
-                  </Button>
-                </Link>
+                <Button variant="ghost" className="w-full justify-start text-primary hover:bg-primary/10">
+                  Register/Login
+                </Button>
+                <Button className="w-full justify-start bg-primary hover:bg-primary/90 text-primary-foreground">
+                  Get Funded
+                </Button>
               </div>
             </div>
           </div>
