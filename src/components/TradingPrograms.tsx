@@ -10,47 +10,141 @@ const TradingPrograms = () => {
   const programs = [
     {
       name: "Heracles Trader",
-      subtitle: "The Divine Strength Program",
-      description: "Prove your divine trading prowess with our most popular evaluation program.",
+      subtitle: "Instant Funding",
+      description: "Prove your divine trading prowess with our instant funding program.",
       accountSizes: ["$2,500", "$5,000", "$10,000", "$25,000", "$50,000", "$100,000"],
-      prices: ["$29", "$49", "$69", "$89", "$169", "$289"],
+      prices: ["$129", "$239", "$449", "$1149", "$2299", "$4599"],
       features: [
-        { name: "Profit Target", values: ["10%", "10%", "10%", "10%", "10%", "10%"] },
-        { name: "Daily Drawdown", values: ["5%", "5%", "5%", "5%", "5%", "5%"] },
-        { name: "Max Drawdown", values: ["10%", "10%", "10%", "10%", "10%", "10%"] },
-        { name: "Trading Period", values: ["Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited"] },
-        { name: "Profit Split", values: ["70%", "70%", "70%", "70%", "70%", "70%"] },
-        { name: "Refund Fee", values: ["Yes", "Yes", "Yes", "Yes", "Yes", "Yes"] }
+        { 
+          name: "Profit Target For First Withdrawal", 
+          values: ["$250 (10%)", "$500 (10%)", "$1,000 (10%)", "$2500 (10%)", "$5000 (10%)", "$10,000 (10%)"] 
+        },
+        { 
+          name: "Profit Target For Second Withdrawal", 
+          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5000 (5%)"] 
+        },
+        { 
+          name: "Profit Target For Third Withdrawal", 
+          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5000 (5%)"] 
+        },
+        { 
+          name: "Profit Target for Subsequent Withdrawals", 
+          values: ["N/A", "N/A", "N/A", "N/A", "N/A", "N/A"] 
+        },
+        { 
+          name: "Daily DrawDown", 
+          values: ["$100 (4%)", "$200 (4%)", "$400 (4%)", "$1000 (4%)", "$2000 (4%)", "$4000 (4%)"] 
+        },
+        { 
+          name: "Overall Drawdown", 
+          values: ["$175 (7%)", "$350 (7%)", "$700 (7%)", "$1750 (7%)", "$3500 (4%)", "$7000 (7%)"] 
+        },
+        { 
+          name: "Minimum Number of Trading Days", 
+          values: ["3", "3", "3", "3", "3", "3"] 
+        },
+        { 
+          name: "Max Number of Trading Days", 
+          values: ["Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited"] 
+        },
+        { 
+          name: "Profit Split", 
+          values: ["50:50 (1st) 60:40 (2nd) 70:30 (3rd)", "50:50 (1st) 60:40 (2nd) 70:30 (3rd)", "50:50 (1st) 60:40 (2nd) 70:30 (3rd)", "50:50 (1st) 60:40 (2nd) 70:30 (3rd)", "50:50 (1st) 60:40 (2nd) 70:30 (3rd)", "50:50 (1st) 60:40 (2nd) 70:30 (3rd)"] 
+        },
+        { 
+          name: "Available Leverage", 
+          values: ["1:30", "1:30", "1:30", "1:30", "1:30", "1:30"] 
+        }
       ]
     },
     {
       name: "Orion Program",
-      subtitle: "The Cosmic Explorer Path",
-      description: "Navigate the trading cosmos with our premium program featuring enhanced conditions.",
+      subtitle: "1 Step Challenge",
+      description: "Navigate the trading cosmos with our premium 1-step challenge program.",
       accountSizes: ["$2,500", "$5,000", "$10,000", "$25,000", "$50,000", "$100,000"],
-      prices: ["$39", "$69", "$89", "$129", "$229", "$389"],
+      prices: ["$59", "$89", "$149", "$249", "$449", "$749"],
       features: [
-        { name: "Profit Target", values: ["8%", "8%", "8%", "8%", "8%", "8%"] },
-        { name: "Daily Drawdown", values: ["6%", "6%", "6%", "6%", "6%", "6%"] },
-        { name: "Max Drawdown", values: ["12%", "12%", "12%", "12%", "12%", "12%"] },
-        { name: "Trading Period", values: ["Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited"] },
-        { name: "Profit Split", values: ["75%", "75%", "75%", "75%", "75%", "75%"] },
-        { name: "Refund Fee", values: ["Yes", "Yes", "Yes", "Yes", "Yes", "Yes"] }
+        { 
+          name: "Profit Target Phase 1", 
+          values: ["$250 (10%)", "$500 (10%)", "$1,000 (10%)", "$2,500 (10%)", "$5,000 (10%)", "$10,000 (10%)"] 
+        },
+        { 
+          name: "Daily D.D", 
+          values: ["$100 (4%)", "$200 (4%)", "$400 (4%)", "$1000 (4%)", "$2000 (4%)", "$4000 (4%)"] 
+        },
+        { 
+          name: "Overall D.D", 
+          values: ["$200 (8%)", "$400 (8%)", "$800 (8%)", "$2000 (8%)", "$4000 (8%)", "$8000 (8%)"] 
+        },
+        { 
+          name: "Profit Target For 1st/2nd Payout", 
+          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5,000 (5%)"] 
+        },
+        { 
+          name: "Profit Target for Subsequent Payouts", 
+          values: ["N/A", "N/A", "N/A", "N/A", "N/A", "N/A"] 
+        },
+        { 
+          name: "Max Number of Trading Days", 
+          values: ["Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited"] 
+        },
+        { 
+          name: "Profit Split", 
+          values: ["70:30", "70:30", "70:30", "70:30", "70:30", "70:30"] 
+        },
+        { 
+          name: "Available Leverage", 
+          values: ["1:30", "1:30", "1:30", "1:30", "1:30", "1:30"] 
+        }
       ]
     },
     {
       name: "Zeus Program",
-      subtitle: "The Supreme Godly Challenge",
-      description: "Rule the markets like a god with our most prestigious instant funding program.",
+      subtitle: "2 Step Challenge",
+      description: "Rule the markets like a god with our most prestigious 2-step challenge program.",
       accountSizes: ["$2,500", "$5,000", "$10,000", "$25,000", "$50,000", "$100,000"],
-      prices: ["$59", "$99", "$139", "$189", "$339", "$589"],
+      prices: ["$27", "$47", "$87", "$187", "$367", "$567"],
       features: [
-        { name: "Profit Target", values: ["No Target", "No Target", "No Target", "No Target", "No Target", "No Target"] },
-        { name: "Daily Drawdown", values: ["3%", "3%", "3%", "3%", "3%", "3%"] },
-        { name: "Max Drawdown", values: ["6%", "6%", "6%", "6%", "6%", "6%"] },
-        { name: "Trading Period", values: ["Instant Funding", "Instant Funding", "Instant Funding", "Instant Funding", "Instant Funding", "Instant Funding"] },
-        { name: "Profit Split", values: ["80%", "80%", "80%", "80%", "80%", "80%"] },
-        { name: "Refund Fee", values: ["No", "No", "No", "No", "No", "No"] }
+        { 
+          name: "Profit Target Phase 1", 
+          values: ["$250 (10%)", "$500 (10%)", "$1,000 (10%)", "$2,500 (10%)", "$5,000 (10%)", "$10,000 (10%)"] 
+        },
+        { 
+          name: "Profit Target Phase 2", 
+          values: ["$125 (5%)", "$250 (5%)", "$750 (5%)", "$1,250 (5%)", "$2,500 (5%)", "$5,000 (5%)"] 
+        },
+        { 
+          name: "Daily D.D", 
+          values: ["$100 (4%)", "$200 (4%)", "$400 (4%)", "$1000 (4%)", "$2000 (4%)", "$4000 (4%)"] 
+        },
+        { 
+          name: "Overall D.D", 
+          values: ["$200 (8%)", "$400 (8%)", "$800 (8%)", "$2000 (8%)", "$4000 (8%)", "$8000 (8%)"] 
+        },
+        { 
+          name: "Profit Target For 1st Payout", 
+          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5,000 (5%)"] 
+        },
+        { 
+          name: "Profit Target for Subsequent Payouts", 
+          values: ["N/A", "N/A", "N/A", "N/A", "N/A", "N/A"] 
+        },
+        { 
+          name: "Minimum Number of Trading Days Per Phase", 
+          values: ["3", "3", "3", "3", "3", "3"] 
+        },
+        { 
+          name: "Max Number of Trading Days", 
+          values: ["Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited"] 
+        },
+        { 
+          name: "Profit Split", 
+          values: ["70:30", "70:30", "70:30", "70:30", "70:30", "70:30"] 
+        },
+        { 
+          name: "Available Leverage", 
+          values: ["1:30", "1:30", "1:30", "1:30", "1:30", "1:30"] 
+        }
       ]
     }
   ];
@@ -107,11 +201,11 @@ const TradingPrograms = () => {
                 {/* Account Size Headers */}
                 <thead>
                   <tr className="border-b border-cosmic-purple/30">
-                    <th className="text-left p-4 w-40 text-cosmic-blue font-bold">
+                    <th className="text-left p-4 w-56 text-cosmic-blue font-bold">
                       {/* Empty header for features column */}
                     </th>
                     {currentProgram.accountSizes.map((size, index) => (
-                      <th key={index} className="text-center p-4 w-32 text-cosmic-blue font-bold text-lg">
+                      <th key={index} className="text-center p-4 w-36 text-cosmic-blue font-bold text-lg">
                         {size}
                       </th>
                     ))}
@@ -122,20 +216,12 @@ const TradingPrograms = () => {
                   {/* Feature Rows */}
                   {currentProgram.features.map((feature, featureIndex) => (
                     <tr key={featureIndex} className="border-b border-cosmic-purple/20 hover:bg-cosmic-purple/5 transition-colors">
-                      <td className="p-4 font-semibold text-cosmic-blue border-r border-cosmic-purple/20">
+                      <td className="p-4 font-semibold text-cosmic-blue border-r border-cosmic-purple/20 w-56">
                         {feature.name}
                       </td>
                       {feature.values.map((value, valueIndex) => (
-                        <td key={valueIndex} className="text-center p-4 text-muted-foreground">
-                          {feature.name === "Refund Fee" ? (
-                            value === "Yes" ? (
-                              <Check className="h-5 w-5 text-cosmic-green mx-auto" />
-                            ) : (
-                              <X className="h-5 w-5 text-cosmic-red mx-auto" />
-                            )
-                          ) : (
-                            value
-                          )}
+                        <td key={valueIndex} className="text-center p-4 text-muted-foreground w-36">
+                          {value}
                         </td>
                       ))}
                     </tr>
@@ -143,11 +229,11 @@ const TradingPrograms = () => {
                   
                   {/* Price Row */}
                   <tr className="border-b-2 border-cosmic-purple/30 bg-cosmic-purple/10">
-                    <td className="p-4 font-bold text-cosmic-blue border-r border-cosmic-purple/20 text-lg">
+                    <td className="p-4 font-bold text-cosmic-blue border-r border-cosmic-purple/20 text-lg w-56">
                       Price
                     </td>
                     {currentProgram.prices.map((price, index) => (
-                      <td key={index} className="text-center p-4">
+                      <td key={index} className="text-center p-4 w-36">
                         <span className="text-2xl font-bold text-cosmic-purple">{price}</span>
                       </td>
                     ))}
@@ -157,9 +243,9 @@ const TradingPrograms = () => {
               
               {/* Buttons Row */}
               <div className="flex mt-6">
-                <div className="w-40"></div> {/* Empty space for features column */}
+                <div className="w-56"></div> {/* Empty space for features column */}
                 {currentProgram.accountSizes.map((size, index) => (
-                  <div key={index} className="flex justify-center px-2 w-32">
+                  <div key={index} className="flex justify-center w-36 px-1">
                     <Button className="w-full text-xs py-2 bg-cosmic-purple hover:bg-cosmic-purple/80 text-white shadow-cosmic transition-all duration-300 hover:scale-105">
                       Get Funded
                     </Button>
