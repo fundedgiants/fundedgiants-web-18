@@ -18,27 +18,26 @@ const TradingPrograms = () => {
         { 
           name: "Profit Target For Withdrawals", 
           values: ["", "", "", "", "", ""],
-          isMainRow: true
+          isMainRow: true,
+          hasSubRows: true
         },
         { 
-          name: "• 1st Withdrawal", 
+          name: "1st", 
           values: ["$250 (10%)", "$500 (10%)", "$1,000 (10%)", "$2500 (10%)", "$5000 (10%)", "$10,000 (10%)"],
-          isSubRow: true
+          isSubRow: true,
+          parentRow: "Profit Target For Withdrawals"
         },
         { 
-          name: "• 2nd Withdrawal", 
+          name: "2nd", 
           values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5000 (5%)"],
-          isSubRow: true
+          isSubRow: true,
+          parentRow: "Profit Target For Withdrawals"
         },
         { 
-          name: "• 3rd Withdrawal", 
+          name: "3rd", 
           values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5000 (5%)"],
-          isSubRow: true
-        },
-        { 
-          name: "• Subsequent Withdrawals", 
-          values: ["N/A", "N/A", "N/A", "N/A", "N/A", "N/A"],
-          isSubRow: true
+          isSubRow: true,
+          parentRow: "Profit Target For Withdrawals"
         },
         { 
           name: "Daily DrawDown", 
@@ -58,7 +57,27 @@ const TradingPrograms = () => {
         },
         { 
           name: "Profit Split", 
-          values: ["50:50 (1st) 60:40 (2nd) 70:30 (3rd)", "50:50 (1st) 60:40 (2nd) 70:30 (3rd)", "50:50 (1st) 60:40 (2nd) 70:30 (3rd)", "50:50 (1st) 60:40 (2nd) 70:30 (3rd)", "50:50 (1st) 60:40 (2nd) 70:30 (3rd)", "50:50 (1st) 60:40 (2nd) 70:30 (3rd)"] 
+          values: ["", "", "", "", "", ""],
+          isMainRow: true,
+          hasSubRows: true
+        },
+        { 
+          name: "1st", 
+          values: ["50:50", "50:50", "50:50", "50:50", "50:50", "50:50"],
+          isSubRow: true,
+          parentRow: "Profit Split"
+        },
+        { 
+          name: "2nd", 
+          values: ["60:40", "60:40", "60:40", "60:40", "60:40", "60:40"],
+          isSubRow: true,
+          parentRow: "Profit Split"
+        },
+        { 
+          name: "3rd", 
+          values: ["70:30", "70:30", "70:30", "70:30", "70:30", "70:30"],
+          isSubRow: true,
+          parentRow: "Profit Split"
         },
         { 
           name: "Available Leverage", 
@@ -92,22 +111,20 @@ const TradingPrograms = () => {
         { 
           name: "Profit Target For Payouts", 
           values: ["", "", "", "", "", ""],
-          isMainRow: true
+          isMainRow: true,
+          hasSubRows: true
         },
         { 
-          name: "• 1st Payout", 
+          name: "1st", 
           values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5,000 (5%)"],
-          isSubRow: true
+          isSubRow: true,
+          parentRow: "Profit Target For Payouts"
         },
         { 
-          name: "• 2nd Payout", 
+          name: "2nd", 
           values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5,000 (5%)"],
-          isSubRow: true
-        },
-        { 
-          name: "• Subsequent Payouts", 
-          values: ["N/A", "N/A", "N/A", "N/A", "N/A", "N/A"],
-          isSubRow: true
+          isSubRow: true,
+          parentRow: "Profit Target For Payouts"
         },
         { 
           name: "Max Number of Trading Days", 
@@ -245,8 +262,21 @@ const TradingPrograms = () => {
                     } ${
                       feature.isSubRow ? 'bg-cosmic-purple/5' : ''
                     }`}>
-                      <td className={`p-4 ${feature.isSubRow ? 'pl-8 text-sm' : 'font-semibold'} text-cosmic-blue border-r border-cosmic-purple/20 w-56`}>
-                        {feature.name}
+                      <td className={`p-4 ${feature.isSubRow ? 'text-sm' : 'font-semibold'} text-cosmic-blue border-r border-cosmic-purple/20 w-56 ${
+                        feature.isSubRow ? 'relative' : ''
+                      }`}>
+                        {feature.isSubRow ? (
+                          <div className="flex items-center">
+                            <div className="w-6 h-6 flex items-center justify-center bg-cosmic-purple/20 rounded text-xs font-bold text-cosmic-purple mr-2">
+                              {feature.name}
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {feature.name === "1st" ? "Withdrawal" : feature.name === "2nd" ? "Withdrawal" : feature.name === "3rd" ? "Withdrawal" : ""}
+                            </span>
+                          </div>
+                        ) : (
+                          feature.name
+                        )}
                       </td>
                       {feature.values.map((value, valueIndex) => (
                         <td key={valueIndex} className={`text-center p-4 ${feature.isSubRow ? 'text-sm' : ''} text-muted-foreground w-36`}>
@@ -274,7 +304,7 @@ const TradingPrograms = () => {
               <div className="flex mt-6">
                 <div className="w-56"></div> {/* Empty space for features column */}
                 {currentProgram.accountSizes.map((size, index) => (
-                  <div key={index} className="w-36 px-2">
+                  <div key={index} className="w-36 px-1">
                     <Button className="w-full text-xs py-2 bg-cosmic-purple hover:bg-cosmic-purple/80 text-white shadow-cosmic transition-all duration-300 hover:scale-105">
                       Get Funded
                     </Button>
