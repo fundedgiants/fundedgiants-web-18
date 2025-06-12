@@ -16,20 +16,29 @@ const TradingPrograms = () => {
       prices: ["$129", "$239", "$449", "$1149", "$2299", "$4599"],
       features: [
         { 
-          name: "Profit Target For First Withdrawal", 
-          values: ["$250 (10%)", "$500 (10%)", "$1,000 (10%)", "$2500 (10%)", "$5000 (10%)", "$10,000 (10%)"] 
+          name: "Profit Target For Withdrawals", 
+          values: ["", "", "", "", "", ""],
+          isMainRow: true
         },
         { 
-          name: "Profit Target For Second Withdrawal", 
-          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5000 (5%)"] 
+          name: "• 1st Withdrawal", 
+          values: ["$250 (10%)", "$500 (10%)", "$1,000 (10%)", "$2500 (10%)", "$5000 (10%)", "$10,000 (10%)"],
+          isSubRow: true
         },
         { 
-          name: "Profit Target For Third Withdrawal", 
-          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5000 (5%)"] 
+          name: "• 2nd Withdrawal", 
+          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5000 (5%)"],
+          isSubRow: true
         },
         { 
-          name: "Profit Target for Subsequent Withdrawals", 
-          values: ["N/A", "N/A", "N/A", "N/A", "N/A", "N/A"] 
+          name: "• 3rd Withdrawal", 
+          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5000 (5%)"],
+          isSubRow: true
+        },
+        { 
+          name: "• Subsequent Withdrawals", 
+          values: ["N/A", "N/A", "N/A", "N/A", "N/A", "N/A"],
+          isSubRow: true
         },
         { 
           name: "Daily DrawDown", 
@@ -37,7 +46,7 @@ const TradingPrograms = () => {
         },
         { 
           name: "Overall Drawdown", 
-          values: ["$175 (7%)", "$350 (7%)", "$700 (7%)", "$1750 (7%)", "$3500 (4%)", "$7000 (7%)"] 
+          values: ["$175 (7%)", "$350 (7%)", "$700 (7%)", "$1750 (7%)", "$3500 (7%)", "$7000 (7%)"] 
         },
         { 
           name: "Minimum Number of Trading Days", 
@@ -54,6 +63,10 @@ const TradingPrograms = () => {
         { 
           name: "Available Leverage", 
           values: ["1:30", "1:30", "1:30", "1:30", "1:30", "1:30"] 
+        },
+        { 
+          name: "Fee Refund", 
+          values: ["No", "No", "No", "No", "No", "No"] 
         }
       ]
     },
@@ -77,12 +90,24 @@ const TradingPrograms = () => {
           values: ["$200 (8%)", "$400 (8%)", "$800 (8%)", "$2000 (8%)", "$4000 (8%)", "$8000 (8%)"] 
         },
         { 
-          name: "Profit Target For 1st/2nd Payout", 
-          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5,000 (5%)"] 
+          name: "Profit Target For Payouts", 
+          values: ["", "", "", "", "", ""],
+          isMainRow: true
         },
         { 
-          name: "Profit Target for Subsequent Payouts", 
-          values: ["N/A", "N/A", "N/A", "N/A", "N/A", "N/A"] 
+          name: "• 1st Payout", 
+          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5,000 (5%)"],
+          isSubRow: true
+        },
+        { 
+          name: "• 2nd Payout", 
+          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5,000 (5%)"],
+          isSubRow: true
+        },
+        { 
+          name: "• Subsequent Payouts", 
+          values: ["N/A", "N/A", "N/A", "N/A", "N/A", "N/A"],
+          isSubRow: true
         },
         { 
           name: "Max Number of Trading Days", 
@@ -215,12 +240,16 @@ const TradingPrograms = () => {
                 <tbody>
                   {/* Feature Rows */}
                   {currentProgram.features.map((feature, featureIndex) => (
-                    <tr key={featureIndex} className="border-b border-cosmic-purple/20 hover:bg-cosmic-purple/5 transition-colors">
-                      <td className="p-4 font-semibold text-cosmic-blue border-r border-cosmic-purple/20 w-56">
+                    <tr key={featureIndex} className={`border-b border-cosmic-purple/20 hover:bg-cosmic-purple/5 transition-colors ${
+                      feature.isMainRow ? 'bg-cosmic-purple/10 font-semibold' : ''
+                    } ${
+                      feature.isSubRow ? 'bg-cosmic-purple/5' : ''
+                    }`}>
+                      <td className={`p-4 ${feature.isSubRow ? 'pl-8 text-sm' : 'font-semibold'} text-cosmic-blue border-r border-cosmic-purple/20 w-56`}>
                         {feature.name}
                       </td>
                       {feature.values.map((value, valueIndex) => (
-                        <td key={valueIndex} className="text-center p-4 text-muted-foreground w-36">
+                        <td key={valueIndex} className={`text-center p-4 ${feature.isSubRow ? 'text-sm' : ''} text-muted-foreground w-36`}>
                           {value}
                         </td>
                       ))}
@@ -245,7 +274,7 @@ const TradingPrograms = () => {
               <div className="flex mt-6">
                 <div className="w-56"></div> {/* Empty space for features column */}
                 {currentProgram.accountSizes.map((size, index) => (
-                  <div key={index} className="flex justify-center w-36 px-1">
+                  <div key={index} className="w-36 px-2">
                     <Button className="w-full text-xs py-2 bg-cosmic-purple hover:bg-cosmic-purple/80 text-white shadow-cosmic transition-all duration-300 hover:scale-105">
                       Get Funded
                     </Button>
