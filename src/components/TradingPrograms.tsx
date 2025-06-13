@@ -240,12 +240,12 @@ const TradingPrograms = () => {
                     <table className="w-full border-collapse bg-cosmic-card/50 rounded-lg overflow-hidden shadow-cosmic">
                       {/* Account Size Headers */}
                       <thead>
-                        <tr className="bg-gradient-to-r from-primary via-accent to-primary">
-                          <th className="text-left p-4 font-bold text-white border-r border-primary/30">
+                        <tr className="bg-gradient-to-r from-green-800 via-green-700 to-green-800">
+                          <th className="text-left p-4 font-bold text-white border-r border-green-600/30">
                             {/* Empty header for features column */}
                           </th>
                           {program.accountSizes.map((size, index) => (
-                            <th key={index} className="text-center p-4 font-bold text-white text-lg border-r border-primary/30 last:border-r-0">
+                            <th key={index} className="text-center p-4 font-bold text-white text-lg border-r border-green-600/30 last:border-r-0">
                               {size}
                             </th>
                           ))}
@@ -256,12 +256,13 @@ const TradingPrograms = () => {
                         {/* Feature Rows */}
                         {program.tableData.map((row, rowIndex) => (
                           <React.Fragment key={rowIndex}>
-                            <tr className="bg-gradient-to-r from-primary/80 via-accent/80 to-primary/80 border-b border-primary/20">
-                              <td className="p-4 font-bold text-white border-r border-primary/30">
+                            {/* Main row with payout target values */}
+                            <tr className="bg-gradient-to-r from-green-900/80 via-green-800/80 to-green-900/80 border-b border-green-700/20">
+                              <td className="p-4 font-bold text-white border-r border-green-600/30">
                                 <div>
                                   {row.label}
                                   {row.subtitle && (
-                                    <div className="text-sm font-normal">{row.subtitle}</div>
+                                    <div className="text-sm font-normal text-green-200">{row.subtitle}</div>
                                   )}
                                 </div>
                               </td>
@@ -271,16 +272,19 @@ const TradingPrograms = () => {
                                 </td>
                               ) : (
                                 row.values.map((value, valueIndex) => (
-                                  <td key={valueIndex} className="text-center p-4 text-white border-r border-primary/30 last:border-r-0">
+                                  <td key={valueIndex} className="text-center p-4 text-white border-r border-green-600/30 last:border-r-0">
                                     {value}
                                   </td>
                                 ))
                               )}
                             </tr>
+                            {/* Profit split sub-row */}
                             {row.profitSplit && (
-                              <tr className="bg-gradient-to-r from-primary/60 via-accent/60 to-primary/60">
-                                <td className="border-r border-primary/20"></td>
-                                <td colSpan={6} className="text-center p-2 font-semibold text-white">
+                              <tr className="bg-gradient-to-r from-green-900/60 via-green-800/60 to-green-900/60 border-b border-green-700/10">
+                                <td className="border-r border-green-600/20 pl-8 py-2">
+                                  <span className="text-sm text-green-300 italic">Profit Split</span>
+                                </td>
+                                <td colSpan={6} className="text-center py-2 font-medium text-green-200 text-sm">
                                   {row.profitSplit}
                                 </td>
                               </tr>
@@ -289,12 +293,12 @@ const TradingPrograms = () => {
                         ))}
                         
                         {/* Price Row */}
-                        <tr className="bg-gradient-to-r from-primary via-accent to-primary border-t-2 border-primary/40">
-                          <td className="p-4 font-bold text-white border-r border-primary/30 text-lg">
+                        <tr className="bg-gradient-to-r from-green-800 via-green-700 to-green-800 border-t-2 border-green-600/40">
+                          <td className="p-4 font-bold text-white border-r border-green-600/30 text-lg">
                             Price
                           </td>
                           {program.prices.map((price, index) => (
-                            <td key={index} className="text-center p-4 border-r border-primary/30 last:border-r-0">
+                            <td key={index} className="text-center p-4 border-r border-green-600/30 last:border-r-0">
                               <span className="text-2xl font-bold text-white">{price}</span>
                             </td>
                           ))}
