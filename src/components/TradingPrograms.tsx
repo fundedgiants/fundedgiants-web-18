@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -240,12 +239,12 @@ const TradingPrograms = () => {
                     <table className="w-full border-collapse bg-cosmic-card/50 rounded-lg overflow-hidden shadow-cosmic">
                       {/* Account Size Headers */}
                       <thead>
-                        <tr className="bg-gradient-to-r from-green-800 via-green-700 to-green-800">
-                          <th className="text-left p-4 font-bold text-white border-r border-green-600/30">
+                        <tr className="bg-gradient-to-r from-cosmic-purple/40 via-cosmic-blue/40 to-cosmic-purple/40 border-b border-cosmic-purple/30">
+                          <th className="text-left p-4 font-bold text-white border-r border-cosmic-purple/30 w-48">
                             {/* Empty header for features column */}
                           </th>
                           {program.accountSizes.map((size, index) => (
-                            <th key={index} className="text-center p-4 font-bold text-white text-lg border-r border-green-600/30 last:border-r-0">
+                            <th key={index} className="text-center p-3 font-bold text-white text-base border-r border-cosmic-purple/30 last:border-r-0 w-32">
                               {size}
                             </th>
                           ))}
@@ -257,12 +256,12 @@ const TradingPrograms = () => {
                         {program.tableData.map((row, rowIndex) => (
                           <React.Fragment key={rowIndex}>
                             {/* Main row with payout target values */}
-                            <tr className="bg-gradient-to-r from-green-900/80 via-green-800/80 to-green-900/80 border-b border-green-700/20">
-                              <td className="p-4 font-bold text-white border-r border-green-600/30">
+                            <tr className="bg-gradient-to-r from-cosmic-card/80 via-cosmic-card/60 to-cosmic-card/80 border-b border-cosmic-purple/20">
+                              <td className="p-4 font-bold text-white border-r border-cosmic-purple/30">
                                 <div>
                                   {row.label}
                                   {row.subtitle && (
-                                    <div className="text-sm font-normal text-green-200">{row.subtitle}</div>
+                                    <div className="text-sm font-normal text-cosmic-blue/80">{row.subtitle}</div>
                                   )}
                                 </div>
                               </td>
@@ -272,7 +271,7 @@ const TradingPrograms = () => {
                                 </td>
                               ) : (
                                 row.values.map((value, valueIndex) => (
-                                  <td key={valueIndex} className="text-center p-4 text-white border-r border-green-600/30 last:border-r-0">
+                                  <td key={valueIndex} className="text-center p-3 text-white border-r border-cosmic-purple/30 last:border-r-0 text-sm">
                                     {value}
                                   </td>
                                 ))
@@ -280,11 +279,11 @@ const TradingPrograms = () => {
                             </tr>
                             {/* Profit split sub-row */}
                             {row.profitSplit && (
-                              <tr className="bg-gradient-to-r from-green-900/60 via-green-800/60 to-green-900/60 border-b border-green-700/10">
-                                <td className="border-r border-green-600/20 pl-8 py-2">
-                                  <span className="text-sm text-green-300 italic">Profit Split</span>
+                              <tr className="bg-gradient-to-r from-cosmic-card/60 via-cosmic-card/40 to-cosmic-card/60 border-b border-cosmic-purple/10">
+                                <td className="border-r border-cosmic-purple/20 pl-8 py-2">
+                                  <span className="text-sm text-cosmic-blue/70 italic">Profit Split</span>
                                 </td>
-                                <td colSpan={6} className="text-center py-2 font-medium text-green-200 text-sm">
+                                <td colSpan={6} className="text-center py-2 font-medium text-cosmic-blue/80 text-sm">
                                   {row.profitSplit}
                                 </td>
                               </tr>
@@ -293,32 +292,35 @@ const TradingPrograms = () => {
                         ))}
                         
                         {/* Price Row */}
-                        <tr className="bg-gradient-to-r from-green-800 via-green-700 to-green-800 border-t-2 border-green-600/40">
-                          <td className="p-4 font-bold text-white border-r border-green-600/30 text-lg">
+                        <tr className="bg-gradient-to-r from-cosmic-purple/40 via-cosmic-blue/40 to-cosmic-purple/40 border-t-2 border-cosmic-purple/40">
+                          <td className="p-4 font-bold text-white border-r border-cosmic-purple/30 text-lg">
                             Price
                           </td>
                           {program.prices.map((price, index) => (
-                            <td key={index} className="text-center p-4 border-r border-green-600/30 last:border-r-0">
-                              <span className="text-2xl font-bold text-white">{price}</span>
+                            <td key={index} className="text-center p-4 border-r border-cosmic-purple/30 last:border-r-0">
+                              <span className="text-xl font-bold text-white">{price}</span>
+                            </td>
+                          ))}
+                        </tr>
+                        
+                        {/* Buttons Row */}
+                        <tr className="bg-cosmic-card/30">
+                          <td className="p-4 border-r border-cosmic-purple/30">
+                            {/* Empty cell for features column */}
+                          </td>
+                          {program.accountSizes.map((size, index) => (
+                            <td key={index} className="text-center p-2 border-r border-cosmic-purple/30 last:border-r-0">
+                              <Button 
+                                size="sm"
+                                className="w-full text-xs py-2 px-2 bg-gradient-to-r from-primary to-accent hover:from-primary/80 hover:to-accent/80 text-white shadow-cosmic transition-all duration-300 hover:scale-105"
+                              >
+                                Get Funded
+                              </Button>
                             </td>
                           ))}
                         </tr>
                       </tbody>
                     </table>
-                    
-                    {/* Buttons Row */}
-                    <div className="flex mt-6 bg-cosmic-card/30 rounded-b-lg border border-t-0 border-cosmic-purple/30">
-                      <div className="w-[200px]"></div> {/* Empty space for features column */}
-                      <div className="flex flex-1">
-                        {program.accountSizes.map((size, index) => (
-                          <div key={index} className="flex-1 px-2 py-4">
-                            <Button className="w-full text-sm py-3 bg-gradient-to-r from-primary to-accent hover:from-primary/80 hover:to-accent/80 text-white shadow-cosmic transition-all duration-300 hover:scale-105">
-                              Get Funded
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
