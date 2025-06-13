@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Check, X } from 'lucide-react';
 
 const TradingPrograms = () => {
   const [activeProgram, setActiveProgram] = useState(0);
@@ -14,78 +13,57 @@ const TradingPrograms = () => {
       description: "Prove your divine trading prowess with our instant funding program.",
       accountSizes: ["$2,500", "$5,000", "$10,000", "$25,000", "$50,000", "$100,000"],
       prices: ["$129", "$239", "$449", "$1149", "$2299", "$4599"],
-      features: [
-        { 
-          name: "Profit Target For Withdrawals", 
-          values: ["", "", "", "", "", ""],
-          isMainRow: true,
-          hasSubRows: true
+      tableData: [
+        {
+          label: "Daily Drawdown",
+          values: ["$100 (4%)", "$200 (4%)", "$400 (4%)", "$1,000 (4%)", "$2,000 (4%)", "$4,000 (4%)"]
         },
-        { 
-          name: "1st", 
-          values: ["$250 (10%)", "$500 (10%)", "$1,000 (10%)", "$2500 (10%)", "$5000 (10%)", "$10,000 (10%)"],
-          isSubRow: true,
-          parentRow: "Profit Target For Withdrawals"
+        {
+          label: "Overall Drawdown", 
+          values: ["$175 (7%)", "$350 (7%)", "$700 (7%)", "$1,750 (7%)", "$3,500 (7%)", "$7,000 (7%)"]
         },
-        { 
-          name: "2nd", 
-          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5000 (5%)"],
-          isSubRow: true,
-          parentRow: "Profit Target For Withdrawals"
+        {
+          label: "1st Payout Target",
+          subtitle: "3 Min Trading Days",
+          values: ["$250(10%)", "$500(10%)", "$1,000(10%)", "$2,500(10%)", "$5,000(10%)", "$10,000(10%)"],
+          profitSplit: "50:50 Profit Split"
         },
-        { 
-          name: "3rd", 
-          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5000 (5%)"],
-          isSubRow: true,
-          parentRow: "Profit Target For Withdrawals"
+        {
+          label: "2nd Payout Target", 
+          subtitle: "3 Min Trading Days",
+          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5,000 (5%)"],
+          profitSplit: "60:40 Profit Split"
         },
-        { 
-          name: "Daily DrawDown", 
-          values: ["$100 (4%)", "$200 (4%)", "$400 (4%)", "$1000 (4%)", "$2000 (4%)", "$4000 (4%)"] 
+        {
+          label: "3rd Payout Target",
+          subtitle: "3 Min Trading Days", 
+          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5,000 (5%)"],
+          profitSplit: "70:30 Profit Split"
         },
-        { 
-          name: "Overall Drawdown", 
-          values: ["$175 (7%)", "$350 (7%)", "$700 (7%)", "$1750 (7%)", "$3500 (7%)", "$7000 (7%)"] 
+        {
+          label: "Subsequent Payouts",
+          values: ["Minimum 2% and On-Demand Daily Payouts at 70:30 Profit Split", "", "", "", "", ""],
+          isSpanned: true
         },
-        { 
-          name: "Minimum Number of Trading Days", 
-          values: ["3", "3", "3", "3", "3", "3"] 
+        {
+          label: "Max Trading Days",
+          values: ["Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited"]
         },
-        { 
-          name: "Max Number of Trading Days", 
-          values: ["Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited"] 
+        {
+          label: "Available Leverage",
+          values: ["1:30", "1:30", "1:30", "1:30", "1:30", "1:30"]
         },
-        { 
-          name: "Profit Split", 
-          values: ["", "", "", "", "", ""],
-          isMainRow: true,
-          hasSubRows: true
+        {
+          label: "Fee Refund", 
+          values: ["No", "No", "No", "No", "No", "No"]
         },
-        { 
-          name: "1st", 
-          values: ["50:50", "50:50", "50:50", "50:50", "50:50", "50:50"],
-          isSubRow: true,
-          parentRow: "Profit Split"
+        {
+          label: "Scaling",
+          values: ["No Scaling", "2x After 10 Payouts", "2.5x After 10 Payouts", "2x After 10 Payouts", "2x After 10 Payouts", "2x After 10 Payouts"]
         },
-        { 
-          name: "2nd", 
-          values: ["60:40", "60:40", "60:40", "60:40", "60:40", "60:40"],
-          isSubRow: true,
-          parentRow: "Profit Split"
-        },
-        { 
-          name: "3rd", 
-          values: ["70:30", "70:30", "70:30", "70:30", "70:30", "70:30"],
-          isSubRow: true,
-          parentRow: "Profit Split"
-        },
-        { 
-          name: "Available Leverage", 
-          values: ["1:30", "1:30", "1:30", "1:30", "1:30", "1:30"] 
-        },
-        { 
-          name: "Fee Refund", 
-          values: ["No", "No", "No", "No", "No", "No"] 
+        {
+          label: "Max Scaling",
+          values: ["None", "$50,000", "$100,000", "$250,000", "$500,000", "$1,000,000"]
         }
       ]
     },
@@ -95,48 +73,55 @@ const TradingPrograms = () => {
       description: "Navigate the trading cosmos with our premium 1-step challenge program.",
       accountSizes: ["$2,500", "$5,000", "$10,000", "$25,000", "$50,000", "$100,000"],
       prices: ["$59", "$89", "$149", "$249", "$449", "$749"],
-      features: [
-        { 
-          name: "Profit Target Phase 1", 
-          values: ["$250 (10%)", "$500 (10%)", "$1,000 (10%)", "$2,500 (10%)", "$5,000 (10%)", "$10,000 (10%)"] 
+      tableData: [
+        {
+          label: "Daily Drawdown",
+          values: ["$100 (4%)", "$200 (4%)", "$400 (4%)", "$1,000 (4%)", "$2,000 (4%)", "$4,000 (4%)"]
         },
-        { 
-          name: "Daily D.D", 
-          values: ["$100 (4%)", "$200 (4%)", "$400 (4%)", "$1000 (4%)", "$2000 (4%)", "$4000 (4%)"] 
+        {
+          label: "Overall Drawdown",
+          values: ["$200 (8%)", "$400 (8%)", "$800 (8%)", "$2000 (8%)", "$4000 (8%)", "$8000 (8%)"]
         },
-        { 
-          name: "Overall D.D", 
-          values: ["$200 (8%)", "$400 (8%)", "$800 (8%)", "$2000 (8%)", "$4000 (8%)", "$8000 (8%)"] 
+        {
+          label: "Profit Target Phase 1",
+          values: ["$250 (10%)", "$500 (10%)", "$1,000 (10%)", "$2,500 (10%)", "$5,000 (10%)", "$10,000 (10%)"]
         },
-        { 
-          name: "Profit Target For Payouts", 
-          values: ["", "", "", "", "", ""],
-          isMainRow: true,
-          hasSubRows: true
-        },
-        { 
-          name: "1st", 
+        {
+          label: "1st Payout Target",
+          subtitle: "3 Min Trading Days",
           values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5,000 (5%)"],
-          isSubRow: true,
-          parentRow: "Profit Target For Payouts"
+          profitSplit: "70:30 Profit Split"
         },
-        { 
-          name: "2nd", 
+        {
+          label: "2nd Payout Target",
+          subtitle: "3 Min Trading Days",
           values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5,000 (5%)"],
-          isSubRow: true,
-          parentRow: "Profit Target For Payouts"
+          profitSplit: "70:30 Profit Split"
         },
-        { 
-          name: "Max Number of Trading Days", 
-          values: ["Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited"] 
+        {
+          label: "Subsequent Payouts",
+          values: ["Minimum 2% and On-Demand Daily Payouts at 70:30 Profit Split", "", "", "", "", ""],
+          isSpanned: true
         },
-        { 
-          name: "Profit Split", 
-          values: ["70:30", "70:30", "70:30", "70:30", "70:30", "70:30"] 
+        {
+          label: "Max Trading Days",
+          values: ["Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited"]
         },
-        { 
-          name: "Available Leverage", 
-          values: ["1:30", "1:30", "1:30", "1:30", "1:30", "1:30"] 
+        {
+          label: "Available Leverage",
+          values: ["1:30", "1:30", "1:30", "1:30", "1:30", "1:30"]
+        },
+        {
+          label: "Fee Refund",
+          values: ["No", "No", "No", "No", "No", "No"]
+        },
+        {
+          label: "Scaling",
+          values: ["No Scaling", "2x After 10 Payouts", "2.5x After 10 Payouts", "2x After 10 Payouts", "2x After 10 Payouts", "2x After 10 Payouts"]
+        },
+        {
+          label: "Max Scaling",
+          values: ["None", "$50,000", "$100,000", "$250,000", "$500,000", "$1,000,000"]
         }
       ]
     },
@@ -146,46 +131,53 @@ const TradingPrograms = () => {
       description: "Rule the markets like a god with our most prestigious 2-step challenge program.",
       accountSizes: ["$2,500", "$5,000", "$10,000", "$25,000", "$50,000", "$100,000"],
       prices: ["$27", "$47", "$87", "$187", "$367", "$567"],
-      features: [
-        { 
-          name: "Profit Target Phase 1", 
-          values: ["$250 (10%)", "$500 (10%)", "$1,000 (10%)", "$2,500 (10%)", "$5,000 (10%)", "$10,000 (10%)"] 
+      tableData: [
+        {
+          label: "Daily Drawdown",
+          values: ["$100 (4%)", "$200 (4%)", "$400 (4%)", "$1,000 (4%)", "$2,000 (4%)", "$4,000 (4%)"]
         },
-        { 
-          name: "Profit Target Phase 2", 
-          values: ["$125 (5%)", "$250 (5%)", "$750 (5%)", "$1,250 (5%)", "$2,500 (5%)", "$5,000 (5%)"] 
+        {
+          label: "Overall Drawdown",
+          values: ["$200 (8%)", "$400 (8%)", "$800 (8%)", "$2000 (8%)", "$4000 (8%)", "$8000 (8%)"]
         },
-        { 
-          name: "Daily D.D", 
-          values: ["$100 (4%)", "$200 (4%)", "$400 (4%)", "$1000 (4%)", "$2000 (4%)", "$4000 (4%)"] 
+        {
+          label: "Profit Target Phase 1",
+          values: ["$250 (10%)", "$500 (10%)", "$1,000 (10%)", "$2,500 (10%)", "$5,000 (10%)", "$10,000 (10%)"]
         },
-        { 
-          name: "Overall D.D", 
-          values: ["$200 (8%)", "$400 (8%)", "$800 (8%)", "$2000 (8%)", "$4000 (8%)", "$8000 (8%)"] 
+        {
+          label: "Profit Target Phase 2",
+          values: ["$125 (5%)", "$250 (5%)", "$750 (5%)", "$1,250 (5%)", "$2,500 (5%)", "$5,000 (5%)"]
         },
-        { 
-          name: "Profit Target For 1st Payout", 
-          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5,000 (5%)"] 
+        {
+          label: "1st Payout Target",
+          subtitle: "3 Min Trading Days",
+          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5,000 (5%)"],
+          profitSplit: "70:30 Profit Split"
         },
-        { 
-          name: "Profit Target for Subsequent Payouts", 
-          values: ["N/A", "N/A", "N/A", "N/A", "N/A", "N/A"] 
+        {
+          label: "Subsequent Payouts",
+          values: ["Minimum 2% and On-Demand Daily Payouts at 70:30 Profit Split", "", "", "", "", ""],
+          isSpanned: true
         },
-        { 
-          name: "Minimum Number of Trading Days Per Phase", 
-          values: ["3", "3", "3", "3", "3", "3"] 
+        {
+          label: "Max Trading Days",
+          values: ["Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited"]
         },
-        { 
-          name: "Max Number of Trading Days", 
-          values: ["Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited"] 
+        {
+          label: "Available Leverage",
+          values: ["1:30", "1:30", "1:30", "1:30", "1:30", "1:30"]
         },
-        { 
-          name: "Profit Split", 
-          values: ["70:30", "70:30", "70:30", "70:30", "70:30", "70:30"] 
+        {
+          label: "Fee Refund",
+          values: ["No", "No", "No", "No", "No", "No"]
         },
-        { 
-          name: "Available Leverage", 
-          values: ["1:30", "1:30", "1:30", "1:30", "1:30", "1:30"] 
+        {
+          label: "Scaling",
+          values: ["No Scaling", "2x After 10 Payouts", "2.5x After 10 Payouts", "2x After 10 Payouts", "2x After 10 Payouts", "2x After 10 Payouts"]
+        },
+        {
+          label: "Max Scaling",
+          values: ["None", "$50,000", "$100,000", "$250,000", "$500,000", "$1,000,000"]
         }
       ]
     }
@@ -205,22 +197,24 @@ const TradingPrograms = () => {
           </p>
         </div>
 
-        {/* Program Selector */}
-        <div className="flex flex-wrap justify-center gap-4 mb-12">
-          {programs.map((program, index) => (
-            <Button
-              key={index}
-              onClick={() => setActiveProgram(index)}
-              variant={activeProgram === index ? "default" : "outline"}
-              className={`px-6 py-3 ${
-                activeProgram === index 
-                  ? "bg-cosmic-purple text-white shadow-cosmic" 
-                  : "border-cosmic-purple/30 text-cosmic-blue hover:bg-cosmic-purple/10"
-              }`}
-            >
-              {program.name}
-            </Button>
-          ))}
+        {/* Tabbed Program Selector */}
+        <div className="flex justify-center mb-12">
+          <div className="bg-cosmic-card border border-cosmic-purple/30 rounded-lg p-1 inline-flex">
+            {programs.map((program, index) => (
+              <Button
+                key={index}
+                onClick={() => setActiveProgram(index)}
+                variant="ghost"
+                className={`px-6 py-3 rounded-md transition-all duration-300 ${
+                  activeProgram === index 
+                    ? "bg-cosmic-purple text-white shadow-cosmic" 
+                    : "text-cosmic-blue hover:bg-cosmic-purple/10 hover:text-white"
+                }`}
+              >
+                {program.name}
+              </Button>
+            ))}
+          </div>
         </div>
 
         {/* Program Details */}
@@ -239,15 +233,15 @@ const TradingPrograms = () => {
           
           <CardContent>
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
+              <table className="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-lg">
                 {/* Account Size Headers */}
                 <thead>
-                  <tr className="border-b border-cosmic-purple/30">
-                    <th className="text-left p-4 w-56 text-cosmic-blue font-bold">
+                  <tr className="bg-blue-600">
+                    <th className="text-left p-4 font-bold text-white border-r border-blue-500">
                       {/* Empty header for features column */}
                     </th>
                     {currentProgram.accountSizes.map((size, index) => (
-                      <th key={index} className="text-center p-4 w-36 text-cosmic-blue font-bold text-lg">
+                      <th key={index} className="text-center p-4 font-bold text-white text-lg border-r border-blue-500 last:border-r-0">
                         {size}
                       </th>
                     ))}
@@ -256,44 +250,48 @@ const TradingPrograms = () => {
                 
                 <tbody>
                   {/* Feature Rows */}
-                  {currentProgram.features.map((feature, featureIndex) => (
-                    <tr key={featureIndex} className={`border-b border-cosmic-purple/20 hover:bg-cosmic-purple/5 transition-colors ${
-                      feature.isMainRow ? 'bg-cosmic-purple/10 font-semibold' : ''
-                    } ${
-                      feature.isSubRow ? 'bg-cosmic-purple/5' : ''
-                    }`}>
-                      <td className={`p-4 ${feature.isSubRow ? 'text-sm' : 'font-semibold'} text-cosmic-blue border-r border-cosmic-purple/20 w-56 ${
-                        feature.isSubRow ? 'relative' : ''
-                      }`}>
-                        {feature.isSubRow ? (
-                          <div className="flex items-center">
-                            <div className="w-6 h-6 flex items-center justify-center bg-cosmic-purple/20 rounded text-xs font-bold text-cosmic-purple mr-2">
-                              {feature.name}
-                            </div>
-                            <span className="text-xs text-muted-foreground">
-                              {feature.name === "1st" ? "Withdrawal" : feature.name === "2nd" ? "Withdrawal" : feature.name === "3rd" ? "Withdrawal" : ""}
-                            </span>
+                  {currentProgram.tableData.map((row, rowIndex) => (
+                    <React.Fragment key={rowIndex}>
+                      <tr className="bg-blue-600 border-b border-blue-500">
+                        <td className="p-4 font-bold text-white border-r border-blue-500">
+                          <div>
+                            {row.label}
+                            {row.subtitle && (
+                              <div className="text-sm font-normal">{row.subtitle}</div>
+                            )}
                           </div>
-                        ) : (
-                          feature.name
-                        )}
-                      </td>
-                      {feature.values.map((value, valueIndex) => (
-                        <td key={valueIndex} className={`text-center p-4 ${feature.isSubRow ? 'text-sm' : ''} text-muted-foreground w-36`}>
-                          {value}
                         </td>
-                      ))}
-                    </tr>
+                        {row.isSpanned ? (
+                          <td colSpan={6} className="text-center p-4 font-semibold text-white">
+                            {row.values[0]}
+                          </td>
+                        ) : (
+                          row.values.map((value, valueIndex) => (
+                            <td key={valueIndex} className="text-center p-4 text-white border-r border-blue-500 last:border-r-0">
+                              {value}
+                            </td>
+                          ))
+                        )}
+                      </tr>
+                      {row.profitSplit && (
+                        <tr className="bg-blue-500">
+                          <td className="border-r border-blue-400"></td>
+                          <td colSpan={6} className="text-center p-2 font-semibold text-white">
+                            {row.profitSplit}
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   ))}
                   
                   {/* Price Row */}
-                  <tr className="border-b-2 border-cosmic-purple/30 bg-cosmic-purple/10">
-                    <td className="p-4 font-bold text-cosmic-blue border-r border-cosmic-purple/20 text-lg w-56">
+                  <tr className="bg-blue-600 border-t-2 border-blue-700">
+                    <td className="p-4 font-bold text-white border-r border-blue-500 text-lg">
                       Price
                     </td>
                     {currentProgram.prices.map((price, index) => (
-                      <td key={index} className="text-center p-4 w-36">
-                        <span className="text-2xl font-bold text-cosmic-purple">{price}</span>
+                      <td key={index} className="text-center p-4 border-r border-blue-500 last:border-r-0">
+                        <span className="text-2xl font-bold text-white">{price}</span>
                       </td>
                     ))}
                   </tr>
@@ -301,15 +299,17 @@ const TradingPrograms = () => {
               </table>
               
               {/* Buttons Row */}
-              <div className="flex mt-6">
-                <div className="w-56"></div> {/* Empty space for features column */}
-                {currentProgram.accountSizes.map((size, index) => (
-                  <div key={index} className="w-36 px-1">
-                    <Button className="w-full text-xs py-2 bg-cosmic-purple hover:bg-cosmic-purple/80 text-white shadow-cosmic transition-all duration-300 hover:scale-105">
-                      Get Funded
-                    </Button>
-                  </div>
-                ))}
+              <div className="flex mt-6 bg-white rounded-b-lg">
+                <div className="w-[200px]"></div> {/* Empty space for features column */}
+                <div className="flex flex-1">
+                  {currentProgram.accountSizes.map((size, index) => (
+                    <div key={index} className="flex-1 px-2 py-4">
+                      <Button className="w-full text-sm py-3 bg-cosmic-purple hover:bg-cosmic-purple/80 text-white shadow-cosmic transition-all duration-300 hover:scale-105">
+                        Get Funded
+                      </Button>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </CardContent>
