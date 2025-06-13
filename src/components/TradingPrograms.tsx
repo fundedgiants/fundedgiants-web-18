@@ -2,10 +2,9 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const TradingPrograms = () => {
-  const [activeProgram, setActiveProgram] = useState(0);
-
   const programs = [
     {
       name: "Heracles Trader",
@@ -183,8 +182,6 @@ const TradingPrograms = () => {
     }
   ];
 
-  const currentProgram = programs[activeProgram];
-
   return (
     <section id="programs" className="py-20 bg-galactic-dark">
       <div className="container mx-auto px-4">
@@ -198,122 +195,132 @@ const TradingPrograms = () => {
         </div>
 
         {/* Tabbed Program Selector */}
-        <div className="flex justify-center mb-12">
-          <div className="bg-cosmic-card border border-cosmic-purple/30 rounded-lg p-1 inline-flex">
-            {programs.map((program, index) => (
-              <Button
-                key={index}
-                onClick={() => setActiveProgram(index)}
-                variant="ghost"
-                className={`px-6 py-3 rounded-md transition-all duration-300 ${
-                  activeProgram === index 
-                    ? "bg-cosmic-purple text-white shadow-cosmic" 
-                    : "text-cosmic-blue hover:bg-cosmic-purple/10 hover:text-white"
-                }`}
-              >
-                {program.name}
-              </Button>
-            ))}
-          </div>
-        </div>
+        <Tabs defaultValue="heracles" className="max-w-7xl mx-auto">
+          <TabsList className="grid w-full grid-cols-3 mb-12 bg-cosmic-card border border-cosmic-purple/30">
+            <TabsTrigger 
+              value="heracles" 
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white"
+            >
+              Heracles Trader
+            </TabsTrigger>
+            <TabsTrigger 
+              value="orion"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white"
+            >
+              Orion Program
+            </TabsTrigger>
+            <TabsTrigger 
+              value="zeus"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white"
+            >
+              Zeus Program
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Program Details */}
-        <Card className="max-w-7xl mx-auto bg-cosmic-card border-cosmic-purple/30 shadow-cosmic backdrop-blur-sm">
-          <CardHeader className="text-center pb-8">
-            <CardTitle className="text-3xl font-bold text-cosmic-blue mb-2">
-              {currentProgram.name}
-            </CardTitle>
-            <p className="text-xl text-cosmic-purple font-semibold mb-4">
-              {currentProgram.subtitle}
-            </p>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              {currentProgram.description}
-            </p>
-          </CardHeader>
-          
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-lg">
-                {/* Account Size Headers */}
-                <thead>
-                  <tr className="bg-blue-600">
-                    <th className="text-left p-4 font-bold text-white border-r border-blue-500">
-                      {/* Empty header for features column */}
-                    </th>
-                    {currentProgram.accountSizes.map((size, index) => (
-                      <th key={index} className="text-center p-4 font-bold text-white text-lg border-r border-blue-500 last:border-r-0">
-                        {size}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
+          {programs.map((program, programIndex) => (
+            <TabsContent 
+              key={program.name.toLowerCase().replace(' ', '')} 
+              value={programIndex === 0 ? 'heracles' : programIndex === 1 ? 'orion' : 'zeus'}
+            >
+              <Card className="bg-cosmic-card border-cosmic-purple/30 shadow-cosmic backdrop-blur-sm">
+                <CardHeader className="text-center pb-8">
+                  <CardTitle className="text-3xl font-bold text-cosmic-blue mb-2">
+                    {program.name}
+                  </CardTitle>
+                  <p className="text-xl text-cosmic-purple font-semibold mb-4">
+                    {program.subtitle}
+                  </p>
+                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                    {program.description}
+                  </p>
+                </CardHeader>
                 
-                <tbody>
-                  {/* Feature Rows */}
-                  {currentProgram.tableData.map((row, rowIndex) => (
-                    <React.Fragment key={rowIndex}>
-                      <tr className="bg-blue-600 border-b border-blue-500">
-                        <td className="p-4 font-bold text-white border-r border-blue-500">
-                          <div>
-                            {row.label}
-                            {row.subtitle && (
-                              <div className="text-sm font-normal">{row.subtitle}</div>
-                            )}
-                          </div>
-                        </td>
-                        {row.isSpanned ? (
-                          <td colSpan={6} className="text-center p-4 font-semibold text-white">
-                            {row.values[0]}
-                          </td>
-                        ) : (
-                          row.values.map((value, valueIndex) => (
-                            <td key={valueIndex} className="text-center p-4 text-white border-r border-blue-500 last:border-r-0">
-                              {value}
-                            </td>
-                          ))
-                        )}
-                      </tr>
-                      {row.profitSplit && (
-                        <tr className="bg-blue-500">
-                          <td className="border-r border-blue-400"></td>
-                          <td colSpan={6} className="text-center p-2 font-semibold text-white">
-                            {row.profitSplit}
-                          </td>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse bg-cosmic-card/50 rounded-lg overflow-hidden shadow-cosmic">
+                      {/* Account Size Headers */}
+                      <thead>
+                        <tr className="bg-gradient-to-r from-primary via-accent to-primary">
+                          <th className="text-left p-4 font-bold text-white border-r border-primary/30">
+                            {/* Empty header for features column */}
+                          </th>
+                          {program.accountSizes.map((size, index) => (
+                            <th key={index} className="text-center p-4 font-bold text-white text-lg border-r border-primary/30 last:border-r-0">
+                              {size}
+                            </th>
+                          ))}
                         </tr>
-                      )}
-                    </React.Fragment>
-                  ))}
-                  
-                  {/* Price Row */}
-                  <tr className="bg-blue-600 border-t-2 border-blue-700">
-                    <td className="p-4 font-bold text-white border-r border-blue-500 text-lg">
-                      Price
-                    </td>
-                    {currentProgram.prices.map((price, index) => (
-                      <td key={index} className="text-center p-4 border-r border-blue-500 last:border-r-0">
-                        <span className="text-2xl font-bold text-white">{price}</span>
-                      </td>
-                    ))}
-                  </tr>
-                </tbody>
-              </table>
-              
-              {/* Buttons Row */}
-              <div className="flex mt-6 bg-white rounded-b-lg">
-                <div className="w-[200px]"></div> {/* Empty space for features column */}
-                <div className="flex flex-1">
-                  {currentProgram.accountSizes.map((size, index) => (
-                    <div key={index} className="flex-1 px-2 py-4">
-                      <Button className="w-full text-sm py-3 bg-cosmic-purple hover:bg-cosmic-purple/80 text-white shadow-cosmic transition-all duration-300 hover:scale-105">
-                        Get Funded
-                      </Button>
+                      </thead>
+                      
+                      <tbody>
+                        {/* Feature Rows */}
+                        {program.tableData.map((row, rowIndex) => (
+                          <React.Fragment key={rowIndex}>
+                            <tr className="bg-gradient-to-r from-primary/80 via-accent/80 to-primary/80 border-b border-primary/20">
+                              <td className="p-4 font-bold text-white border-r border-primary/30">
+                                <div>
+                                  {row.label}
+                                  {row.subtitle && (
+                                    <div className="text-sm font-normal">{row.subtitle}</div>
+                                  )}
+                                </div>
+                              </td>
+                              {row.isSpanned ? (
+                                <td colSpan={6} className="text-center p-4 font-semibold text-white">
+                                  {row.values[0]}
+                                </td>
+                              ) : (
+                                row.values.map((value, valueIndex) => (
+                                  <td key={valueIndex} className="text-center p-4 text-white border-r border-primary/30 last:border-r-0">
+                                    {value}
+                                  </td>
+                                ))
+                              )}
+                            </tr>
+                            {row.profitSplit && (
+                              <tr className="bg-gradient-to-r from-primary/60 via-accent/60 to-primary/60">
+                                <td className="border-r border-primary/20"></td>
+                                <td colSpan={6} className="text-center p-2 font-semibold text-white">
+                                  {row.profitSplit}
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
+                        ))}
+                        
+                        {/* Price Row */}
+                        <tr className="bg-gradient-to-r from-primary via-accent to-primary border-t-2 border-primary/40">
+                          <td className="p-4 font-bold text-white border-r border-primary/30 text-lg">
+                            Price
+                          </td>
+                          {program.prices.map((price, index) => (
+                            <td key={index} className="text-center p-4 border-r border-primary/30 last:border-r-0">
+                              <span className="text-2xl font-bold text-white">{price}</span>
+                            </td>
+                          ))}
+                        </tr>
+                      </tbody>
+                    </table>
+                    
+                    {/* Buttons Row */}
+                    <div className="flex mt-6 bg-cosmic-card/30 rounded-b-lg border border-t-0 border-cosmic-purple/30">
+                      <div className="w-[200px]"></div> {/* Empty space for features column */}
+                      <div className="flex flex-1">
+                        {program.accountSizes.map((size, index) => (
+                          <div key={index} className="flex-1 px-2 py-4">
+                            <Button className="w-full text-sm py-3 bg-gradient-to-r from-primary to-accent hover:from-primary/80 hover:to-accent/80 text-white shadow-cosmic transition-all duration-300 hover:scale-105">
+                              Get Funded
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          ))}
+        </Tabs>
       </div>
     </section>
   );
