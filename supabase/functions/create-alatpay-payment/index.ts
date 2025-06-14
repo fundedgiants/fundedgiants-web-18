@@ -29,6 +29,25 @@ serve(async (req) => {
     const { orderId, totalPrice, email, firstName, lastName, phone }: AlatpayRequest = await req.json()
     console.log('Request body parsed:', { orderId, totalPrice, email, firstName, lastName, phone });
     
+    // Format phone number to E.164, assuming Nigerian numbers as primary
+    let formattedPhone = phone;
+    if (phone) {
+      const sanitizedPhone = phone.replace(/\s/g, ''); // Remove whitespace
+      if (sanitizedPhone.startsWith('0') && sanitizedPhone.length === 11) {
+        formattedPhone = `+234${sanitizedPhone.substring(1)}`;
+        console.log(`Formatted phone number from ${phone} to ${formattedPhone}`);
+      } else if (!sanitizedPhone.startsWith('+')) {
+        // Best effort for other formats (e.g., missing '+')
+        formattedPhone = `+${sanitizedPhone}`;
+        console.log(`Formatted phone number from ${phone} to ${formattedPhone}`);
+      } else {
+        formattedPhone = sanitizedPhone;
+        console.log('Phone number seems to be in correct format, just removed whitespace.');
+      }
+    } else {
+      console.warn('Phone number is missing from the request.');
+    }
+    
     const alatpayPrimaryKey = Deno.env.get('ALATPAY_PRIMARY_KEY');
     const alatpayBusinessId = Deno.env.get('ALATPAY_BUSINESS_ID');
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -87,7 +106,7 @@ serve(async (req) => {
         currency: "NGN",
         businessId: alatpayBusinessId,
         email: email,
-        phone: phone,
+        phone: formattedPhone, // Using the formatted phone number
         firstName: firstName,
         lastName: lastName,
         paymentMethods: ["card", "banktransfer"],
