@@ -1,4 +1,3 @@
-
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
@@ -64,12 +63,13 @@ serve(async (req) => {
     }
     console.log('Exchange rate fetched:', rate);
 
-    const ngnAmount = Math.ceil(totalPrice * rate);
-    console.log(`Calculated NGN amount: ${ngnAmount} (from USD ${totalPrice} at rate ${rate})`);
+    const ngnAmount = totalPrice * rate;
+    const ngnAmountInKobo = Math.ceil(ngnAmount * 100); // Klasha might expect amount in kobo
+    console.log(`Calculated NGN amount: ${ngnAmount.toFixed(2)}, which is ${ngnAmountInKobo} in kobo (from USD ${totalPrice} at rate ${rate})`);
 
     // 2. Initiate payment with NGN amount
     const klashaPayload = {
-        amount: ngnAmount,
+        amount: ngnAmountInKobo,
         currency: "NGN",
         email: email,
         fullname: `${firstName} ${lastName}`,

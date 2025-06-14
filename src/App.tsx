@@ -19,6 +19,7 @@ import AffiliatePortal from "./pages/AffiliatePortal";
 import Certificates from "./pages/Certificates";
 import Profile from "./pages/Profile";
 import Billing from "./pages/Billing";
+import ExchangeRate from "./pages/ExchangeRate";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="/billing" element={<Billing />} />
               <Route path="/faq" element={<FAQ />} />
+              <Route path="/exchange-rate" element={<ExchangeRate />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
