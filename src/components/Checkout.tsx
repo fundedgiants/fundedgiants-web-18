@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -36,7 +35,7 @@ const Checkout = () => {
   const [checkoutData, setCheckoutData] = useState<CheckoutState>({
     program: searchParams.get('program') || 'heracles',
     accountSize: searchParams.get('size') || '2500',
-    platform: 'MT4',
+    platform: 'MT5',
     priceFeed: 'real',
     addOns: [],
     billingInfo: {
@@ -45,6 +44,15 @@ const Checkout = () => {
     },
     paymentMethod: 'card'
   });
+
+  useEffect(() => {
+    const program = checkoutData.program;
+    if (program === 'heracles') {
+        setCheckoutData(prev => ({ ...prev, priceFeed: 'real' }));
+    } else {
+        setCheckoutData(prev => ({ ...prev, priceFeed: 'simulated' }));
+    }
+  }, [checkoutData.program]);
 
   const programs = {
     heracles: { name: 'Heracles Trader', subtitle: 'Instant Funding' },
@@ -62,22 +70,24 @@ const Checkout = () => {
   ];
 
   const addOns = [
-    { id: 'reset', name: 'Reset Add-on', description: 'Reset your challenge if you fail', price: 25 },
-    { id: 'biweekly', name: 'Bi-weekly Payouts', description: 'Get paid every 2 weeks instead of monthly', price: 50 },
-    { id: 'news', name: 'News Trading', description: 'Trade during news events', price: 30 }
+    { id: 'reset', name: 'Reset Add-on', description: 'Reset your challenge if you fail', pricePercent: 10 },
+    { id: 'biweekly', name: 'Bi-weekly Payouts', description: 'Get paid every 2 weeks instead of monthly', pricePercent: 20 },
+    { id: 'news', name: 'News Trading', description: 'Trade during news events', pricePercent: 15 }
   ];
 
   const steps = [
     { number: 1, title: 'Account Selection', completed: currentStep > 1 },
-    { number: 2, title: 'Platform & Feed', completed: currentStep > 2 },
+    { number: 2, title: 'Platform', completed: currentStep > 2 },
     { number: 3, title: 'Add-ons', completed: currentStep > 3 },
     { number: 4, title: 'Billing Information', completed: currentStep > 4 },
     { number: 5, title: 'Payment', completed: false }
   ];
 
   const selectedAccount = accountSizes.find(size => size.value === checkoutData.accountSize);
+  const basePrice = selectedAccount?.price || 0;
   const selectedAddOns = addOns.filter(addon => checkoutData.addOns.includes(addon.id));
-  const totalPrice = (selectedAccount?.price || 0) + selectedAddOns.reduce((sum, addon) => sum + addon.price, 0);
+  const addOnsPrice = selectedAddOns.reduce((sum, addon) => sum + (basePrice * (addon.pricePercent / 100)), 0);
+  const totalPrice = basePrice + addOnsPrice;
 
   const handleNext = () => {
     if (currentStep < 5) setCurrentStep(currentStep + 1);
@@ -110,20 +120,24 @@ const Checkout = () => {
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold mb-4 text-white">Select Trading Program</h3>
-              <RadioGroup 
-                value={checkoutData.program} 
-                onValueChange={(value) => setCheckoutData(prev => ({ ...prev, program: value }))}
-              >
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {Object.entries(programs).map(([key, program]) => (
-                  <div key={key} className="flex items-center space-x-3 p-4 border border-primary/20 rounded-lg hover:border-primary/40 transition-colors">
-                    <RadioGroupItem value={key} id={key} />
-                    <label htmlFor={key} className="flex-1 cursor-pointer">
+                  <div
+                    key={key}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                      checkoutData.program === key
+                        ? 'border-primary bg-primary/10'
+                        : 'border-muted hover:border-primary/40'
+                    }`}
+                    onClick={() => setCheckoutData(prev => ({ ...prev, program: key }))}
+                  >
+                    <div className="text-center">
                       <div className="font-medium text-white">{program.name}</div>
                       <div className="text-sm text-primary">{program.subtitle}</div>
-                    </label>
+                    </div>
                   </div>
                 ))}
-              </RadioGroup>
+              </div>
             </div>
             
             <div>
@@ -160,29 +174,12 @@ const Checkout = () => {
                 onValueChange={(value) => setCheckoutData(prev => ({ ...prev, platform: value }))}
               >
                 <div className="flex items-center space-x-3 p-4 border border-primary/20 rounded-lg">
-                  <RadioGroupItem value="MT4" id="mt4" />
-                  <label htmlFor="mt4" className="cursor-pointer text-white">MetaTrader 4</label>
-                </div>
-                <div className="flex items-center space-x-3 p-4 border border-primary/20 rounded-lg">
                   <RadioGroupItem value="MT5" id="mt5" />
                   <label htmlFor="mt5" className="cursor-pointer text-white">MetaTrader 5</label>
                 </div>
-              </RadioGroup>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-4 text-white">Price Feed</h3>
-              <RadioGroup 
-                value={checkoutData.priceFeed} 
-                onValueChange={(value) => setCheckoutData(prev => ({ ...prev, priceFeed: value }))}
-              >
                 <div className="flex items-center space-x-3 p-4 border border-primary/20 rounded-lg">
-                  <RadioGroupItem value="real" id="real" />
-                  <label htmlFor="real" className="cursor-pointer text-white">Real Market Data</label>
-                </div>
-                <div className="flex items-center space-x-3 p-4 border border-primary/20 rounded-lg">
-                  <RadioGroupItem value="delayed" id="delayed" />
-                  <label htmlFor="delayed" className="cursor-pointer text-white">Delayed Market Data</label>
+                  <RadioGroupItem value="MatchTrader" id="matchtrader" />
+                  <label htmlFor="matchtrader" className="cursor-pointer text-white">MatchTrader</label>
                 </div>
               </RadioGroup>
             </div>
@@ -208,7 +205,7 @@ const Checkout = () => {
                     <div className="font-medium text-white">{addon.name}</div>
                     <div className="text-sm text-muted-foreground">{addon.description}</div>
                   </div>
-                  <div className="text-primary font-bold">+${addon.price}</div>
+                  <div className="text-primary font-bold">+{addon.pricePercent}%</div>
                 </div>
               </div>
             ))}
@@ -386,7 +383,7 @@ const Checkout = () => {
                       </Button>
                     ) : (
                       <Button className="bg-primary hover:bg-primary/90">
-                        Complete Purchase - ${totalPrice}
+                        Complete Purchase - ${totalPrice.toFixed(2)}
                       </Button>
                     )}
                   </div>
@@ -432,8 +429,8 @@ const Checkout = () => {
                   
                   {selectedAddOns.map((addon) => (
                     <div key={addon.id} className="flex justify-between items-center">
-                      <span className="text-muted-foreground text-sm">{addon.name}:</span>
-                      <span className="text-white">+${addon.price}</span>
+                      <span className="text-muted-foreground text-sm">{addon.name} ({addon.pricePercent}%):</span>
+                      <span className="text-white">+${(basePrice * (addon.pricePercent / 100)).toFixed(2)}</span>
                     </div>
                   ))}
                   
@@ -441,7 +438,7 @@ const Checkout = () => {
                   
                   <div className="flex justify-between items-center text-lg font-bold">
                     <span className="text-white">Total:</span>
-                    <span className="text-primary">${totalPrice}</span>
+                    <span className="text-primary">${totalPrice.toFixed(2)}</span>
                   </div>
                 </CardContent>
               </Card>
