@@ -9,7 +9,7 @@ import Index from "./pages/Index";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import FAQ from "./pages/FAQ";
-import Auth from "./components/Auth";
+import AuthPage from "./pages/AuthPage";
 import Checkout from "./components/Checkout";
 import NotFound from "./pages/NotFound";
 
@@ -19,7 +19,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
-      <Sonner />
+      <Sonner richColors />
       <BrowserRouter>
         <Navigation />
         <div className="pt-16">
@@ -28,7 +28,7 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/faq" element={<FAQ />} />
-            <Route path="/auth" element={<Auth />} />
+            <Route path="/auth" element={<AuthPage />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

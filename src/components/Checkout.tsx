@@ -4,8 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, ArrowRight, Check, CreditCard, Smartphone } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, CreditCard, Smartphone, Loader2 } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import Auth from '@/components/Auth';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface CheckoutState {
   program: string;
@@ -31,6 +35,7 @@ const Checkout = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
+  const { user, loading: authLoading } = useAuth();
   
   const [checkoutData, setCheckoutData] = useState<CheckoutState>({
     program: searchParams.get('program') || 'heracles',
@@ -75,6 +80,23 @@ const Checkout = () => {
     { id: 'no_profit_target', name: 'Remove Profit Target from 1st, 2nd, and 3rd Withdrawals', description: 'Removes profit targets and minimum trading days for your first 3 payouts.', pricePercent: 30 },
     { id: 'profit_split', name: 'Increase Profit Split (80:20 from onset)', description: 'Enjoy an 80:20 profit split from the very beginning.', pricePercent: 50 }
   ];
+  
+  const [authComplete, setAuthComplete] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading) {
+      setAuthComplete(!!user);
+      if(user) {
+        setCheckoutData(prev => ({
+          ...prev,
+          billingInfo: {
+            ...prev.billingInfo,
+            email: user.email || '',
+          }
+        }))
+      }
+    }
+  }, [user, authLoading]);
 
   const steps = [
     { number: 1, title: 'Account Selection', completed: currentStep > 1 },
@@ -112,6 +134,29 @@ const Checkout = () => {
       ...prev,
       billingInfo: { ...prev.billingInfo, [field]: value }
     }));
+  };
+
+  const handleCompletePurchase = async () => {
+    if (!user) {
+      toast.error("You must be logged in to complete your purchase.");
+      return;
+    }
+
+    const { error } = await supabase.from('orders').insert({
+      user_id: user.id,
+      program_id: checkoutData.accountSize,
+      program_name: programs[checkoutData.program as keyof typeof programs].name,
+      program_price: basePrice,
+      selected_addons: selectedAddOns,
+      total_price: totalPrice,
+    });
+
+    if (error) {
+      toast.error(`Order placement failed: ${error.message}`);
+    } else {
+      toast.success("Purchase successful! Your order has been placed.");
+      navigate('/');
+    }
   };
 
   const renderStepContent = () => {
@@ -309,11 +354,19 @@ const Checkout = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-background pt-20 pb-10">
-      <div className="container mx-auto px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center mb-8">
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!authComplete) {
+    return (
+      <div className="min-h-screen bg-background pt-20 pb-10">
+        <div className="container mx-auto px-4 max-w-lg">
+           <div className="flex items-center mb-8">
             <Button
               variant="ghost"
               onClick={() => navigate('/')}
@@ -322,6 +375,32 @@ const Checkout = () => {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Home
             </Button>
+          </div>
+          <Auth embedded />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background pt-20 pb-10">
+      <div className="container mx-auto px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/')}
+              className="text-primary hover:text-primary/80"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Home
+            </Button>
+            {user && (
+              <div className="flex items-center gap-4">
+                <span className="text-muted-foreground">Logged in as {user.email}</span>
+                <Button variant="outline" size="sm" onClick={() => supabase.auth.signOut()}>Logout</Button>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -383,7 +462,7 @@ const Checkout = () => {
                         <ArrowRight className="h-4 w-4 ml-2" />
                       </Button>
                     ) : (
-                      <Button className="bg-primary hover:bg-primary/90">
+                      <Button onClick={handleCompletePurchase} className="bg-primary hover:bg-primary/90">
                         Complete Purchase - ${totalPrice.toFixed(2)}
                       </Button>
                     )}
