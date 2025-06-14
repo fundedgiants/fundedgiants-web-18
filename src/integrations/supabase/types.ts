@@ -90,6 +90,66 @@ export type Database = {
         }
         Relationships: []
       }
+      trading_accounts: {
+        Row: {
+          bi_weekly_payout: boolean
+          created_at: string
+          id: string
+          is_visible: boolean
+          login_id: string
+          order_id: string | null
+          platform: Database["public"]["Enums"]["trading_platform"]
+          profit_protect: boolean
+          program_name: string
+          starting_balance: number
+          status: Database["public"]["Enums"]["trading_account_status"]
+          user_id: string
+        }
+        Insert: {
+          bi_weekly_payout?: boolean
+          created_at?: string
+          id?: string
+          is_visible?: boolean
+          login_id: string
+          order_id?: string | null
+          platform: Database["public"]["Enums"]["trading_platform"]
+          profit_protect?: boolean
+          program_name: string
+          starting_balance: number
+          status?: Database["public"]["Enums"]["trading_account_status"]
+          user_id: string
+        }
+        Update: {
+          bi_weekly_payout?: boolean
+          created_at?: string
+          id?: string
+          is_visible?: boolean
+          login_id?: string
+          order_id?: string | null
+          platform?: Database["public"]["Enums"]["trading_platform"]
+          profit_protect?: boolean
+          program_name?: string
+          starting_balance?: number
+          status?: Database["public"]["Enums"]["trading_account_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trading_accounts_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trading_accounts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -98,7 +158,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      trading_account_status: "active" | "passed" | "failed" | "inactive"
+      trading_platform: "MT4" | "MT5" | "HT5"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -213,6 +274,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      trading_account_status: ["active", "passed", "failed", "inactive"],
+      trading_platform: ["MT4", "MT5", "HT5"],
+    },
   },
 } as const

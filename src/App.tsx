@@ -13,6 +13,12 @@ import AuthPage from "./pages/AuthPage";
 import Checkout from "./components/Checkout";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+import DashboardLayout from "./layouts/DashboardLayout";
+import TradingAccounts from "./pages/TradingAccounts";
+import AffiliatePortal from "./pages/AffiliatePortal";
+import Certificates from "./pages/Certificates";
+import Profile from "./pages/Profile";
+import Billing from "./pages/Billing";
 
 const queryClient = new QueryClient();
 
@@ -28,10 +34,19 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/faq" element={<FAQ />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/checkout" element={<Checkout />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            
+            <Route element={<DashboardLayout />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/trading-accounts" element={<TradingAccounts />} />
+              <Route path="/affiliate-portal" element={<AffiliatePortal />} />
+              <Route path="/certificates" element={<Certificates />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/billing" element={<Billing />} />
+              <Route path="/faq" element={<FAQ />} />
+            </Route>
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
