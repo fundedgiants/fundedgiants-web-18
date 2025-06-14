@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
+import { KlashaButton } from 'klasha-pay';
 
 interface CheckoutState {
   program: string;
@@ -39,6 +40,8 @@ const Checkout = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const { user, loading: authLoading } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showKlashaButton, setShowKlashaButton] = useState(false);
+  const [klashaConfig, setKlashaConfig] = useState<any>(null);
   
   const [checkoutData, setCheckoutData] = useState<CheckoutState>({
     program: searchParams.get('program') || 'heracles',
@@ -200,23 +203,23 @@ const Checkout = () => {
       }
       return data;
     },
-    enabled: checkoutData.paymentMethod === 'ngn',
+    enabled: checkoutData.paymentMethod === 'klasha',
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
   const ngnRate = ngnRateData?.rate;
 
-  const { data: paystackPublicKeyData } = useQuery({
-    queryKey: ['paystackPublicKey'],
+  const { data: klashaConfigData, isLoading: isLoadingKlashaConfig } = useQuery({
+    queryKey: ['klashaConfig'],
     queryFn: async () => {
-        const { data, error } = await supabase.functions.invoke('get-paystack-public-key');
+        const { data, error } = await supabase.functions.invoke('get-klasha-config');
         if (error) {
             toast.error("Could not fetch payment configuration.");
-            console.error("Paystack public key fetch error:", error);
+            console.error("Klasha config fetch error:", error);
             return null;
         }
-        return data.publicKey;
+        return data;
     },
-    enabled: checkoutData.paymentMethod === 'ngn',
+    enabled: checkoutData.paymentMethod === 'klasha',
     staleTime: Infinity,
     retry: false,
   });
@@ -226,7 +229,11 @@ const Checkout = () => {
   };
 
   const handlePrevious = () => {
-    if (currentStep > 1) setCurrentStep(currentStep - 1);
+    if (currentStep > 1) {
+      setShowKlashaButton(false);
+      setKlashaConfig(null);
+      setCurrentStep(currentStep - 1);
+    }
   };
 
   const handleAddOnToggle = (addonId: string) => {
@@ -343,7 +350,7 @@ const Checkout = () => {
       selected_addons: selectedAddOns,
       total_price: totalPrice,
       payment_method: checkoutData.paymentMethod,
-      payment_provider: checkoutData.paymentMethod === 'crypto' ? 'nowpayments' : checkoutData.paymentMethod === 'ngn' ? 'paystack' : null,
+      payment_provider: checkoutData.paymentMethod === 'crypto' ? 'nowpayments' : checkoutData.paymentMethod === 'klasha' ? 'klasha' : null,
       payment_status: 'pending',
     }).select().single();
 
@@ -392,60 +399,40 @@ const Checkout = () => {
       toast.warning("This payment method is coming soon!");
       await supabase.from('orders').update({ payment_status: 'cancelled' }).eq('id', orderId);
       setIsProcessing(false);
-    } else if (checkoutData.paymentMethod === 'ngn') {
-      if (!ngnRate || !paystackPublicKeyData) {
+    } else if (checkoutData.paymentMethod === 'klasha') {
+      if (!ngnRate || !klashaConfigData?.publicKey) {
           toast.error("Payment provider not ready. Please wait a moment and try again.");
           setIsProcessing(false);
           return;
       }
 
-      try {
-          const amountInKobo = Math.round(totalPrice * ngnRate * 100);
+      const amountInNGN = Math.round(totalPrice * ngnRate);
 
-          const { data: paystackData, error: paystackError } = await supabase.functions.invoke('create-paystack-payment', {
-              body: { 
-                  orderId, 
-                  email: checkoutData.billingInfo.email,
-                  amountInKobo,
-              },
-          });
-
-          if (paystackError) throw new Error(paystackError.message);
-          if (!paystackData.access_code) {
-              throw new Error('Could not retrieve payment details from provider.');
-          }
-
-          const handler = (window as any).PaystackPop.setup({
-              key: paystackPublicKeyData,
-              email: checkoutData.billingInfo.email,
-              amount: amountInKobo,
-              ref: orderId,
-              access_code: paystackData.access_code,
-              onClose: function() {
-                  toast.info("Payment window closed.");
-                  setIsProcessing(false);
-              },
-              callback: function(response: any) {
-                  if (response.status === 'success' && response.reference) {
-                      navigate(`/payment-success?reference=${response.reference}`);
-                  } else {
-                      toast.error("Payment was not successful. Please try again.");
-                      setIsProcessing(false);
-                  }
-              }
-          });
-          handler.openIframe();
-
-      } catch (error: any) {
-          let errorMessage = 'Payment initialization failed. Please try again later.';
-          if (error.message) {
-              errorMessage = `Payment initialization failed: ${error.message}`;
-          }
-          
-          toast.error(errorMessage);
-          await supabase.from('orders').update({ payment_status: 'failed' }).eq('id', orderId);
+      const config = {
+        publicKey: klashaConfigData.publicKey,
+        businessId: klashaConfigData.businessId,
+        email: checkoutData.billingInfo.email,
+        amount: amountInNGN,
+        tx_ref: orderId,
+        currency: 'NGN',
+        fullname: `${checkoutData.billingInfo.firstName} ${checkoutData.billingInfo.lastName}`,
+        phone_number: `${checkoutData.billingInfo.countryCode}${checkoutData.billingInfo.phone}`,
+        callback: (response: any) => {
+          console.log("Klasha success callback:", response);
+          // Webhook is the source of truth, but we can redirect user on successful interaction.
+          navigate(`/payment-success?reference=${orderId}`);
+        },
+        onClose: () => {
+          toast.info("Payment window closed.");
+          setShowKlashaButton(false);
           setIsProcessing(false);
-      }
+        }
+      };
+      
+      setKlashaConfig(config);
+      setShowKlashaButton(true);
+      setIsProcessing(false);
+      return;
     } else {
       toast.error("Please select a payment method.");
       setIsProcessing(false);
@@ -674,7 +661,7 @@ const Checkout = () => {
         const paymentMethods = [
             { value: 'card', label: 'Credit/Debit Card', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> },
             { value: 'crypto', label: 'Cryptocurrency', subtitle: 'via NowPayments', icon: <Bitcoin className="h-8 w-8 text-primary mb-2" /> },
-            { value: 'ngn', label: 'Nigerian Naira', subtitle: 'via Paystack', icon: <span className="text-primary text-3xl font-bold mb-1">₦</span> }
+            { value: 'klasha', label: 'Local Methods', subtitle: 'via Klasha', icon: <span className="text-primary text-3xl font-bold mb-1">K</span> }
         ];
         return (
           <div className="space-y-6">
@@ -693,7 +680,7 @@ const Checkout = () => {
                   {method.icon}
                   <div className="font-medium text-white mt-1">{method.label}</div>
                    {method.subtitle && <div className="text-sm text-primary">{method.subtitle}</div>}
-                  {method.value === 'ngn' && checkoutData.paymentMethod === 'ngn' && ngnRate && (
+                  {method.value === 'klasha' && checkoutData.paymentMethod === 'klasha' && ngnRate && (
                     <div className="text-xs text-muted-foreground mt-1">
                       (≈ ₦{Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')})
                     </div>
@@ -797,11 +784,24 @@ const Checkout = () => {
                         <ArrowRight className="h-4 w-4 ml-2" />
                       </Button>
                     ) : (
-                      <Button onClick={handleCompletePurchase} className="bg-primary hover:bg-primary/90" disabled={isProcessing}>
-                        {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Complete Purchase - ${totalPrice.toFixed(2)}
-                        {checkoutData.paymentMethod === 'ngn' && ngnRate && ` / ~₦${Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')}`}
-                      </Button>
+                      <>
+                        {!showKlashaButton ? (
+                          <Button onClick={handleCompletePurchase} className="bg-primary hover:bg-primary/90" disabled={isProcessing || (checkoutData.paymentMethod === 'klasha' && isLoadingKlashaConfig)}>
+                            {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Complete Purchase - ${totalPrice.toFixed(2)}
+                            {checkoutData.paymentMethod === 'klasha' && ngnRate && ` / ~₦${Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')}`}
+                          </Button>
+                        ) : (
+                          klashaConfig && (
+                            <KlashaButton 
+                              {...klashaConfig} 
+                              className="bg-primary hover:bg-primary/90 text-white font-semibold py-2 px-4 rounded inline-flex items-center justify-center"
+                            >
+                              Pay with Klasha - ₦{klashaConfig.amount.toLocaleString('en-NG')}
+                            </KlashaButton>
+                          )
+                        )}
+                      </>
                     )}
                   </div>
                 </CardContent>
