@@ -576,7 +576,7 @@ const Checkout = () => {
       case 5:
         const paymentMethods = [
             { value: 'card', label: 'Credit/Debit Card', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> },
-            { value: 'crypto', label: 'Cryptocurrency', icon: <Smartphone className="h-8 w-8 text-primary mb-2" /> },
+            { value: 'crypto', label: 'Cryptocurrency', subtitle: 'via NowPayments', icon: <Smartphone className="h-8 w-8 text-primary mb-2" /> },
             { value: 'ngn', label: 'Nigerian Naira', subtitle: 'via Alatpay', icon: <span className="text-primary text-3xl font-bold mb-1">₦</span> }
         ];
         return (

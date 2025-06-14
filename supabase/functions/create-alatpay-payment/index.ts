@@ -124,6 +124,7 @@ serve(async (req) => {
       status: 200,
     })
   } catch (error) {
+    console.error('Full error object in create-alatpay-payment function:', error);
     console.error('Error caught in create-alatpay-payment function:', error.message);
     if (error.cause) {
       console.error('Error cause:', error.cause);
@@ -134,4 +135,3 @@ serve(async (req) => {
     })
   }
 })
-
