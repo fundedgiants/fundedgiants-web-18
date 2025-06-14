@@ -31,15 +31,17 @@ serve(async (req) => {
     
     const alatpayPrimaryKey = Deno.env.get('ALATPAY_PRIMARY_KEY');
     const alatpayBusinessId = Deno.env.get('ALATPAY_BUSINESS_ID');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
 
     if (!alatpayPrimaryKey) console.error('ALATPAY_PRIMARY_KEY secret is missing.');
     if (!alatpayBusinessId) console.error('ALATPAY_BUSINESS_ID secret is missing.');
+    if (!supabaseUrl) console.error('SUPABASE_URL secret is missing.');
 
-    if (!alatpayPrimaryKey || !alatpayBusinessId) {
-      console.error('ALATPAY_PRIMARY_KEY or ALATPAY_BUSINESS_ID secrets are not set');
-      throw new Error('Alatpay secrets are not set in Supabase.')
+    if (!alatpayPrimaryKey || !alatpayBusinessId || !supabaseUrl) {
+      console.error('Alatpay secrets or SUPABASE_URL are not set in Supabase.');
+      throw new Error('Alatpay secrets or SUPABASE_URL are not set in Supabase.')
     }
-    console.log('Alatpay secrets found.');
+    console.log('Alatpay secrets and Supabase URL found.');
 
     const origin = req.headers.get('origin');
     if (!origin) {
@@ -77,6 +79,9 @@ serve(async (req) => {
     console.log(`Calculated NGN amount: ${ngnAmount.toFixed(2)}, which is ${ngnAmountInKobo} in kobo (from USD ${totalPrice} at rate ${rate})`);
 
     // 2. Initiate payment with NGN amount
+    const callbackUrl = `${supabaseUrl}/functions/v1/alatpay-webhook`;
+    console.log('Using webhook callback URL:', callbackUrl);
+
     const alatpayPayload = {
         amount: ngnAmountInKobo,
         currency: "NGN",
@@ -88,10 +93,11 @@ serve(async (req) => {
         paymentMethods: ["card", "banktransfer"],
         redirectUrl: `${origin}/dashboard`,
         merchantRef: orderId,
+        callbackUrl: callbackUrl,
     };
     console.log('Initiating payment with Alatpay. Payload:', JSON.stringify(alatpayPayload, null, 2));
 
-    const paymentResponse = await fetch('https://sandbox.alatpay.ng/api/v1/checkout/create', {
+    const paymentResponse = await fetch('https://live.alatpay.ng/api/v1/checkout/create', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -101,15 +107,22 @@ serve(async (req) => {
         },
         body: JSON.stringify(alatpayPayload)
     });
-    console.log('Alatpay API response status:', paymentResponse.status);
-
-    const alatpayResponse = await paymentResponse.json();
+    
+    const alatpayResponseText = await paymentResponse.text();
+    console.log(`Alatpay API response status: ${paymentResponse.status}`);
+    console.log('Alatpay API raw response text:', alatpayResponseText);
 
     if (!paymentResponse.ok) {
-        console.error('Alatpay payment API returned an error. Response:', JSON.stringify(alatpayResponse, null, 2));
-        throw new Error(alatpayResponse.message || 'Failed to initialize Alatpay payment');
+        console.error(`Alatpay payment API returned an error. Status: ${paymentResponse.status}. Response:`, alatpayResponseText);
+        try {
+            const alatpayResponseJson = JSON.parse(alatpayResponseText);
+            throw new Error(alatpayResponseJson.message || 'Failed to initialize Alatpay payment');
+        } catch (e) {
+            throw new Error(`Failed to initialize Alatpay payment. Raw response: ${alatpayResponseText}`);
+        }
     }
 
+    const alatpayResponse = JSON.parse(alatpayResponseText);
     console.log('Alatpay API success response:', JSON.stringify(alatpayResponse, null, 2));
 
     if (!alatpayResponse.data || !alatpayResponse.data.checkoutUrl) {
