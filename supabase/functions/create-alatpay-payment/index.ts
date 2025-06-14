@@ -1,4 +1,3 @@
-
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
@@ -120,13 +119,12 @@ serve(async (req) => {
       console.error('--- DIAGNOSTIC STEP: Failed to connect to google.com ---', e);
     }
 
-    const paymentResponse = await fetch('https://api.alatpay.ng/v1/checkout/create', {
+    const paymentResponse = await fetch('https://live.alatpay.ng/api/v1/checkout/create', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${alatpayPrimaryKey}`,
             'Business-Id': alatpayBusinessId,
-            'User-Agent': 'Supabase Edge Function',
         },
         body: JSON.stringify(alatpayPayload)
     });
