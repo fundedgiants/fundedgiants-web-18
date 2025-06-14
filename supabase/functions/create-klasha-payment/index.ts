@@ -1,5 +1,6 @@
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
+import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -29,16 +30,24 @@ serve(async (req) => {
     const origin = req.headers.get('origin');
     if (!origin) throw new Error('Could not determine app origin from request headers.');
 
-    // 1. Get USD to NGN exchange rate from Klasha
-    const rateResponse = await fetch('https://gate.klasha.com/klasha-revamp/v1/exchange/rate?source_currency=USD&destination_currency=NGN');
-    if (!rateResponse.ok) {
-        const errorBody = await rateResponse.text();
-        console.error('Klasha rate API error:', errorBody);
-        throw new Error('Failed to fetch Klasha exchange rate.');
+    // 1. Get USD to NGN exchange rate from our database
+    const supabaseAdmin = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+
+    const { data: rateData, error: rateError } = await supabaseAdmin
+        .from('exchange_rates')
+        .select('rate')
+        .eq('currency_pair', 'USD_NGN')
+        .single()
+    
+    if (rateError || !rateData) {
+        console.error('Failed to fetch exchange rate from DB:', rateError?.message)
+        throw new Error('Could not fetch USD to NGN exchange rate. An admin may need to set it in the dashboard.')
     }
-    const rateData = await rateResponse.json();
-    const rate = rateData.data.rate;
-    if (!rate) throw new Error('Could not get exchange rate from Klasha.');
+    const rate = rateData.rate
+    if (!rate) throw new Error('Could not get exchange rate. An admin may need to set it in the dashboard.')
 
     const ngnAmount = Math.ceil(totalPrice * rate);
 
@@ -85,3 +94,4 @@ serve(async (req) => {
     })
   }
 })
+

@@ -9,6 +9,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
 
 interface CheckoutState {
   program: string;
@@ -155,6 +156,27 @@ const Checkout = () => {
   const selectedAddOns = addOns.filter(addon => checkoutData.addOns.includes(addon.id));
   const addOnsPrice = selectedAddOns.reduce((sum, addon) => sum + (basePrice * (addon.pricePercent / 100)), 0);
   const totalPrice = basePrice + addOnsPrice;
+
+  const { data: ngnRateData } = useQuery({
+    queryKey: ['exchange_rate', 'USD_NGN'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('exchange_rates')
+        .select('rate')
+        .eq('currency_pair', 'USD_NGN')
+        .single();
+      
+      if (error) {
+        console.error("Failed to fetch NGN exchange rate:", error.message);
+        toast.error("Could not fetch NGN exchange rate.");
+        return null;
+      }
+      return data;
+    },
+    enabled: checkoutData.paymentMethod === 'ngn',
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+  const ngnRate = ngnRateData?.rate;
 
   const handleNext = () => {
     if (currentStep < 5) setCurrentStep(currentStep + 1);
@@ -567,6 +589,11 @@ const Checkout = () => {
                 <RadioGroupItem value="ngn" id="ngn" />
                 <span className="text-primary font-bold">₦</span>
                 <label htmlFor="ngn" className="cursor-pointer text-white">Nigerian Naira (NGN)</label>
+                {checkoutData.paymentMethod === 'ngn' && ngnRate && (
+                  <span className="text-sm text-muted-foreground ml-auto">
+                    (≈ ₦{Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')})
+                  </span>
+                )}
               </div>
             </RadioGroup>
           </div>
@@ -668,6 +695,7 @@ const Checkout = () => {
                       <Button onClick={handleCompletePurchase} className="bg-primary hover:bg-primary/90" disabled={isProcessing}>
                         {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Complete Purchase - ${totalPrice.toFixed(2)}
+                        {checkoutData.paymentMethod === 'ngn' && ngnRate && ` / ~₦${Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')}`}
                       </Button>
                     )}
                   </div>

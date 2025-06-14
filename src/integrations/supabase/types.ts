@@ -9,6 +9,30 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      exchange_rates: {
+        Row: {
+          created_at: string
+          currency_pair: string
+          id: number
+          rate: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency_pair: string
+          id?: number
+          rate: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency_pair?: string
+          id?: number
+          rate?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           created_at: string
