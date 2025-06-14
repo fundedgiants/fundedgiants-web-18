@@ -57,16 +57,50 @@ const Checkout = () => {
   });
 
   useEffect(() => {
-    if (user) {
-      setCheckoutData(prev => ({
-        ...prev,
-        billingInfo: {
-          ...prev.billingInfo,
-          email: user.email || '',
+    const fetchProfile = async () => {
+      if (user) {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (error && error.code !== 'PGRST116') { // Ignore error when no profile found
+          toast.error("Could not fetch your profile data.");
+          console.error("Profile fetch error:", error);
+        } else if (profile) {
+          setCheckoutData(prev => ({
+            ...prev,
+            billingInfo: {
+              ...prev.billingInfo,
+              firstName: profile.first_name || '',
+              lastName: profile.last_name || '',
+              email: user.email || '',
+              phone: profile.phone || '',
+              country: profile.country || '',
+              state: profile.state || '',
+              city: profile.city || '',
+              address: profile.address || '',
+              zipCode: profile.zip_code || '',
+            }
+          }));
+        } else {
+            // User exists but has no profile yet, just set email
+            setCheckoutData(prev => ({
+                ...prev,
+                billingInfo: {
+                    ...prev.billingInfo,
+                    email: user.email || '',
+                }
+            }))
         }
-      }))
+      }
+    };
+
+    if (!authLoading) {
+      fetchProfile();
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   useEffect(() => {
     const program = checkoutData.program;
@@ -214,6 +248,25 @@ const Checkout = () => {
       toast.error("Authentication is required to complete the purchase.");
       setIsProcessing(false);
       return;
+    }
+
+    // Update profile with billing info
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({
+        first_name: checkoutData.billingInfo.firstName,
+        last_name: checkoutData.billingInfo.lastName,
+        phone: checkoutData.billingInfo.phone,
+        country: checkoutData.billingInfo.country,
+        state: checkoutData.billingInfo.state,
+        city: checkoutData.billingInfo.city,
+        address: checkoutData.billingInfo.address,
+        zip_code: checkoutData.billingInfo.zipCode,
+      })
+      .eq('id', sessionUser.id);
+
+    if (profileError) {
+      toast.warn(`Could not save billing info: ${profileError.message}`);
     }
 
     const { data: orderData, error: orderError } = await supabase.from('orders').insert({

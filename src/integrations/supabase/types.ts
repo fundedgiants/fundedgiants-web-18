@@ -56,19 +56,37 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
+          city: string | null
+          country: string | null
           first_name: string | null
           id: string
           last_name: string | null
+          phone: string | null
+          state: string | null
+          zip_code: string | null
         }
         Insert: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
           first_name?: string | null
           id: string
           last_name?: string | null
+          phone?: string | null
+          state?: string | null
+          zip_code?: string | null
         }
         Update: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null
+          phone?: string | null
+          state?: string | null
+          zip_code?: string | null
         }
         Relationships: []
       }
