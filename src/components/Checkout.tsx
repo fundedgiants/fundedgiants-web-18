@@ -312,10 +312,37 @@ const Checkout = () => {
           await supabase.from('orders').update({ payment_status: 'failed' }).eq('id', orderId);
           setIsProcessing(false);
       }
-    } else if (checkoutData.paymentMethod === 'card' || checkoutData.paymentMethod === 'ngn') {
+    } else if (checkoutData.paymentMethod === 'card') {
       toast.warning("This payment method is coming soon!");
       await supabase.from('orders').update({ payment_status: 'cancelled' }).eq('id', orderId);
       setIsProcessing(false);
+    } else if (checkoutData.paymentMethod === 'ngn') {
+      try {
+        const { data: klashaData, error: klashaError } = await supabase.functions.invoke('create-klasha-payment', {
+          body: { 
+            orderId, 
+            totalPrice,
+            email: checkoutData.billingInfo.email,
+            firstName: checkoutData.billingInfo.firstName,
+            lastName: checkoutData.billingInfo.lastName,
+            phone: checkoutData.billingInfo.phone,
+          },
+        });
+
+        if (klashaError) {
+            throw new Error(klashaError.message);
+        }
+
+        if (klashaData.redirect_url) {
+            window.location.href = klashaData.redirect_url;
+        } else {
+            throw new Error('Could not retrieve Klasha payment URL.');
+        }
+      } catch (error: any) {
+          toast.error(`Payment initialization failed: ${error.message}`);
+          await supabase.from('orders').update({ payment_status: 'failed' }).eq('id', orderId);
+          setIsProcessing(false);
+      }
     } else {
       toast.error("Please select a payment method.");
       setIsProcessing(false);
