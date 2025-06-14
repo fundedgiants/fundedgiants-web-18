@@ -32,3 +32,10 @@ export const steps = [
     { id: 2, name: 'Select Add-ons' },
     { id: 3, name: 'Confirm & Pay' }
 ];
+
+export const stepsWithAuth = [
+    { id: 1, name: 'Choose Program' },
+    { id: 2, name: 'Select Add-ons' },
+    { id: 3, name: 'Account' },
+    { id: 4, name: 'Confirm & Pay' }
+];
