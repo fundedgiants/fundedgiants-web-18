@@ -207,7 +207,7 @@ const Checkout = () => {
     let sessionUser = user;
 
     if (!sessionUser) {
-      const { email, password, confirmPassword, firstName, lastName } = checkoutData.billingInfo;
+      const { email, password, confirmPassword, firstName, lastName, phone } = checkoutData.billingInfo;
 
       if (currentStep !== 5) {
         handleNext();
@@ -221,8 +221,8 @@ const Checkout = () => {
         setIsProcessing(false);
         return;
       }
-      if (!email || !firstName || !lastName) {
-        toast.error("Please fill in all required billing details.");
+      if (!email || !firstName || !lastName || !phone) {
+        toast.error("Please fill in all required billing details, including your phone number.");
         setCurrentStep(4);
         setIsProcessing(false);
         return;
@@ -503,6 +503,7 @@ const Checkout = () => {
                 value={checkoutData.billingInfo.phone}
                 onChange={(e) => handleBillingChange('phone', e.target.value)}
                 className="bg-card/50 border-muted"
+                required
               />
               <Input
                 placeholder="Country"
