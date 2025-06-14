@@ -91,12 +91,13 @@ serve(async (req) => {
     };
     console.log('Initiating payment with Alatpay. Payload:', JSON.stringify(alatpayPayload, null, 2));
 
-    const paymentResponse = await fetch('https://live.alatpay.ng/api/v1/checkout/create', {
+    const paymentResponse = await fetch('https://sandbox.alatpay.ng/api/v1/checkout/create', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${alatpayPrimaryKey}`,
             'Business-Id': alatpayBusinessId,
+            'User-Agent': 'Supabase Edge Function',
         },
         body: JSON.stringify(alatpayPayload)
     });
