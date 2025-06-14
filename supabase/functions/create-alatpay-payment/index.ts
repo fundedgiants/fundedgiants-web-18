@@ -1,3 +1,4 @@
+
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
@@ -34,8 +35,6 @@ serve(async (req) => {
     }
     
     let phone = rawPhone;
-    // Alatpay documentation example uses local Nigerian format (e.g., 08012345678), not E.164.
-    // We'll convert Nigerian numbers to that format.
     if (rawPhone.startsWith('+234')) {
       phone = '0' + rawPhone.substring(4);
       console.log(`Converted Nigerian phone number from ${rawPhone} to local format: ${phone}`);
@@ -46,16 +45,19 @@ serve(async (req) => {
     const alatpayPrimaryKey = Deno.env.get('ALATPAY_PRIMARY_KEY');
     const alatpayBusinessId = Deno.env.get('ALATPAY_BUSINESS_ID');
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    if (!alatpayPrimaryKey) console.error('ALATPAY_PRIMARY_KEY secret is missing.');
-    if (!alatpayBusinessId) console.error('ALATPAY_BUSINESS_ID secret is missing.');
-    if (!supabaseUrl) console.error('SUPABASE_URL secret is missing.');
-
-    if (!alatpayPrimaryKey || !alatpayBusinessId || !supabaseUrl) {
-      console.error('Alatpay secrets or SUPABASE_URL are not set in Supabase.');
-      throw new Error('Alatpay secrets or SUPABASE_URL are not set in Supabase.')
+    if (!alatpayPrimaryKey || !alatpayBusinessId || !supabaseUrl || !supabaseServiceRoleKey) {
+      const missing = [
+        !alatpayPrimaryKey && 'ALATPAY_PRIMARY_KEY',
+        !alatpayBusinessId && 'ALATPAY_BUSINESS_ID',
+        !supabaseUrl && 'SUPABASE_URL',
+        !supabaseServiceRoleKey && 'SUPABASE_SERVICE_ROLE_KEY'
+      ].filter(Boolean).join(', ');
+      console.error(`Missing environment variables: ${missing}`);
+      throw new Error(`Server configuration error: Missing required secrets.`);
     }
-    console.log('Alatpay secrets and Supabase URL found.');
+    console.log('All required secrets and environment variables are present.');
 
     const origin = req.headers.get('origin');
     if (!origin) {
@@ -65,27 +67,21 @@ serve(async (req) => {
     console.log('Origin found:', origin);
 
     // 1. Get USD to NGN exchange rate from our database
-    const supabaseAdmin = createClient(
-        Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
 
     console.log('Fetching USD_NGN exchange rate from database...');
     const { data: rateData, error: rateError } = await supabaseAdmin
         .from('exchange_rates')
         .select('rate')
         .eq('currency_pair', 'USD_NGN')
-        .single()
+        .single();
     
-    if (rateError || !rateData) {
-        console.error('Failed to fetch exchange rate from DB:', rateError?.message);
-        throw new Error('Could not fetch USD to NGN exchange rate. An admin may need to set it in the dashboard.')
+    if (rateError || !rateData || !rateData.rate) {
+        const dbError = rateError?.message || 'Rate not found or is null.';
+        console.error('Failed to fetch exchange rate from DB:', dbError);
+        throw new Error('Could not fetch USD to NGN exchange rate. Please contact support.');
     }
     const rate = rateData.rate;
-    if (!rate) {
-      console.error('Exchange rate is null or undefined in DB response.');
-      throw new Error('Could not get exchange rate. An admin may need to set it in the dashboard.')
-    }
     console.log('Exchange rate fetched successfully:', rate);
 
     const ngnAmount = totalPrice * rate;
@@ -94,6 +90,8 @@ serve(async (req) => {
 
     // 2. Initiate payment with NGN amount
     const callbackUrl = `${supabaseUrl}/functions/v1/alatpay-webhook`;
+    const redirectUrl = `${origin}/dashboard`;
+    console.log('Using redirect URL:', redirectUrl);
     console.log('Using webhook callback URL:', callbackUrl);
 
     const alatpayPayload = {
@@ -101,64 +99,66 @@ serve(async (req) => {
         currency: "NGN",
         businessId: alatpayBusinessId,
         email: email,
-        phone: phone, // Use the potentially converted phone number
+        phone: phone,
         firstName: firstName,
         lastName: lastName,
         paymentMethods: ["card", "banktransfer"],
-        redirectUrl: `${origin}/dashboard`,
+        redirectUrl: redirectUrl,
         merchantRef: orderId,
-        callbackUrl: callbackUrl, // Reverted from callBackUrl
+        callbackUrl: callbackUrl,
     };
-    console.log('Initiating payment with Alatpay. Payload:', JSON.stringify(alatpayPayload, null, 2));
-
-    try {
-      console.log('--- DIAGNOSTIC STEP: Testing outbound connectivity to google.com ---');
-      const googleRes = await fetch('https://www.google.com');
-      console.log(`--- DIAGNOSTIC STEP: Successfully connected to google.com. Status: ${googleRes.status} ---`);
-    } catch (e) {
-      console.error('--- DIAGNOSTIC STEP: Failed to connect to google.com ---', e);
-    }
-
-    const paymentResponse = await fetch('https://live.alatpay.ng/api/v1/checkout/create', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': `${alatpayPrimaryKey}`,
-        },
-        body: JSON.stringify(alatpayPayload)
-    });
     
-    const alatpayResponseText = await paymentResponse.text();
+    console.log('Preparing to call Alatpay API.');
+    const alatpayApiUrl = 'https://live.alatpay.ng/api/v1/checkout/create';
+    console.log('Endpoint:', alatpayApiUrl);
+    console.log('Payload:', JSON.stringify(alatpayPayload, null, 2));
+
+    let paymentResponse;
+    try {
+      paymentResponse = await fetch(alatpayApiUrl, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': `${alatpayPrimaryKey}`,
+          },
+          body: JSON.stringify(alatpayPayload)
+      });
+    } catch (networkError) {
+      console.error('Fatal network error while calling Alatpay API:', networkError);
+      throw new Error(`A network error occurred while trying to connect to the payment gateway. Please contact support. Details: ${networkError.message}`);
+    }
+    
+    const responseBodyText = await paymentResponse.text();
     console.log(`Alatpay API response status: ${paymentResponse.status}`);
-    console.log('Alatpay API raw response text:', alatpayResponseText);
+    console.log('Alatpay API raw response body:', responseBodyText);
 
     if (!paymentResponse.ok) {
-        console.error(`Alatpay payment API returned an error. Status: ${paymentResponse.status}. Response:`, alatpayResponseText);
+        console.error(`Alatpay API returned a non-OK status (${paymentResponse.status}).`);
         try {
-            const alatpayResponseJson = JSON.parse(alatpayResponseText);
-            throw new Error(alatpayResponseJson.message || 'Failed to initialize Alatpay payment');
+            const errorJson = JSON.parse(responseBodyText);
+            throw new Error(errorJson.message || `Alatpay returned status ${paymentResponse.status}`);
         } catch (e) {
-            throw new Error(`Failed to initialize Alatpay payment. Raw response: ${alatpayResponseText}`);
+            throw new Error(`Failed to initialize payment. Alatpay returned a non-JSON error: ${responseBodyText}`);
         }
     }
 
-    const alatpayResponse = JSON.parse(alatpayResponseText);
-    console.log('Alatpay API success response:', JSON.stringify(alatpayResponse, null, 2));
+    const alatpayResponse = JSON.parse(responseBodyText);
+    console.log('Alatpay API success response parsed:', JSON.stringify(alatpayResponse, null, 2));
 
     if (!alatpayResponse.data || !alatpayResponse.data.checkoutUrl) {
-      console.error('Invalid Alatpay payment response: checkoutUrl is missing. Response:', JSON.stringify(alatpayResponse, null, 2));
-      throw new Error('Could not retrieve payment URL from Alatpay.');
+      console.error('Invalid Alatpay payment response: checkoutUrl is missing.');
+      throw new Error('Could not retrieve payment URL from Alatpay after successful request.');
     }
     
-    console.log('Successfully got checkout URL:', alatpayResponse.data.checkoutUrl);
+    const checkoutUrl = alatpayResponse.data.checkoutUrl;
+    console.log('Successfully got checkout URL:', checkoutUrl);
     console.log('create-alatpay-payment function finished successfully.');
 
-    return new Response(JSON.stringify({ checkoutUrl: alatpayResponse.data.checkoutUrl }), {
+    return new Response(JSON.stringify({ checkoutUrl }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })
   } catch (error) {
-    console.error('Full error object in create-alatpay-payment function:', error);
     console.error('Error caught in create-alatpay-payment function:', error.message);
     if (error.cause) {
       console.error('Error cause:', error.cause);

@@ -9,91 +9,86 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  console.log('alatpay-webhook function invoked.');
+  console.log('Alatpay webhook received a request.');
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
+  let bodyText = '';
   try {
-    const signature = req.headers.get('x-alatpay-signature')
+    const signature = req.headers.get('x-alatpay-signature');
     if (!signature) {
-      console.error('Missing x-alatpay-signature header');
+      console.error('Missing x-alatpay-signature header. Request rejected.');
       return new Response(JSON.stringify({ error: 'Missing signature' }), { status: 401, headers: corsHeaders })
     }
 
-    const bodyText = await req.text()
-    const alatpaySecondaryKey = Deno.env.get('ALATPAY_SECONDARY_KEY')
+    bodyText = await req.text();
+    console.log('Webhook raw body received:', bodyText);
+
+    const alatpaySecondaryKey = Deno.env.get('ALATPAY_SECONDARY_KEY');
     if (!alatpaySecondaryKey) {
-        console.error('ALATPAY_SECONDARY_KEY is not set');
-        throw new Error('Alatpay secondary key is not configured.');
+        console.error('ALATPAY_SECONDARY_KEY secret is not set in environment. Cannot verify signature.');
+        throw new Error('Webhook security key is not configured on the server.');
     }
 
     const key = await crypto.subtle.importKey(
-        'raw',
-        new TextEncoder().encode(alatpaySecondaryKey),
+        'raw', new TextEncoder().encode(alatpaySecondaryKey),
         { name: 'HMAC', hash: 'SHA-256' },
-        false,
-        ['sign']
+        false, ['sign']
     );
-
-    const mac = await crypto.subtle.sign(
-        'HMAC',
-        key,
-        new TextEncoder().encode(bodyText)
-    );
-
+    const mac = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(bodyText));
     const calculatedSignature = Array.from(new Uint8Array(mac)).map(b => b.toString(16).padStart(2, '0')).join('');
 
     if (calculatedSignature !== signature) {
-        console.error('Invalid signature');
-        console.log(`Received: ${signature}, Calculated: ${calculatedSignature}`);
+        console.error('Invalid signature. Request rejected.');
+        console.log(`Received Signature: ${signature}`);
+        console.log(`Calculated Signature: ${calculatedSignature}`);
         return new Response(JSON.stringify({ error: 'Invalid signature' }), { status: 401, headers: corsHeaders });
     }
     console.log('Signature verified successfully.');
 
     const payload = JSON.parse(bodyText);
-    console.log('Webhook payload:', JSON.stringify(payload, null, 2));
+    console.log('Webhook parsed payload:', JSON.stringify(payload, null, 2));
 
-    const { merchantRef, status } = payload.data;
-    const orderId = merchantRef;
-    
-    if (!orderId) {
-        console.error('merchantRef (orderId) is missing in webhook payload');
-        return new Response(JSON.stringify({ error: 'Missing merchantRef' }), { status: 400, headers: corsHeaders });
+    if (!payload.data || !payload.data.merchantRef) {
+        console.error('merchantRef (orderId) is missing in webhook payload data.');
+        return new Response(JSON.stringify({ error: 'Missing merchantRef in payload' }), { status: 400, headers: corsHeaders });
     }
+
+    const { merchantRef: orderId, status } = payload.data;
     
     let paymentStatus;
-    if (status === 'successful') {
-        paymentStatus = 'paid';
-    } else if (status === 'failed' || status === 'declined') {
-        paymentStatus = 'failed';
-    } else {
-        console.log(`Unhandled payment status from webhook: ${status}`);
-        paymentStatus = 'pending'; // Do not update for other statuses
+    switch (status) {
+        case 'successful':
+            paymentStatus = 'paid';
+            break;
+        case 'failed':
+        case 'declined':
+            paymentStatus = 'failed';
+            break;
+        default:
+            console.log(`Received unhandled payment status from webhook: '${status}'. No update will be performed.`);
+            return new Response(JSON.stringify({ message: 'Unhandled status, no action taken.' }), { status: 200, headers: corsHeaders });
     }
     
-    if (paymentStatus === 'pending') {
-         console.log('Webhook status is pending, no update needed.');
-         return new Response(JSON.stringify({ message: 'Unhandled status, no update performed.' }), { status: 200, headers: corsHeaders });
-    }
-
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    );
 
-    console.log(`Updating order ${orderId} with payment_status: ${paymentStatus}`);
+    console.log(`Attempting to update order ${orderId} with payment_status: ${paymentStatus}`);
     const { error: updateError } = await supabaseAdmin
       .from('orders')
       .update({ payment_status: paymentStatus })
-      .eq('id', orderId)
+      .eq('id', orderId);
 
     if (updateError) {
       console.error(`Failed to update order ${orderId}:`, updateError.message);
-      throw new Error(`Failed to update order status: ${updateError.message}`);
+      throw new Error(`Database error while updating order status: ${updateError.message}`);
     }
 
-    console.log(`Order ${orderId} updated successfully.`);
+    console.log(`Order ${orderId} status updated to '${paymentStatus}' successfully.`);
     
     return new Response(JSON.stringify({ received: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -101,11 +96,14 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Error in alatpay-webhook:', error.message);
+    console.error('Error processing Alatpay webhook:', error.message);
     if (error.cause) {
       console.error('Error cause:', error.cause);
     }
-    return new Response(JSON.stringify({ error: error.message }), {
+    if (bodyText) {
+      console.error('Webhook body at time of error:', bodyText);
+    }
+    return new Response(JSON.stringify({ error: 'Webhook processing failed' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
     })
