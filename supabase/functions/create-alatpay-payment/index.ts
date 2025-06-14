@@ -1,3 +1,4 @@
+
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
@@ -25,12 +26,22 @@ serve(async (req) => {
 
   try {
     console.log(`Handling ${req.method} request.`);
-    const { orderId, totalPrice, email, firstName, lastName, phone }: AlatpayRequest = await req.json()
-    console.log('Request body parsed:', { orderId, totalPrice, email, firstName, lastName, phone });
+    const { orderId, totalPrice, email, firstName, lastName, phone: rawPhone }: AlatpayRequest = await req.json()
+    console.log('Request body parsed:', { orderId, totalPrice, email, firstName, lastName, rawPhone });
     
-    if (!phone || !phone.startsWith('+')) {
-      console.error('Phone number is missing from the request or not in E.164 format. Received:', phone);
-      throw new Error('Phone number must be provided in international format (e.g., +2348012345678).');
+    if (!rawPhone) {
+      console.error('Phone number is missing from the request.');
+      throw new Error('Phone number must be provided.');
+    }
+    
+    let phone = rawPhone;
+    // Alatpay documentation example uses local Nigerian format (e.g., 08012345678), not E.164.
+    // We'll convert Nigerian numbers to that format.
+    if (rawPhone.startsWith('+234')) {
+      phone = '0' + rawPhone.substring(4);
+      console.log(`Converted Nigerian phone number from ${rawPhone} to local format: ${phone}`);
+    } else {
+      console.log(`Phone number is not a Nigerian number, using as-is: ${rawPhone}`);
     }
     
     const alatpayPrimaryKey = Deno.env.get('ALATPAY_PRIMARY_KEY');
@@ -91,7 +102,7 @@ serve(async (req) => {
         currency: "NGN",
         businessId: alatpayBusinessId,
         email: email,
-        phone: phone, // Use phone directly from request
+        phone: phone, // Use the potentially converted phone number
         firstName: firstName,
         lastName: lastName,
         paymentMethods: ["card", "banktransfer"],
