@@ -1,4 +1,3 @@
-
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
@@ -108,7 +107,7 @@ serve(async (req) => {
         paymentMethods: ["card", "banktransfer"],
         redirectUrl: `${origin}/dashboard`,
         merchantRef: orderId,
-        callBackUrl: callbackUrl, // Changed to callBackUrl
+        callbackUrl: callbackUrl, // Reverted from callBackUrl
     };
     console.log('Initiating payment with Alatpay. Payload:', JSON.stringify(alatpayPayload, null, 2));
 
@@ -120,7 +119,7 @@ serve(async (req) => {
       console.error('--- DIAGNOSTIC STEP: Failed to connect to google.com ---', e);
     }
 
-    const paymentResponse = await fetch('https://api.alat.ng/api/v1/checkout/create', {
+    const paymentResponse = await fetch('https://live.alatpay.ng/api/v1/checkout/create', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
