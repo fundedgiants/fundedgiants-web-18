@@ -112,6 +112,14 @@ serve(async (req) => {
     };
     console.log('Initiating payment with Alatpay. Payload:', JSON.stringify(alatpayPayload, null, 2));
 
+    try {
+      console.log('--- DIAGNOSTIC STEP: Testing outbound connectivity to google.com ---');
+      const googleRes = await fetch('https://www.google.com');
+      console.log(`--- DIAGNOSTIC STEP: Successfully connected to google.com. Status: ${googleRes.status} ---`);
+    } catch (e) {
+      console.error('--- DIAGNOSTIC STEP: Failed to connect to google.com ---', e);
+    }
+
     const paymentResponse = await fetch('https://api.alatpay.ng/v1/checkout/create', {
         method: 'POST',
         headers: {
