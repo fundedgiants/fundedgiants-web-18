@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, ArrowRight, Check, CreditCard, Smartphone, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, CreditCard, Loader2, Bitcoin } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,6 +22,7 @@ interface CheckoutState {
     lastName: string;
     email: string;
     phone: string;
+    countryCode: string;
     country: string;
     state: string;
     city: string;
@@ -47,6 +49,7 @@ const Checkout = () => {
     addOns: [],
     billingInfo: {
       firstName: '', lastName: '', email: '', phone: '',
+      countryCode: '+234',
       country: '', state: '', city: '', address: '', zipCode: '',
       password: '', confirmPassword: ''
     },
@@ -66,6 +69,18 @@ const Checkout = () => {
           toast.error("Could not fetch your profile data.");
           console.error("Profile fetch error:", error);
         } else if (profile) {
+          let loadedCountryCode = '';
+          let loadedPhone = profile.phone || '';
+
+          if (profile.phone) {
+            const prefixes = [{code: '+234'}, {code: '+1'}, {code: '+44'}, {code: '+27'}, {code: '+233'}];
+            const matchedPrefix = prefixes.find(p => profile.phone.startsWith(p.code));
+            if (matchedPrefix) {
+                loadedCountryCode = matchedPrefix.code;
+                loadedPhone = profile.phone.substring(matchedPrefix.code.length);
+            }
+          }
+
           setCheckoutData(prev => ({
             ...prev,
             billingInfo: {
@@ -73,7 +88,8 @@ const Checkout = () => {
               firstName: profile.first_name || '',
               lastName: profile.last_name || '',
               email: user.email || '',
-              phone: profile.phone || '',
+              phone: loadedPhone,
+              countryCode: loadedCountryCode || prev.billingInfo.countryCode,
               country: profile.country || '',
               state: profile.state || '',
               city: profile.city || '',
@@ -206,7 +222,7 @@ const Checkout = () => {
     let sessionUser = user;
 
     if (!sessionUser) {
-      const { email, password, confirmPassword, firstName, lastName, phone } = checkoutData.billingInfo;
+      const { email, password, confirmPassword, firstName, lastName, phone, countryCode } = checkoutData.billingInfo;
 
       if (currentStep !== 5) {
         handleNext();
@@ -268,13 +284,17 @@ const Checkout = () => {
       return;
     }
 
-    // Update profile with billing info
+    // Combine phone number parts and update profile
+    const { phone, countryCode } = checkoutData.billingInfo;
+    const numberPart = phone.replace(/^0+/, '');
+    const fullPhoneNumber = `${countryCode}${numberPart}`;
+
     const { error: profileError } = await supabase
       .from('profiles')
       .update({
         first_name: checkoutData.billingInfo.firstName,
         last_name: checkoutData.billingInfo.lastName,
-        phone: checkoutData.billingInfo.phone,
+        phone: fullPhoneNumber,
         country: checkoutData.billingInfo.country,
         state: checkoutData.billingInfo.state,
         city: checkoutData.billingInfo.city,
@@ -346,7 +366,7 @@ const Checkout = () => {
             email: checkoutData.billingInfo.email,
             firstName: checkoutData.billingInfo.firstName,
             lastName: checkoutData.billingInfo.lastName,
-            phone: checkoutData.billingInfo.phone,
+            phone: fullPhoneNumber,
           },
         });
 
@@ -503,13 +523,28 @@ const Checkout = () => {
                 required
                 disabled={!!user}
               />
-              <Input
-                placeholder="Phone"
-                value={checkoutData.billingInfo.phone}
-                onChange={(e) => handleBillingChange('phone', e.target.value)}
-                className="bg-card/50 border-muted"
-                required
-              />
+              <div className="flex items-center gap-2">
+                <select
+                  value={checkoutData.billingInfo.countryCode}
+                  onChange={(e) => handleBillingChange('countryCode', e.target.value)}
+                  className="bg-card/50 border border-muted rounded-md px-2 py-2 h-10 w-40 text-white"
+                  style={{ colorScheme: 'dark' }}
+                >
+                  <option value="+234">NG (+234)</option>
+                  <option value="+1">US (+1)</option>
+                  <option value="+44">UK (+44)</option>
+                  <option value="+27">ZA (+27)</option>
+                  <option value="+233">GH (+233)</option>
+                </select>
+                <Input
+                  placeholder="Phone Number"
+                  type="tel"
+                  value={checkoutData.billingInfo.phone}
+                  onChange={(e) => handleBillingChange('phone', e.target.value)}
+                  className="bg-card/50 border-muted flex-1"
+                  required
+                />
+              </div>
               <Input
                 placeholder="Country"
                 value={checkoutData.billingInfo.country}
@@ -576,7 +611,7 @@ const Checkout = () => {
       case 5:
         const paymentMethods = [
             { value: 'card', label: 'Credit/Debit Card', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> },
-            { value: 'crypto', label: 'Cryptocurrency', subtitle: 'via NowPayments', icon: <Smartphone className="h-8 w-8 text-primary mb-2" /> },
+            { value: 'crypto', label: 'Cryptocurrency', subtitle: 'via NowPayments', icon: <Bitcoin className="h-8 w-8 text-primary mb-2" /> },
             { value: 'ngn', label: 'Nigerian Naira', subtitle: 'via Alatpay', icon: <span className="text-primary text-3xl font-bold mb-1">₦</span> }
         ];
         return (

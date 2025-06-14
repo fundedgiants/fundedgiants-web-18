@@ -1,4 +1,3 @@
-
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
@@ -29,23 +28,9 @@ serve(async (req) => {
     const { orderId, totalPrice, email, firstName, lastName, phone }: AlatpayRequest = await req.json()
     console.log('Request body parsed:', { orderId, totalPrice, email, firstName, lastName, phone });
     
-    // Format phone number to E.164, assuming Nigerian numbers as primary
-    let formattedPhone = phone;
-    if (phone) {
-      const sanitizedPhone = phone.replace(/\s/g, ''); // Remove whitespace
-      if (sanitizedPhone.startsWith('0') && sanitizedPhone.length === 11) {
-        formattedPhone = `+234${sanitizedPhone.substring(1)}`;
-        console.log(`Formatted phone number from ${phone} to ${formattedPhone}`);
-      } else if (!sanitizedPhone.startsWith('+')) {
-        // Best effort for other formats (e.g., missing '+')
-        formattedPhone = `+${sanitizedPhone}`;
-        console.log(`Formatted phone number from ${phone} to ${formattedPhone}`);
-      } else {
-        formattedPhone = sanitizedPhone;
-        console.log('Phone number seems to be in correct format, just removed whitespace.');
-      }
-    } else {
-      console.warn('Phone number is missing from the request.');
+    if (!phone || !phone.startsWith('+')) {
+      console.error('Phone number is missing from the request or not in E.164 format. Received:', phone);
+      throw new Error('Phone number must be provided in international format (e.g., +2348012345678).');
     }
     
     const alatpayPrimaryKey = Deno.env.get('ALATPAY_PRIMARY_KEY');
@@ -106,7 +91,7 @@ serve(async (req) => {
         currency: "NGN",
         businessId: alatpayBusinessId,
         email: email,
-        phone: formattedPhone, // Using the formatted phone number
+        phone: phone, // Use phone directly from request
         firstName: firstName,
         lastName: lastName,
         paymentMethods: ["card", "banktransfer"],
