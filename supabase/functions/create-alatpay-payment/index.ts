@@ -17,27 +17,33 @@ interface AlatpayRequest {
 }
 
 serve(async (req) => {
+  console.log('create-alatpay-payment function invoked.');
+
   if (req.method === 'OPTIONS') {
+    console.log('Handling OPTIONS preflight request.');
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    console.log('create-alatpay-payment function started');
+    console.log(`Handling ${req.method} request.`);
     const { orderId, totalPrice, email, firstName, lastName, phone }: AlatpayRequest = await req.json()
     console.log('Request body parsed:', { orderId, totalPrice, email, firstName, lastName, phone });
     
     const alatpayPrimaryKey = Deno.env.get('ALATPAY_PRIMARY_KEY');
     const alatpayBusinessId = Deno.env.get('ALATPAY_BUSINESS_ID');
 
+    if (!alatpayPrimaryKey) console.error('ALATPAY_PRIMARY_KEY secret is missing.');
+    if (!alatpayBusinessId) console.error('ALATPAY_BUSINESS_ID secret is missing.');
+
     if (!alatpayPrimaryKey || !alatpayBusinessId) {
       console.error('ALATPAY_PRIMARY_KEY or ALATPAY_BUSINESS_ID secrets are not set');
       throw new Error('Alatpay secrets are not set in Supabase.')
     }
-    console.log('Alatpay secrets found');
+    console.log('Alatpay secrets found.');
 
     const origin = req.headers.get('origin');
     if (!origin) {
-      console.error('Origin header is missing');
+      console.error('Origin header is missing from the request.');
       throw new Error('Could not determine app origin from request headers.');
     }
     console.log('Origin found:', origin);
@@ -48,7 +54,7 @@ serve(async (req) => {
         Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    console.log('Fetching exchange rate...');
+    console.log('Fetching USD_NGN exchange rate from database...');
     const { data: rateData, error: rateError } = await supabaseAdmin
         .from('exchange_rates')
         .select('rate')
@@ -56,15 +62,15 @@ serve(async (req) => {
         .single()
     
     if (rateError || !rateData) {
-        console.error('Failed to fetch exchange rate from DB:', rateError?.message)
+        console.error('Failed to fetch exchange rate from DB:', rateError?.message);
         throw new Error('Could not fetch USD to NGN exchange rate. An admin may need to set it in the dashboard.')
     }
-    const rate = rateData.rate
+    const rate = rateData.rate;
     if (!rate) {
-      console.error('Exchange rate is null or undefined from DB');
+      console.error('Exchange rate is null or undefined in DB response.');
       throw new Error('Could not get exchange rate. An admin may need to set it in the dashboard.')
     }
-    console.log('Exchange rate fetched:', rate);
+    console.log('Exchange rate fetched successfully:', rate);
 
     const ngnAmount = totalPrice * rate;
     const ngnAmountInKobo = Math.ceil(ngnAmount * 100);
@@ -99,27 +105,28 @@ serve(async (req) => {
     const alatpayResponse = await paymentResponse.json();
 
     if (!paymentResponse.ok) {
-        console.error('Alatpay payment API error. Response:', JSON.stringify(alatpayResponse, null, 2));
+        console.error('Alatpay payment API returned an error. Response:', JSON.stringify(alatpayResponse, null, 2));
         throw new Error(alatpayResponse.message || 'Failed to initialize Alatpay payment');
     }
 
     console.log('Alatpay API success response:', JSON.stringify(alatpayResponse, null, 2));
 
     if (!alatpayResponse.data || !alatpayResponse.data.checkoutUrl) {
-      console.error('Invalid Alatpay payment response: checkoutUrl missing. Response:', JSON.stringify(alatpayResponse, null, 2));
+      console.error('Invalid Alatpay payment response: checkoutUrl is missing. Response:', JSON.stringify(alatpayResponse, null, 2));
       throw new Error('Could not retrieve payment URL from Alatpay.');
     }
     
     console.log('Successfully got checkout URL:', alatpayResponse.data.checkoutUrl);
+    console.log('create-alatpay-payment function finished successfully.');
 
     return new Response(JSON.stringify({ checkoutUrl: alatpayResponse.data.checkoutUrl }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })
   } catch (error) {
-    console.error('Error in create-alatpay-payment function catch block:', error);
+    console.error('Error caught in create-alatpay-payment function:', error.message);
     if (error.cause) {
-      console.error('Fetch error cause:', error.cause);
+      console.error('Error cause:', error.cause);
     }
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -127,3 +134,4 @@ serve(async (req) => {
     })
   }
 })
+

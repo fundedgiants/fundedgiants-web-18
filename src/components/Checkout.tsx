@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, ArrowRight, Check, CreditCard, Smartphone, Loader2 } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
@@ -423,23 +422,29 @@ const Checkout = () => {
         );
 
       case 2:
+        const platforms = [
+          { value: 'MT5', label: 'MetaTrader 5' },
+          { value: 'MatchTrader', label: 'MatchTrader' }
+        ];
         return (
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold mb-4 text-white">Trading Platform</h3>
-              <RadioGroup 
-                value={checkoutData.platform} 
-                onValueChange={(value) => setCheckoutData(prev => ({ ...prev, platform: value }))}
-              >
-                <div className="flex items-center space-x-3 p-4 border border-primary/20 rounded-lg">
-                  <RadioGroupItem value="MT5" id="mt5" />
-                  <label htmlFor="mt5" className="cursor-pointer text-white">MetaTrader 5</label>
-                </div>
-                <div className="flex items-center space-x-3 p-4 border border-primary/20 rounded-lg">
-                  <RadioGroupItem value="MatchTrader" id="matchtrader" />
-                  <label htmlFor="matchtrader" className="cursor-pointer text-white">MatchTrader</label>
-                </div>
-              </RadioGroup>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {platforms.map((platform) => (
+                  <div
+                    key={platform.value}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all h-24 flex items-center justify-center ${
+                      checkoutData.platform === platform.value
+                        ? 'border-primary bg-primary/10'
+                        : 'border-muted hover:border-primary/40'
+                    }`}
+                    onClick={() => setCheckoutData(prev => ({ ...prev, platform: platform.value }))}
+                  >
+                    <div className="text-center font-medium text-white text-lg">{platform.label}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         );
@@ -569,34 +574,36 @@ const Checkout = () => {
         );
 
       case 5:
+        const paymentMethods = [
+            { value: 'card', label: 'Credit/Debit Card', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> },
+            { value: 'crypto', label: 'Cryptocurrency', icon: <Smartphone className="h-8 w-8 text-primary mb-2" /> },
+            { value: 'ngn', label: 'Nigerian Naira', subtitle: 'via Alatpay', icon: <span className="text-primary text-3xl font-bold mb-1">₦</span> }
+        ];
         return (
           <div className="space-y-6">
             <h3 className="text-lg font-semibold mb-4 text-white">Payment Method</h3>
-            <RadioGroup 
-              value={checkoutData.paymentMethod} 
-              onValueChange={(value) => setCheckoutData(prev => ({ ...prev, paymentMethod: value }))}
-            >
-              <div className="flex items-center space-x-3 p-4 border border-primary/20 rounded-lg">
-                <RadioGroupItem value="card" id="card" />
-                <CreditCard className="h-5 w-5 text-primary" />
-                <label htmlFor="card" className="cursor-pointer text-white">Credit/Debit Card</label>
-              </div>
-              <div className="flex items-center space-x-3 p-4 border border-primary/20 rounded-lg">
-                <RadioGroupItem value="crypto" id="crypto" />
-                <Smartphone className="h-5 w-5 text-primary" />
-                <label htmlFor="crypto" className="cursor-pointer text-white">Cryptocurrency</label>
-              </div>
-              <div className="flex items-center space-x-3 p-4 border border-primary/20 rounded-lg">
-                <RadioGroupItem value="ngn" id="ngn" />
-                <span className="text-primary font-bold">₦</span>
-                <label htmlFor="ngn" className="cursor-pointer text-white">Nigerian Naira (NGN) via Alatpay</label>
-                {checkoutData.paymentMethod === 'ngn' && ngnRate && (
-                  <span className="text-sm text-muted-foreground ml-auto">
-                    (≈ ₦{Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')})
-                  </span>
-                )}
-              </div>
-            </RadioGroup>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {paymentMethods.map((method) => (
+                <div
+                  key={method.value}
+                  className={`p-4 border rounded-lg cursor-pointer transition-all flex flex-col items-center justify-center text-center h-32 ${
+                    checkoutData.paymentMethod === method.value
+                      ? 'border-primary bg-primary/10'
+                      : 'border-muted hover:border-primary/40'
+                  }`}
+                  onClick={() => setCheckoutData(prev => ({ ...prev, paymentMethod: method.value }))}
+                >
+                  {method.icon}
+                  <div className="font-medium text-white mt-1">{method.label}</div>
+                   {method.subtitle && <div className="text-sm text-primary">{method.subtitle}</div>}
+                  {method.value === 'ngn' && checkoutData.paymentMethod === 'ngn' && ngnRate && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      (≈ ₦{Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')})
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         );
 
@@ -657,7 +664,7 @@ const Checkout = () => {
                           >
                             {step.completed ? <Check className="h-5 w-5" /> : step.number}
                           </div>
-                          <div className="text-xs text-center mt-2 text-muted-foreground">
+                          <div className="text-xs text-center mt-2 text-muted-foreground w-20">
                             {step.title}
                           </div>
                         </div>
