@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -349,7 +348,14 @@ const Checkout = () => {
             throw new Error('Could not retrieve payment URL.');
         }
       } catch (error: any) {
-          toast.error(`Payment initialization failed: ${error.message}`);
+          let errorMessage = 'Payment initialization failed. Please try again later.';
+          if (error.message && (error.message.includes('error sending request') || error.message.includes('Failed to connect'))) {
+              errorMessage = 'We are having trouble connecting to the payment provider. Please contact support if this issue persists.';
+          } else if (error.message) {
+              errorMessage = `Payment initialization failed: ${error.message}`;
+          }
+          
+          toast.error(errorMessage);
           await supabase.from('orders').update({ payment_status: 'failed' }).eq('id', orderId);
           setIsProcessing(false);
       }
@@ -380,7 +386,14 @@ const Checkout = () => {
             throw new Error('Could not retrieve Alatpay payment URL.');
         }
       } catch (error: any) {
-          toast.error(`Payment initialization failed: ${error.message}`);
+          let errorMessage = 'Payment initialization failed. Please try again later.';
+          if (error.message && (error.message.includes('error sending request') || error.message.includes('Failed to connect'))) {
+              errorMessage = 'We are having trouble connecting to the payment provider. Please contact support if this issue persists.';
+          } else if (error.message) {
+              errorMessage = `Payment initialization failed: ${error.message}`;
+          }
+          
+          toast.error(errorMessage);
           await supabase.from('orders').update({ payment_status: 'failed' }).eq('id', orderId);
           setIsProcessing(false);
       }
