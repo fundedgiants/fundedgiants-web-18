@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, TrendingUp, Shield, Zap } from 'lucide-react';
@@ -6,7 +7,7 @@ const Hero = () => {
   const [heroContent, setHeroContent] = useState({
     title: "Trade with FundedGiants",
     subtitle: "Elite Mythic Trading Realm",
-    description: "Ascend to the pantheon of elite traders. Harness the power of the giants with funding up to $200,000 and keep up to 70% of your cosmic profits. No hidden fees, transparent divine rules, and instant payouts from the realm of giants.",
+    description: "Ascend to the pantheon of elite traders. Harness the power of the giants with funding up to $200,000 and scale up to $1,000,000. Keep up to 70% of your cosmic profits with no hidden fees, transparent divine rules, and instant payouts from the realm of giants.",
     primaryCTA: "Begin Your Ascension",
     secondaryCTA: "Explore Divine Programs"
   });
@@ -108,7 +109,7 @@ const Hero = () => {
                 <TrendingUp className="h-10 w-10 text-primary group-hover:scale-110 transition-transform" />
                 <div className="text-left">
                   <h3 className="font-bold text-lg text-foreground">⚡ Up to $200K Divine Funding</h3>
-                  <p className="text-sm text-muted-foreground">Trade with the power of giants</p>
+                  <p className="text-sm text-muted-foreground">Scale up to $1M with the power of giants</p>
                 </div>
               </div>
               
