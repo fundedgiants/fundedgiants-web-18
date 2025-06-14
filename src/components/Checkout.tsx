@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
-import { KlashaButton } from 'klasha-pay';
+import KlashaPaymentButton from './KlashaPaymentButton';
 
 interface CheckoutState {
   program: string;
@@ -410,12 +410,12 @@ const Checkout = () => {
 
       const config = {
         publicKey: klashaConfigData.publicKey,
-        businessId: klashaConfigData.businessId,
         email: checkoutData.billingInfo.email,
         amount: amountInNGN,
         tx_ref: orderId,
         currency: 'NGN',
-        fullname: `${checkoutData.billingInfo.firstName} ${checkoutData.billingInfo.lastName}`,
+        firstname: checkoutData.billingInfo.firstName,
+        lastname: checkoutData.billingInfo.lastName,
         phone_number: `${checkoutData.billingInfo.countryCode}${checkoutData.billingInfo.phone}`,
         callback: (response: any) => {
           console.log("Klasha success callback:", response);
@@ -793,12 +793,10 @@ const Checkout = () => {
                           </Button>
                         ) : (
                           klashaConfig && (
-                            <KlashaButton 
-                              {...klashaConfig} 
-                              className="bg-primary hover:bg-primary/90 text-white font-semibold py-2 px-4 rounded inline-flex items-center justify-center"
-                            >
-                              Pay with Klasha - ₦{klashaConfig.amount.toLocaleString('en-NG')}
-                            </KlashaButton>
+                            <KlashaPaymentButton 
+                              config={klashaConfig}
+                              isProcessing={isProcessing}
+                            />
                           )
                         )}
                       </>
