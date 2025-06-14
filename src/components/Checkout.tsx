@@ -62,7 +62,9 @@ const Checkout = () => {
     document.body.appendChild(script);
 
     return () => {
-        document.body.removeChild(script);
+        if (document.body.contains(script)) {
+            document.body.removeChild(script);
+        }
     }
   }, []);
 
@@ -341,7 +343,7 @@ const Checkout = () => {
       selected_addons: selectedAddOns,
       total_price: totalPrice,
       payment_method: checkoutData.paymentMethod,
-      payment_provider: checkoutData.paymentMethod === 'crypto' ? 'nowpayments' : checkoutData.paymentMethod === 'ngn' ? 'alatpay' : null,
+      payment_provider: checkoutData.paymentMethod === 'crypto' ? 'nowpayments' : checkoutData.paymentMethod === 'ngn' ? 'paystack' : null,
       payment_status: 'pending',
     }).select().single();
 
@@ -424,9 +426,8 @@ const Checkout = () => {
                   setIsProcessing(false);
               },
               callback: function(response: any) {
-                  if (response.status === 'success') {
-                      toast.success("Payment successful! Your order is being processed.");
-                      navigate('/dashboard');
+                  if (response.status === 'success' && response.reference) {
+                      navigate(`/payment-success?reference=${response.reference}`);
                   } else {
                       toast.error("Payment was not successful. Please try again.");
                       setIsProcessing(false);

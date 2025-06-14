@@ -20,6 +20,7 @@ import Certificates from "./pages/Certificates";
 import Profile from "./pages/Profile";
 import Billing from "./pages/Billing";
 import ExchangeRate from "./pages/ExchangeRate";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
             
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />

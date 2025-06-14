@@ -1,6 +1,5 @@
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
-import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,11 +12,6 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
-
     const { orderId, email, amountInKobo } = await req.json();
 
     if (!orderId || !email || !amountInKobo) {
@@ -49,11 +43,6 @@ serve(async (req) => {
         console.error('Paystack API error:', paystackData);
         throw new Error(paystackData.message || 'Failed to initialize payment with provider.');
     }
-
-    await supabaseAdmin
-        .from('orders')
-        .update({ payment_provider: 'paystack', payment_provider_invoice_id: orderId })
-        .eq('id', orderId);
 
     return new Response(JSON.stringify({ access_code: paystackData.data.access_code }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

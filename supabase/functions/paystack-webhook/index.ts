@@ -45,7 +45,7 @@ serve(async (req) => {
     const payload = JSON.parse(bodyText);
 
     if (payload.event === 'charge.success') {
-      const { reference, status } = payload.data;
+      const { reference, status, id: transactionId } = payload.data;
       if (status === 'success') {
         const orderId = reference;
         
@@ -56,7 +56,7 @@ serve(async (req) => {
 
         const { error: updateError } = await supabaseAdmin
           .from('orders')
-          .update({ payment_status: 'paid' })
+          .update({ payment_status: 'paid', payment_provider_invoice_id: transactionId.toString() })
           .eq('id', orderId);
 
         if (updateError) {
