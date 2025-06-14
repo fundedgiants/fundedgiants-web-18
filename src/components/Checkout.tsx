@@ -296,7 +296,7 @@ const Checkout = () => {
       selected_addons: selectedAddOns,
       total_price: totalPrice,
       payment_method: checkoutData.paymentMethod,
-      payment_provider: checkoutData.paymentMethod === 'crypto' ? 'nowpayments' : null,
+      payment_provider: checkoutData.paymentMethod === 'crypto' ? 'nowpayments' : checkoutData.paymentMethod === 'ngn' ? 'alatpay' : null,
       payment_status: 'pending',
     }).select().single();
 
@@ -307,9 +307,9 @@ const Checkout = () => {
     }
 
     if (!orderData) {
-        toast.error(`Order placement failed: Could not retrieve order data.`);
-        setIsProcessing(false);
-        return;
+      toast.error(`Order placement failed: Could not retrieve order data.`);
+      setIsProcessing(false);
+      return;
     }
 
     const orderId = orderData.id;
@@ -340,7 +340,7 @@ const Checkout = () => {
       setIsProcessing(false);
     } else if (checkoutData.paymentMethod === 'ngn') {
       try {
-        const { data: klashaData, error: klashaError } = await supabase.functions.invoke('create-klasha-payment', {
+        const { data: alatpayData, error: alatpayError } = await supabase.functions.invoke('create-alatpay-payment', {
           body: { 
             orderId, 
             totalPrice,
@@ -351,14 +351,14 @@ const Checkout = () => {
           },
         });
 
-        if (klashaError) {
-            throw new Error(klashaError.message);
+        if (alatpayError) {
+            throw new Error(alatpayError.message);
         }
 
-        if (klashaData.redirect_url) {
-            window.location.href = klashaData.redirect_url;
+        if (alatpayData.checkoutUrl) {
+            window.location.href = alatpayData.checkoutUrl;
         } else {
-            throw new Error('Could not retrieve Klasha payment URL.');
+            throw new Error('Could not retrieve Alatpay payment URL.');
         }
       } catch (error: any) {
           toast.error(`Payment initialization failed: ${error.message}`);
@@ -589,7 +589,7 @@ const Checkout = () => {
               <div className="flex items-center space-x-3 p-4 border border-primary/20 rounded-lg">
                 <RadioGroupItem value="ngn" id="ngn" />
                 <span className="text-primary font-bold">₦</span>
-                <label htmlFor="ngn" className="cursor-pointer text-white">Nigerian Naira (NGN)</label>
+                <label htmlFor="ngn" className="cursor-pointer text-white">Nigerian Naira (NGN) via Alatpay</label>
                 {checkoutData.paymentMethod === 'ngn' && ngnRate && (
                   <span className="text-sm text-muted-foreground ml-auto">
                     (≈ ₦{Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')})

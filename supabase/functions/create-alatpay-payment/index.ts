@@ -7,12 +7,12 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface KlashaRequest {
+interface AlatpayRequest {
   orderId: string;
   totalPrice: number; // in USD
   email: string;
   firstName: string;
-  lastName:string;
+  lastName: string;
   phone: string;
 }
 
@@ -22,16 +22,18 @@ serve(async (req) => {
   }
 
   try {
-    console.log('create-klasha-payment function started');
-    const { orderId, totalPrice, email, firstName, lastName, phone }: KlashaRequest = await req.json()
+    console.log('create-alatpay-payment function started');
+    const { orderId, totalPrice, email, firstName, lastName, phone }: AlatpayRequest = await req.json()
     console.log('Request body parsed:', { orderId, totalPrice, email, firstName, lastName, phone });
     
-    const klashaSecretKey = Deno.env.get('KLASHA_PRIVATE_KEY')
-    if (!klashaSecretKey) {
-      console.error('KLASHA_PRIVATE_KEY secret is not set');
-      throw new Error('KLASHA_PRIVATE_KEY secret is not set in Supabase.')
+    const alatpayPrimaryKey = Deno.env.get('ALATPAY_PRIMARY_KEY');
+    const alatpayBusinessId = Deno.env.get('ALATPAY_BUSINESS_ID');
+
+    if (!alatpayPrimaryKey || !alatpayBusinessId) {
+      console.error('ALATPAY_PRIMARY_KEY or ALATPAY_BUSINESS_ID secrets are not set');
+      throw new Error('Alatpay secrets are not set in Supabase.')
     }
-    console.log('KLASHA_PRIVATE_KEY found');
+    console.log('Alatpay secrets found');
 
     const origin = req.headers.get('origin');
     if (!origin) {
@@ -65,54 +67,57 @@ serve(async (req) => {
     console.log('Exchange rate fetched:', rate);
 
     const ngnAmount = totalPrice * rate;
-    const ngnAmountInKobo = Math.ceil(ngnAmount * 100); // Klasha might expect amount in kobo
+    const ngnAmountInKobo = Math.ceil(ngnAmount * 100);
     console.log(`Calculated NGN amount: ${ngnAmount.toFixed(2)}, which is ${ngnAmountInKobo} in kobo (from USD ${totalPrice} at rate ${rate})`);
 
     // 2. Initiate payment with NGN amount
-    const klashaPayload = {
+    const alatpayPayload = {
         amount: ngnAmountInKobo,
         currency: "NGN",
+        businessId: alatpayBusinessId,
         email: email,
-        fullname: `${firstName} ${lastName}`,
-        phone_number: phone,
-        tx_ref: orderId,
-        payment_type: "card,bank_transfer",
-        callback_url: `${origin}/dashboard`
+        phone: phone,
+        firstName: firstName,
+        lastName: lastName,
+        paymentMethods: ["card", "banktransfer"],
+        redirectUrl: `${origin}/dashboard`,
+        merchantRef: orderId,
     };
-    console.log('Initiating payment with Klasha. Payload:', JSON.stringify(klashaPayload, null, 2));
+    console.log('Initiating payment with Alatpay. Payload:', JSON.stringify(alatpayPayload, null, 2));
 
-    const paymentResponse = await fetch('https://api.klasha.com/v1/payment/charge', {
+    const paymentResponse = await fetch('https://live.alatpay.ng/api/v1/checkout/create', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'x-api-key': klashaSecretKey
+            'Authorization': `Bearer ${alatpayPrimaryKey}`,
+            'Business-Id': alatpayBusinessId,
         },
-        body: JSON.stringify(klashaPayload)
+        body: JSON.stringify(alatpayPayload)
     });
-    console.log('Klasha API response status:', paymentResponse.status);
+    console.log('Alatpay API response status:', paymentResponse.status);
 
-    const klashaResponse = await paymentResponse.json();
+    const alatpayResponse = await paymentResponse.json();
 
     if (!paymentResponse.ok) {
-        console.error('Klasha payment API error. Response:', JSON.stringify(klashaResponse, null, 2));
-        throw new Error(klashaResponse.message || 'Failed to initialize Klasha payment');
+        console.error('Alatpay payment API error. Response:', JSON.stringify(alatpayResponse, null, 2));
+        throw new Error(alatpayResponse.message || 'Failed to initialize Alatpay payment');
     }
 
-    console.log('Klasha API success response:', JSON.stringify(klashaResponse, null, 2));
+    console.log('Alatpay API success response:', JSON.stringify(alatpayResponse, null, 2));
 
-    if (!klashaResponse.data || !klashaResponse.data.redirect_url) {
-      console.error('Invalid Klasha payment response: redirect_url missing. Response:', JSON.stringify(klashaResponse, null, 2));
-      throw new Error('Could not retrieve payment URL from Klasha.');
+    if (!alatpayResponse.data || !alatpayResponse.data.checkoutUrl) {
+      console.error('Invalid Alatpay payment response: checkoutUrl missing. Response:', JSON.stringify(alatpayResponse, null, 2));
+      throw new Error('Could not retrieve payment URL from Alatpay.');
     }
     
-    console.log('Successfully got redirect URL:', klashaResponse.data.redirect_url);
+    console.log('Successfully got checkout URL:', alatpayResponse.data.checkoutUrl);
 
-    return new Response(JSON.stringify({ redirect_url: klashaResponse.data.redirect_url }), {
+    return new Response(JSON.stringify({ checkoutUrl: alatpayResponse.data.checkoutUrl }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })
   } catch (error) {
-    console.error('Error in create-klasha-payment function catch block:', error);
+    console.error('Error in create-alatpay-payment function catch block:', error);
     if (error.cause) {
       console.error('Fetch error cause:', error.cause);
     }
