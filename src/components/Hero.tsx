@@ -2,8 +2,11 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, TrendingUp, Shield, Zap } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Hero = () => {
+  const navigate = useNavigate();
+  
   const [heroContent, setHeroContent] = useState({
     title: "Trade with FundedGiants",
     subtitle: "Elite Mythic Trading Realm",
@@ -17,6 +20,14 @@ const Hero = () => {
   const handleSave = () => {
     setIsEditing(false);
     console.log('Hero content saved:', heroContent);
+  };
+
+  const handlePrimaryCTA = () => {
+    navigate('/checkout?program=heracles&size=10000');
+  };
+
+  const handleSecondaryCTA = () => {
+    navigate('/#programs');
   };
 
   return (
@@ -83,11 +94,20 @@ const Hero = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16 animate-fade-in">
-                <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 text-lg font-semibold group shadow-lg shadow-primary/25">
+                <Button 
+                  size="lg" 
+                  onClick={handlePrimaryCTA}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 text-lg font-semibold group shadow-lg shadow-primary/25"
+                >
                   ⚔️ {heroContent.primaryCTA}
                   <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
                 </Button>
-                <Button size="lg" variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground px-8 py-4 text-lg font-semibold">
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  onClick={handleSecondaryCTA}
+                  className="border-primary text-primary hover:bg-primary hover:text-primary-foreground px-8 py-4 text-lg font-semibold"
+                >
                   🌌 {heroContent.secondaryCTA}
                 </Button>
               </div>

@@ -2,15 +2,24 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useNavigate } from 'react-router-dom';
 
 const TradingPrograms = () => {
+  const navigate = useNavigate();
+  
+  const handleGetFunded = (program: string, accountSize: string) => {
+    navigate(`/checkout?program=${program}&size=${accountSize}`);
+  };
+
   const programs = [
     {
       name: "Heracles Trader",
       subtitle: "Instant Funding",
       description: "Prove your divine trading prowess with our instant funding program.",
       accountSizes: ["$2,500", "$5,000", "$10,000", "$25,000", "$50,000", "$100,000"],
+      accountValues: ["2500", "5000", "10000", "25000", "50000", "100000"],
       prices: ["$129", "$239", "$449", "$1149", "$2299", "$4599"],
+      programKey: "heracles",
       tableData: [
         {
           label: "Daily Drawdown",
@@ -70,7 +79,9 @@ const TradingPrograms = () => {
       subtitle: "1 Step Challenge",
       description: "Navigate the trading cosmos with our premium 1-step challenge program.",
       accountSizes: ["$2,500", "$5,000", "$10,000", "$25,000", "$50,000", "$100,000"],
+      accountValues: ["2500", "5000", "10000", "25000", "50000", "100000"],
       prices: ["$59", "$89", "$149", "$249", "$449", "$749"],
+      programKey: "orion",
       tableData: [
         {
           label: "Daily Drawdown",
@@ -128,7 +139,9 @@ const TradingPrograms = () => {
       subtitle: "2 Step Challenge",
       description: "Rule the markets like a god with our most prestigious 2-step challenge program.",
       accountSizes: ["$2,500", "$5,000", "$10,000", "$25,000", "$50,000", "$100,000"],
+      accountValues: ["2500", "5000", "10000", "25000", "50000", "100000"],
       prices: ["$27", "$47", "$87", "$187", "$367", "$567"],
+      programKey: "zeus",
       tableData: [
         {
           label: "Daily Drawdown",
@@ -312,6 +325,7 @@ const TradingPrograms = () => {
                             <td key={index} className="text-center p-2 border-r border-cosmic-purple/30 last:border-r-0">
                               <Button 
                                 size="sm"
+                                onClick={() => handleGetFunded(program.programKey, program.accountValues[index])}
                                 className="w-full text-xs py-2 px-2 bg-gradient-to-r from-primary to-accent hover:from-primary/80 hover:to-accent/80 text-white shadow-cosmic transition-all duration-300 hover:scale-105"
                               >
                                 Get Funded
