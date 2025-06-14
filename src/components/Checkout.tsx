@@ -7,7 +7,6 @@ import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, ArrowRight, Check, CreditCard, Smartphone, Loader2 } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import Auth from '@/components/Auth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -27,6 +26,8 @@ interface CheckoutState {
     city: string;
     address: string;
     zipCode: string;
+    password?: string;
+    confirmPassword?: string;
   };
   paymentMethod: string;
 }
@@ -45,10 +46,23 @@ const Checkout = () => {
     addOns: [],
     billingInfo: {
       firstName: '', lastName: '', email: '', phone: '',
-      country: '', state: '', city: '', address: '', zipCode: ''
+      country: '', state: '', city: '', address: '', zipCode: '',
+      password: '', confirmPassword: ''
     },
     paymentMethod: 'card'
   });
+
+  useEffect(() => {
+    if (user) {
+      setCheckoutData(prev => ({
+        ...prev,
+        billingInfo: {
+          ...prev.billingInfo,
+          email: user.email || '',
+        }
+      }))
+    }
+  }, [user]);
 
   useEffect(() => {
     const program = checkoutData.program;
@@ -81,12 +95,8 @@ const Checkout = () => {
     { id: 'profit_split', name: 'Increase Profit Split (80:20 from onset)', description: 'Enjoy an 80:20 profit split from the very beginning.', pricePercent: 50 }
   ];
   
-  const [authComplete, setAuthComplete] = useState(false);
-
   useEffect(() => {
-    if (!authLoading) {
-      setAuthComplete(!!user);
-      if(user) {
+    if (!authLoading && user) {
         setCheckoutData(prev => ({
           ...prev,
           billingInfo: {
@@ -94,7 +104,6 @@ const Checkout = () => {
             email: user.email || '',
           }
         }))
-      }
     }
   }, [user, authLoading]);
 
@@ -137,13 +146,68 @@ const Checkout = () => {
   };
 
   const handleCompletePurchase = async () => {
-    if (!user) {
-      toast.error("You must be logged in to complete your purchase.");
+    let sessionUser = user;
+
+    if (!sessionUser) {
+      const { email, password, confirmPassword, firstName, lastName } = checkoutData.billingInfo;
+
+      if (currentStep !== 5) {
+        handleNext();
+        return;
+      }
+      
+      if (!password || password !== confirmPassword) {
+        toast.error("Passwords do not match or are missing.");
+        setCurrentStep(4);
+        return;
+      }
+      if (!email || !firstName || !lastName) {
+        toast.error("Please fill in all required billing details.");
+        setCurrentStep(4);
+        return;
+      }
+
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { first_name: firstName, last_name: lastName },
+          emailRedirectTo: `${window.location.origin}/`,
+        },
+      });
+
+      if (signUpError) {
+        if (signUpError.message.includes("User already registered")) {
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+
+          if (signInError) {
+            toast.error(`Login failed: ${signInError.message}`);
+            return;
+          }
+          if (signInData.user) {
+            toast.success("Logged in successfully!");
+            sessionUser = signInData.user;
+          }
+        } else {
+          toast.error(`Sign up failed: ${signUpError.message}`);
+          return;
+        }
+      } else if (signUpData.user) {
+        toast.success("Account created successfully!");
+        sessionUser = signUpData.user;
+      }
+    }
+
+    if (!sessionUser) {
+      toast.error("Authentication is required to complete the purchase.");
       return;
     }
 
     const { error } = await supabase.from('orders').insert({
-      user_id: user.id,
+      user_id: sessionUser.id,
       program_id: checkoutData.accountSize,
       program_name: programs[checkoutData.program as keyof typeof programs].name,
       program_price: basePrice,
@@ -268,12 +332,14 @@ const Checkout = () => {
                 value={checkoutData.billingInfo.firstName}
                 onChange={(e) => handleBillingChange('firstName', e.target.value)}
                 className="bg-card/50 border-muted"
+                required
               />
               <Input
                 placeholder="Last Name"
                 value={checkoutData.billingInfo.lastName}
                 onChange={(e) => handleBillingChange('lastName', e.target.value)}
                 className="bg-card/50 border-muted"
+                required
               />
               <Input
                 placeholder="Email"
@@ -281,6 +347,8 @@ const Checkout = () => {
                 value={checkoutData.billingInfo.email}
                 onChange={(e) => handleBillingChange('email', e.target.value)}
                 className="bg-card/50 border-muted md:col-span-2"
+                required
+                disabled={!!user}
               />
               <Input
                 placeholder="Phone"
@@ -319,6 +387,35 @@ const Checkout = () => {
                 className="bg-card/50 border-muted"
               />
             </div>
+            {!user && (
+              <>
+                <Separator className="my-2 bg-primary/20" />
+                <div>
+                  <h4 className="text-md font-semibold text-white">Account Password</h4>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Create an account to save your progress. If you have an account, enter your password to log in.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input
+                      placeholder="Password"
+                      type="password"
+                      value={checkoutData.billingInfo.password}
+                      onChange={(e) => handleBillingChange('password', e.target.value)}
+                      className="bg-card/50 border-muted"
+                      required
+                    />
+                    <Input
+                      placeholder="Confirm Password"
+                      type="password"
+                      value={checkoutData.billingInfo.confirmPassword}
+                      onChange={(e) => handleBillingChange('confirmPassword', e.target.value)}
+                      className="bg-card/50 border-muted"
+                      required
+                    />
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         );
 
@@ -358,26 +455,6 @@ const Checkout = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!authComplete) {
-    return (
-      <div className="min-h-screen bg-background pt-20 pb-10">
-        <div className="container mx-auto px-4 max-w-lg">
-           <div className="flex items-center mb-8">
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/')}
-              className="text-primary hover:text-primary/80"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Home
-            </Button>
-          </div>
-          <Auth embedded />
-        </div>
       </div>
     );
   }
