@@ -26,12 +26,12 @@ serve(async (req) => {
     const { orderId, totalPrice, email, firstName, lastName, phone }: KlashaRequest = await req.json()
     console.log('Request body parsed:', { orderId, totalPrice, email, firstName, lastName, phone });
     
-    const klashaPublicKey = Deno.env.get('KLASHA_PUBLIC_KEY')
-    if (!klashaPublicKey) {
-      console.error('KLASHA_PUBLIC_KEY secret is not set');
-      throw new Error('KLASHA_PUBLIC_KEY secret is not set in Supabase.')
+    const klashaSecretKey = Deno.env.get('KLASHA_PRIVATE_KEY')
+    if (!klashaSecretKey) {
+      console.error('KLASHA_PRIVATE_KEY secret is not set');
+      throw new Error('KLASHA_PRIVATE_KEY secret is not set in Supabase.')
     }
-    console.log('KLASHA_PUBLIC_KEY found');
+    console.log('KLASHA_PRIVATE_KEY found');
 
     const origin = req.headers.get('origin');
     if (!origin) {
@@ -84,7 +84,7 @@ serve(async (req) => {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'x-api-key': klashaPublicKey
+            'x-api-key': klashaSecretKey
         },
         body: JSON.stringify(klashaPayload)
     });
