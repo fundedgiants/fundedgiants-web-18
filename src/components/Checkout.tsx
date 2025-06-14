@@ -56,6 +56,17 @@ const Checkout = () => {
   });
 
   useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://js.paystack.co/v1/inline.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+        document.body.removeChild(script);
+    }
+  }, []);
+
+  useEffect(() => {
     const fetchProfile = async () => {
       if (user) {
         const { data: profile, error } = await supabase
@@ -191,6 +202,22 @@ const Checkout = () => {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
   const ngnRate = ngnRateData?.rate;
+
+  const { data: paystackPublicKeyData } = useQuery({
+    queryKey: ['paystackPublicKey'],
+    queryFn: async () => {
+        const { data, error } = await supabase.functions.invoke('get-paystack-public-key');
+        if (error) {
+            toast.error("Could not fetch payment configuration.");
+            console.error("Paystack public key fetch error:", error);
+            return null;
+        }
+        return data.publicKey;
+    },
+    enabled: checkoutData.paymentMethod === 'ngn',
+    staleTime: Infinity,
+    retry: false,
+  });
 
   const handleNext = () => {
     if (currentStep < 5) setCurrentStep(currentStep + 1);
@@ -364,32 +391,53 @@ const Checkout = () => {
       await supabase.from('orders').update({ payment_status: 'cancelled' }).eq('id', orderId);
       setIsProcessing(false);
     } else if (checkoutData.paymentMethod === 'ngn') {
+      if (!ngnRate || !paystackPublicKeyData) {
+          toast.error("Payment provider not ready. Please wait a moment and try again.");
+          setIsProcessing(false);
+          return;
+      }
+
       try {
-        const { data: alatpayData, error: alatpayError } = await supabase.functions.invoke('create-alatpay-payment', {
-          body: { 
-            orderId, 
-            totalPrice,
-            email: checkoutData.billingInfo.email,
-            firstName: checkoutData.billingInfo.firstName,
-            lastName: checkoutData.billingInfo.lastName,
-            phone: fullPhoneNumber,
-          },
-        });
+          const amountInKobo = Math.round(totalPrice * ngnRate * 100);
 
-        if (alatpayError) {
-            throw new Error(alatpayError.message);
-        }
+          const { data: paystackData, error: paystackError } = await supabase.functions.invoke('create-paystack-payment', {
+              body: { 
+                  orderId, 
+                  email: checkoutData.billingInfo.email,
+                  amountInKobo,
+              },
+          });
 
-        if (alatpayData.checkoutUrl) {
-            window.location.href = alatpayData.checkoutUrl;
-        } else {
-            throw new Error('Could not retrieve Alatpay payment URL.');
-        }
+          if (paystackError) throw new Error(paystackError.message);
+          if (!paystackData.access_code) {
+              throw new Error('Could not retrieve payment details from provider.');
+          }
+
+          const handler = (window as any).PaystackPop.setup({
+              key: paystackPublicKeyData,
+              email: checkoutData.billingInfo.email,
+              amount: amountInKobo,
+              ref: orderId,
+              access_code: paystackData.access_code,
+              onClose: function() {
+                  toast.info("Payment window closed.");
+                  setIsProcessing(false);
+              },
+              callback: function(response: any) {
+                  if (response.status === 'success') {
+                      toast.success("Payment successful! Your order is being processed.");
+                      navigate('/dashboard');
+                  } else {
+                      toast.error("Payment was not successful. Please try again.");
+                      setIsProcessing(false);
+                  }
+              }
+          });
+          handler.openIframe();
+
       } catch (error: any) {
           let errorMessage = 'Payment initialization failed. Please try again later.';
-          if (error.message && (error.message.includes('error sending request') || error.message.includes('Failed to connect'))) {
-              errorMessage = 'We are having trouble connecting to the payment provider. Please contact support if this issue persists.';
-          } else if (error.message) {
+          if (error.message) {
               errorMessage = `Payment initialization failed: ${error.message}`;
           }
           
@@ -625,7 +673,7 @@ const Checkout = () => {
         const paymentMethods = [
             { value: 'card', label: 'Credit/Debit Card', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> },
             { value: 'crypto', label: 'Cryptocurrency', subtitle: 'via NowPayments', icon: <Bitcoin className="h-8 w-8 text-primary mb-2" /> },
-            { value: 'ngn', label: 'Nigerian Naira', subtitle: 'via Alatpay', icon: <span className="text-primary text-3xl font-bold mb-1">₦</span> }
+            { value: 'ngn', label: 'Nigerian Naira', subtitle: 'via Paystack', icon: <span className="text-primary text-3xl font-bold mb-1">₦</span> }
         ];
         return (
           <div className="space-y-6">
