@@ -2,10 +2,26 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { session } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    setIsOpen(false);
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error(`Logout failed: ${error.message}`);
+    } else {
+      toast.success('You have been logged out.');
+      navigate('/');
+    }
+  };
 
   const navItems = [
     { name: 'Home', path: '/' },
@@ -40,11 +56,17 @@ const Navigation = () => {
 
           {/* Auth & CTA Buttons */}
           <div className="hidden lg:flex items-center space-x-4">
-            <Button variant="ghost" className="text-primary hover:bg-primary/10">
-              Register/Login
-            </Button>
-            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              Get Funded
+            {session ? (
+              <Button onClick={handleLogout} variant="ghost" className="text-primary hover:bg-primary/10">
+                Logout
+              </Button>
+            ) : (
+              <Button asChild variant="ghost" className="text-primary hover:bg-primary/10">
+                <Link to="/auth">Register/Login</Link>
+              </Button>
+            )}
+            <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              <Link to="/checkout">Get Funded</Link>
             </Button>
           </div>
 
@@ -72,11 +94,17 @@ const Navigation = () => {
                 </Link>
               ))}
               <div className="flex flex-col space-y-2 pt-4 border-t border-primary/20">
-                <Button variant="ghost" className="w-full justify-start text-primary hover:bg-primary/10">
-                  Register/Login
-                </Button>
-                <Button className="w-full justify-start bg-primary hover:bg-primary/90 text-primary-foreground">
-                  Get Funded
+                {session ? (
+                  <Button onClick={handleLogout} variant="ghost" className="w-full justify-start text-primary hover:bg-primary/10">
+                    Logout
+                  </Button>
+                ) : (
+                  <Button asChild variant="ghost" className="w-full justify-start text-primary hover:bg-primary/10">
+                    <Link to="/auth" onClick={() => setIsOpen(false)}>Register/Login</Link>
+                  </Button>
+                )}
+                <Button asChild className="w-full justify-start bg-primary hover:bg-primary/90 text-primary-foreground">
+                  <Link to="/checkout" onClick={() => setIsOpen(false)}>Get Funded</Link>
                 </Button>
               </div>
             </div>
