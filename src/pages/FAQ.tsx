@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
+import { ChevronDown, ChevronUp, Scroll, Crown, Shield } from 'lucide-react';
 
 const FAQ = () => {
   const [openItem, setOpenItem] = useState<number | null>(0);
@@ -149,55 +149,66 @@ const FAQ = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background bg-stars">
-      <div className="absolute inset-0 bg-cosmic-gradient"></div>
+    <div className="min-h-screen bg-background bg-cosmic-stars">
+      <div className="absolute inset-0 bg-divine-gradient"></div>
       
-      {/* Hero Section */}
-      <section className="relative py-32 px-4">
-        <div className="container mx-auto text-center max-w-4xl relative z-10">
-          <h1 className="text-5xl md:text-7xl font-bold mb-8 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-            ❓ Divine FAQ Realm ❓
+      {/* Divine Hero Section */}
+      <section className="relative py-40 px-4">
+        <div className="container mx-auto text-center max-w-5xl relative z-10">
+          <div className="flex items-center justify-center gap-6 mb-8">
+            <Crown className="h-16 w-16 text-primary animate-lightning-pulse" />
+            <Scroll className="h-20 w-20 text-accent animate-lightning-pulse" style={{animationDelay: '0.5s'}} />
+            <Crown className="h-16 w-16 text-primary animate-lightning-pulse" style={{animationDelay: '1s'}} />
+          </div>
+          <h1 className="text-6xl md:text-8xl font-black mb-10 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent cinzel-font text-divine-glow">
+            📜 DIVINE CODEX 📜
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed">
-            Comprehensive guide to our trading rules, programs, and divine wisdom for funded traders.
+          <p className="text-2xl md:text-3xl text-muted-foreground leading-relaxed font-medium">
+            Sacred knowledge and divine laws for warriors of the trading realm.
           </p>
         </div>
       </section>
 
-      <section className="py-20 px-4 relative z-10">
-        <div className="container mx-auto max-w-4xl">
+      <section className="py-24 px-4 relative z-10">
+        <div className="container mx-auto max-w-5xl">
           {faqs.map((category, categoryIndex) => (
-            <div key={categoryIndex} className="mb-12">
-              <h2 className="text-3xl font-bold text-primary mb-8 flex items-center gap-3">
-                <HelpCircle className="h-8 w-8" />
-                {category.category}
-              </h2>
-              <div className="space-y-4">
+            <div key={categoryIndex} className="mb-16">
+              <div className="flex items-center gap-4 mb-10">
+                <Shield className="h-10 w-10 text-primary animate-lightning-pulse" />
+                <h2 className="text-4xl font-black text-primary cinzel-font text-divine-glow">
+                  {category.category}
+                </h2>
+              </div>
+              <div className="space-y-6">
                 {category.questions.map((faq, faqIndex) => {
                   const itemIndex = categoryIndex * 100 + faqIndex;
                   const isOpen = openItem === itemIndex;
                   
                   return (
-                    <Card key={faqIndex} className="bg-card/20 backdrop-blur-sm border-primary/30 shadow-xl overflow-hidden">
+                    <Card key={faqIndex} className="card-divine shadow-2xl overflow-hidden group hover:border-primary/60 transition-all duration-300">
                       <CardContent className="p-0">
                         <button
                           onClick={() => toggleItem(itemIndex)}
-                          className="w-full text-left p-6 flex items-center justify-between hover:bg-primary/10 transition-colors"
+                          className="w-full text-left p-8 flex items-center justify-between hover:bg-primary/5 transition-colors group"
                         >
-                          <h3 className="text-lg font-semibold text-foreground pr-4">
+                          <h3 className="text-xl font-bold text-foreground pr-6 cinzel-font group-hover:text-primary transition-colors">
                             {faq.question}
                           </h3>
-                          {isOpen ? (
-                            <ChevronUp className="h-5 w-5 text-primary flex-shrink-0" />
-                          ) : (
-                            <ChevronDown className="h-5 w-5 text-primary flex-shrink-0" />
-                          )}
+                          <div className="bg-primary/20 p-2 rounded-full group-hover:bg-primary/30 transition-colors">
+                            {isOpen ? (
+                              <ChevronUp className="h-6 w-6 text-primary flex-shrink-0" />
+                            ) : (
+                              <ChevronDown className="h-6 w-6 text-primary flex-shrink-0" />
+                            )}
+                          </div>
                         </button>
                         {isOpen && (
-                          <div className="px-6 pb-6">
-                            <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                              {faq.answer}
-                            </p>
+                          <div className="px-8 pb-8">
+                            <div className="bg-gradient-to-r from-primary/5 to-accent/5 p-6 rounded-lg border-l-4 border-primary">
+                              <p className="text-muted-foreground leading-relaxed whitespace-pre-line text-lg">
+                                {faq.answer}
+                              </p>
+                            </div>
                           </div>
                         )}
                       </CardContent>
@@ -210,21 +221,28 @@ const FAQ = () => {
         </div>
       </section>
 
-      {/* Contact CTA */}
-      <section className="py-20 px-4 relative z-10">
+      {/* Divine Contact CTA */}
+      <section className="py-24 px-4 relative z-10">
         <div className="container mx-auto text-center">
-          <Card className="bg-gradient-to-r from-primary/20 to-accent/20 backdrop-blur-sm border-primary/30 shadow-2xl max-w-3xl mx-auto">
-            <CardContent className="p-12">
-              <h2 className="text-3xl font-bold text-primary mb-6">Still Need Divine Guidance?</h2>
-              <p className="text-muted-foreground mb-8 text-lg">
-                Can't find the answer you're looking for? Our cosmic council is here to help you navigate any question about trading rules, programs, or account management.
+          <Card className="card-divine shadow-2xl max-w-4xl mx-auto border-divine-glow">
+            <CardContent className="p-16">
+              <div className="flex items-center justify-center gap-4 mb-8">
+                <Crown className="h-12 w-12 text-primary animate-lightning-pulse" />
+                <Scroll className="h-16 w-16 text-accent animate-lightning-pulse" style={{animationDelay: '0.5s'}} />
+                <Crown className="h-12 w-12 text-primary animate-lightning-pulse" style={{animationDelay: '1s'}} />
+              </div>
+              <h2 className="text-4xl font-black text-primary mb-8 cinzel-font text-divine-glow">
+                SEEK DIVINE GUIDANCE?
+              </h2>
+              <p className="text-muted-foreground mb-12 text-xl leading-relaxed">
+                Cannot find the sacred knowledge you seek? Our divine council of trading gods awaits to guide you through any mysteries of rules, programs, or account management.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-md font-semibold">
-                  📧 Contact Support
+              <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                <button className="btn-divine px-12 py-4 text-xl font-bold cinzel-font shadow-xl">
+                  📧 SUMMON DIVINE COUNCIL
                 </button>
-                <button className="border border-primary text-primary hover:bg-primary hover:text-primary-foreground px-8 py-3 rounded-md font-semibold">
-                  💬 Live Chat
+                <button className="btn-war px-12 py-4 text-xl font-bold cinzel-font shadow-xl">
+                  💬 ENTER SACRED CHAMBER
                 </button>
               </div>
             </CardContent>
