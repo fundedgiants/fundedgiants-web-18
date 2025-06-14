@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -59,14 +60,22 @@ const Checkout = () => {
   });
 
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://js.paystack.co/v1/inline.js';
-    script.async = true;
-    document.body.appendChild(script);
+    const paystackScript = document.createElement('script');
+    paystackScript.src = 'https://js.paystack.co/v1/inline.js';
+    paystackScript.async = true;
+    document.body.appendChild(paystackScript);
+
+    const klashaScript = document.createElement('script');
+    klashaScript.src = 'https://js.klasha.com/v2/klasha-react.js';
+    klashaScript.async = true;
+    document.body.appendChild(klashaScript);
 
     return () => {
-        if (document.body.contains(script)) {
-            document.body.removeChild(script);
+        if (document.body.contains(paystackScript)) {
+            document.body.removeChild(paystackScript);
+        }
+        if (document.body.contains(klashaScript)) {
+            document.body.removeChild(klashaScript);
         }
     }
   }, []);
