@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -73,8 +72,8 @@ const Checkout = () => {
   const addOns = [
     { id: 'leverage', name: 'Increase Leverage to 1:50', description: 'Boost your trading power with higher leverage.', pricePercent: 20 },
     { id: 'drawdown', name: 'Increase DrawDown by 2%', description: 'Get more room for your trades to breathe.', pricePercent: 20 },
-    { id: 'no_profit_target', name: 'Remove Profit Target (First 3 Withdrawals)', description: 'Removes profit targets and minimum trading days for your first 3 payouts.', pricePercent: 30 },
-    { id: 'profit_split', name: 'Increase Profit Split to 80%', description: 'Enjoy an 80% profit split from the very beginning.', pricePercent: 50 }
+    { id: 'no_profit_target', name: 'Remove Profit Target from 1st, 2nd, and 3rd Withdrawals', description: 'Removes profit targets and minimum trading days for your first 3 payouts.', pricePercent: 30 },
+    { id: 'profit_split', name: 'Increase Profit Split (80:20 from onset)', description: 'Enjoy an 80:20 profit split from the very beginning.', pricePercent: 50 }
   ];
 
   const steps = [
