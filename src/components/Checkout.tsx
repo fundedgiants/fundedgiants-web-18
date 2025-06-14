@@ -64,9 +64,17 @@ const Checkout = () => {
     paystackScript.async = true;
     document.body.appendChild(paystackScript);
 
+    const klashaScript = document.createElement('script');
+    klashaScript.src = 'https://js.klasha.com/v2/klasha-inline.js';
+    klashaScript.async = true;
+    document.body.appendChild(klashaScript);
+
     return () => {
         if (document.body.contains(paystackScript)) {
             document.body.removeChild(paystackScript);
+        }
+        if (document.body.contains(klashaScript)) {
+            document.body.removeChild(klashaScript);
         }
     }
   }, []);
