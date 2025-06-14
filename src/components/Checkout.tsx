@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -37,6 +38,7 @@ const Checkout = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const { user, loading: authLoading } = useAuth();
+  const [isProcessing, setIsProcessing] = useState(false);
   
   const [checkoutData, setCheckoutData] = useState<CheckoutState>({
     program: searchParams.get('program') || 'heracles',
@@ -146,6 +148,7 @@ const Checkout = () => {
   };
 
   const handleCompletePurchase = async () => {
+    setIsProcessing(true);
     let sessionUser = user;
 
     if (!sessionUser) {
@@ -153,17 +156,20 @@ const Checkout = () => {
 
       if (currentStep !== 5) {
         handleNext();
+        setIsProcessing(false);
         return;
       }
       
       if (!password || password !== confirmPassword) {
         toast.error("Passwords do not match or are missing.");
         setCurrentStep(4);
+        setIsProcessing(false);
         return;
       }
       if (!email || !firstName || !lastName) {
         toast.error("Please fill in all required billing details.");
         setCurrentStep(4);
+        setIsProcessing(false);
         return;
       }
 
@@ -172,7 +178,6 @@ const Checkout = () => {
         password,
         options: {
           data: { first_name: firstName, last_name: lastName },
-          emailRedirectTo: `${window.location.origin}/`,
         },
       });
 
@@ -185,6 +190,7 @@ const Checkout = () => {
 
           if (signInError) {
             toast.error(`Login failed: ${signInError.message}`);
+            setIsProcessing(false);
             return;
           }
           if (signInData.user) {
@@ -193,6 +199,7 @@ const Checkout = () => {
           }
         } else {
           toast.error(`Sign up failed: ${signUpError.message}`);
+          setIsProcessing(false);
           return;
         }
       } else if (signUpData.user) {
@@ -203,23 +210,63 @@ const Checkout = () => {
 
     if (!sessionUser) {
       toast.error("Authentication is required to complete the purchase.");
+      setIsProcessing(false);
       return;
     }
 
-    const { error } = await supabase.from('orders').insert({
+    const { data: orderData, error: orderError } = await supabase.from('orders').insert({
       user_id: sessionUser.id,
       program_id: checkoutData.accountSize,
       program_name: programs[checkoutData.program as keyof typeof programs].name,
       program_price: basePrice,
       selected_addons: selectedAddOns,
       total_price: totalPrice,
-    });
+      payment_method: checkoutData.paymentMethod,
+      payment_provider: checkoutData.paymentMethod === 'crypto' ? 'nowpayments' : null,
+      payment_status: 'pending',
+    }).select().single();
 
-    if (error) {
-      toast.error(`Order placement failed: ${error.message}`);
+    if (orderError) {
+      toast.error(`Order placement failed: ${orderError.message}`);
+      setIsProcessing(false);
+      return;
+    }
+
+    if (!orderData) {
+        toast.error(`Order placement failed: Could not retrieve order data.`);
+        setIsProcessing(false);
+        return;
+    }
+
+    const orderId = orderData.id;
+
+    if (checkoutData.paymentMethod === 'crypto') {
+      try {
+        const { data: invoiceData, error: invoiceError } = await supabase.functions.invoke('create-nowpayments-invoice', {
+            body: { orderId, totalPrice },
+        });
+
+        if (invoiceError) {
+            throw new Error(invoiceError.message);
+        }
+
+        if (invoiceData.invoice_url) {
+            window.location.href = invoiceData.invoice_url;
+        } else {
+            throw new Error('Could not retrieve payment URL.');
+        }
+      } catch (error: any) {
+          toast.error(`Payment initialization failed: ${error.message}`);
+          await supabase.from('orders').update({ payment_status: 'failed' }).eq('id', orderId);
+          setIsProcessing(false);
+      }
+    } else if (checkoutData.paymentMethod === 'card' || checkoutData.paymentMethod === 'ngn') {
+      toast.info("This payment method is coming soon!");
+      await supabase.from('orders').update({ payment_status: 'cancelled' }).eq('id', orderId);
+      setIsProcessing(false);
     } else {
-      toast.success("Purchase successful! Your order has been placed.");
-      navigate('/');
+      toast.error("Please select a payment method.");
+      setIsProcessing(false);
     }
   };
 
@@ -526,7 +573,7 @@ const Checkout = () => {
                     <Button
                       variant="outline"
                       onClick={handlePrevious}
-                      disabled={currentStep === 1}
+                      disabled={currentStep === 1 || isProcessing}
                       className="border-primary text-primary hover:bg-primary hover:text-white"
                     >
                       <ArrowLeft className="h-4 w-4 mr-2" />
@@ -539,7 +586,8 @@ const Checkout = () => {
                         <ArrowRight className="h-4 w-4 ml-2" />
                       </Button>
                     ) : (
-                      <Button onClick={handleCompletePurchase} className="bg-primary hover:bg-primary/90">
+                      <Button onClick={handleCompletePurchase} className="bg-primary hover:bg-primary/90" disabled={isProcessing}>
+                        {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Complete Purchase - ${totalPrice.toFixed(2)}
                       </Button>
                     )}
