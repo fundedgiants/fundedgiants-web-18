@@ -1,3 +1,4 @@
+
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
@@ -80,7 +81,7 @@ serve(async (req) => {
     };
     console.log('Initiating payment with Klasha. Payload:', JSON.stringify(klashaPayload, null, 2));
 
-    const paymentResponse = await fetch('https://gate.klasha.com/klasha-revamp/v1/payment/charge', {
+    const paymentResponse = await fetch('https://api.klasha.com/v1/payment/charge', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -112,6 +113,9 @@ serve(async (req) => {
     })
   } catch (error) {
     console.error('Error in create-klasha-payment function catch block:', error);
+    if (error.cause) {
+      console.error('Fetch error cause:', error.cause);
+    }
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
