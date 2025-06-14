@@ -1,23 +1,67 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { crypto } from "https://deno.land/std@0.168.0/crypto/mod.ts";
+import { encode } from "https://deno.land/std@0.168.0/encoding/hex.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// In a production environment, you should verify the IPN signature
-// using your IPN secret key from your NowPayments account settings.
-// This is a crucial security measure. You can add it as a Supabase secret.
-// const NOWPAYMENTS_IPN_SECRET = Deno.env.get('NOWPAYMENTS_IPN_SECRET_KEY')
+const NOWPAYMENTS_IPN_SECRET = Deno.env.get('NOWPAYMENTS_IPN_SECRET_KEY')
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
+  // Must clone the request to read the body twice (once for raw text, once for JSON)
+  const reqClone = req.clone();
+
   try {
+    const rawBody = await reqClone.text();
+    const signatureHeader = req.headers.get('x-nowpayments-sig');
+
+    if (!NOWPAYMENTS_IPN_SECRET) {
+      console.error('NOWPAYMENTS_IPN_SECRET_KEY is not set. IPN verification failed. This is insecure.');
+      return new Response(JSON.stringify({ error: 'IPN secret not configured' }), {
+          status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    if (!signatureHeader) {
+      console.error('Missing x-nowpayments-sig header');
+      return new Response(JSON.stringify({ error: 'Missing signature' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const key = await crypto.subtle.importKey(
+        "raw",
+        new TextEncoder().encode(NOWPAYMENTS_IPN_SECRET),
+        { name: "HMAC", hash: "SHA-512" },
+        false,
+        ["sign"]
+    );
+    const signature = await crypto.subtle.sign(
+        "HMAC",
+        key,
+        new TextEncoder().encode(rawBody)
+    );
+
+    const generatedSignatureHex = new TextDecoder().decode(encode(new Uint8Array(signature)));
+
+    if (generatedSignatureHex !== signatureHeader) {
+        console.error('Invalid IPN signature');
+        return new Response(JSON.stringify({ error: 'Invalid signature' }), {
+            status: 401,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+    }
+
+    console.log('IPN Signature verified successfully.');
+    
     // We use the service_role key to bypass RLS for this server-to-server interaction.
     const supabaseAdmin = createClient(
         Deno.env.get('SUPABASE_URL') ?? '',
