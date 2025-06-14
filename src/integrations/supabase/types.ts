@@ -13,6 +13,10 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          payment_method: string | null
+          payment_provider: string | null
+          payment_provider_invoice_id: string | null
+          payment_status: string
           program_id: string
           program_name: string
           program_price: number
@@ -23,6 +27,10 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          payment_method?: string | null
+          payment_provider?: string | null
+          payment_provider_invoice_id?: string | null
+          payment_status?: string
           program_id: string
           program_name: string
           program_price: number
@@ -33,6 +41,10 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          payment_method?: string | null
+          payment_provider?: string | null
+          payment_provider_invoice_id?: string | null
+          payment_status?: string
           program_id?: string
           program_name?: string
           program_price?: number
