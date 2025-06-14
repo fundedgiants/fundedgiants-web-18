@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useForm } from 'react-hook-form';
@@ -35,7 +34,7 @@ const ExchangeRate = () => {
   const form = useForm<z.infer<typeof exchangeRateSchema>>({
     resolver: zodResolver(exchangeRateSchema),
     values: {
-        rate: exchangeRate?.rate || 0,
+        rate: exchangeRate?.rate || 1700,
     }
   });
 

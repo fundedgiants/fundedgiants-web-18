@@ -80,7 +80,7 @@ serve(async (req) => {
     };
     console.log('Initiating payment with Klasha. Payload:', JSON.stringify(klashaPayload, null, 2));
 
-    const paymentResponse = await fetch('https://gate.klasha.com/klasha-revamp/v1/payment', {
+    const paymentResponse = await fetch('https://gate.klasha.com/klasha-revamp/v1/payment/charge', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ serve(async (req) => {
       status: 200,
     })
   } catch (error) {
-    console.error('Error in create-klasha-payment function catch block:', error.message);
+    console.error('Error in create-klasha-payment function catch block:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
