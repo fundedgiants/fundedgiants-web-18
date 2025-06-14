@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,6 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface CheckoutState {
   program: string;
@@ -40,8 +38,6 @@ const Checkout = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const { user, loading: authLoading } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [paymentUrl, setPaymentUrl] = useState('');
   
   const [checkoutData, setCheckoutData] = useState<CheckoutState>({
     program: searchParams.get('program') || 'heracles',
@@ -307,9 +303,7 @@ const Checkout = () => {
         }
 
         if (invoiceData.invoice_url) {
-            setPaymentUrl(invoiceData.invoice_url);
-            setIsPaymentModalOpen(true);
-            setIsProcessing(false);
+            window.location.href = invoiceData.invoice_url;
         } else {
             throw new Error('Could not retrieve payment URL.');
         }
@@ -319,7 +313,7 @@ const Checkout = () => {
           setIsProcessing(false);
       }
     } else if (checkoutData.paymentMethod === 'card' || checkoutData.paymentMethod === 'ngn') {
-      toast.info("This payment method is coming soon!");
+      toast.warning("This payment method is coming soon!");
       await supabase.from('orders').update({ payment_status: 'cancelled' }).eq('id', orderId);
       setIsProcessing(false);
     } else {
@@ -709,25 +703,6 @@ const Checkout = () => {
           </div>
         </div>
       </div>
-      <Dialog open={isPaymentModalOpen} onOpenChange={setIsPaymentModalOpen}>
-        <DialogContent className="max-w-4xl w-full h-[90vh] flex flex-col">
-            <DialogHeader>
-                <DialogTitle>Complete Your Payment</DialogTitle>
-                <DialogDescription>
-                    Follow the instructions below to complete your payment. You can close this window when you're done.
-                </DialogDescription>
-            </DialogHeader>
-            {paymentUrl && (
-                <div className="flex-grow mt-4">
-                    <iframe
-                        src={paymentUrl}
-                        title="NOWPayments"
-                        className="w-full h-full border rounded-md bg-white"
-                    />
-                </div>
-            )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
