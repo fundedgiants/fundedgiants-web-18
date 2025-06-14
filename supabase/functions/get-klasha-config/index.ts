@@ -8,14 +8,18 @@ serve(async (req) => {
   }
 
   try {
+    console.log("Attempting to fetch Klasha config...");
     const publicKey = Deno.env.get("KLASHA_PUBLIC_KEY");
     const businessId = Deno.env.get("KLASHA_BUSINESS_ID");
+    console.log(`KLASHA_PUBLIC_KEY retrieved: ${publicKey ? 'Yes' : 'No'}`);
+    console.log(`KLASHA_BUSINESS_ID retrieved: ${businessId ? 'Yes' : 'No'}`);
 
     if (!publicKey) {
       console.error("KLASHA_PUBLIC_KEY is not set in environment variables.");
       throw new Error("Payment provider configuration is missing.");
     }
 
+    console.log("Successfully fetched Klasha config.");
     return new Response(JSON.stringify({ publicKey, businessId }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
