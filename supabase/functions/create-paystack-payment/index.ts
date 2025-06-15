@@ -1,28 +1,39 @@
-
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
+import { corsHeaders } from '../_shared/cors.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    const { orderId, email, amountInKobo } = await req.json();
-
-    if (!orderId || !email || !amountInKobo) {
-      return new Response(JSON.stringify({ error: 'Missing required fields: orderId, email, amountInKobo' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }});
-    }
-
+    const { programId, programName, programPrice, totalPrice, selectedAddons, userId, email, affiliateCode } = await req.json();
     const paystackSecretKey = Deno.env.get('PAYSTACK_SECRET_KEY');
-    if (!paystackSecretKey) {
-        console.error('PAYSTACK_SECRET_KEY is not set.');
-        throw new Error('Payment provider secret key is not configured.');
-    }
+    
+    if (!paystackSecretKey) throw new Error("Paystack secret key not found in environment variables.");
+
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+    
+    const { data: order, error: orderError } = await supabaseAdmin
+      .from('orders')
+      .insert({
+        program_id: programId,
+        program_name: programName,
+        program_price: programPrice,
+        total_price: totalPrice,
+        selected_addons: selectedAddons,
+        user_id: userId,
+        payment_provider: 'paystack',
+        affiliate_code: affiliateCode, // Save the affiliate code
+      })
+      .select()
+      .single();
+
+    if (orderError) throw orderError;
 
     const paystackResponse = await fetch('https://api.paystack.co/transaction/initialize', {
         method: 'POST',
