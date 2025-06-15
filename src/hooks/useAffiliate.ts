@@ -43,7 +43,7 @@ async function fetchAffiliateData(userId: string): Promise<AffiliateData> {
 
   const { data: referrals, error: referralsError } = await supabase
     .from('affiliate_referrals')
-    .select('*, orders(profiles(first_name, last_name))')
+    .select('*, profiles:referred_user_id(first_name, last_name)')
     .eq('affiliate_id', affiliate.id)
     .order('created_at', { ascending: false });
 
