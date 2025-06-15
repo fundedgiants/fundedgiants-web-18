@@ -430,6 +430,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_total_users_count: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       has_role: {
         Args: {
           user_id_to_check: string
