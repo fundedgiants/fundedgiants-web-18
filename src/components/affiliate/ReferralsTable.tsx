@@ -6,11 +6,9 @@ import { Database } from "@/integrations/supabase/types";
 import { format } from 'date-fns';
 
 type Referral = Database['public']['Tables']['affiliate_referrals']['Row'] & {
-  orders: {
-    profiles: {
-      first_name: string | null;
-      last_name: string | null;
-    } | null;
+  profiles: {
+    first_name: string | null;
+    last_name: string | null;
   } | null;
 };
 
@@ -52,7 +50,7 @@ const ReferralsTable = ({ referrals }: ReferralsTableProps) => {
             {referrals.map((referral) => (
               <TableRow key={referral.id}>
                 <TableCell>{format(new Date(referral.created_at), 'MMM d, yyyy')}</TableCell>
-                <TableCell>{referral.orders?.profiles?.first_name || 'N/A'}</TableCell>
+                <TableCell>{referral.profiles?.first_name || 'N/A'}</TableCell>
                 <TableCell>${Number(referral.commission_amount).toFixed(2)}</TableCell>
                 <TableCell>
                   <Badge variant={getStatusVariant(referral.status)}>{referral.status}</Badge>
