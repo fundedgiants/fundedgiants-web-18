@@ -1,10 +1,14 @@
+
 import { useState } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from './ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useAffiliateContext } from '@/contexts/AffiliateContext'; // Import the context hook
+import { useAffiliateContext } from '@/contexts/AffiliateContext';
+import { Input } from './ui/input';
+import { Loader2, Tag } from 'lucide-react';
+import { Separator } from './ui/separator';
 
 interface Addon {
   id: string;
@@ -27,11 +31,52 @@ const Checkout = ({ programId, programName, programPrice, addons, onPaymentSucce
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
-  const { affiliateCode } = useAffiliateContext(); // Get affiliate code from context
+  const { affiliateCode: affiliateCodeFromUrl } = useAffiliateContext();
+
+  const [discountCodeInput, setDiscountCodeInput] = useState('');
+  const [affiliateCodeInput, setAffiliateCodeInput] = useState(affiliateCodeFromUrl || '');
+  
+  const [isApplyingCode, setIsApplyingCode] = useState(false);
+  const [appliedDiscount, setAppliedDiscount] = useState<{ amount: number; code: string | null }>({ amount: 0, code: null });
+  const [affiliateCodeToTie, setAffiliateCodeToTie] = useState<string | null>(affiliateCodeFromUrl);
 
   const selectedAddons = addons.filter(addon => addon.selected);
   const addonsTotal = selectedAddons.reduce((acc, addon) => acc + addon.price, 0);
-  const totalPrice = programPrice + addonsTotal;
+  const initialTotalPrice = programPrice + addonsTotal;
+  const finalPrice = initialTotalPrice - appliedDiscount.amount;
+
+  const handleApplyCodes = async () => {
+    setIsApplyingCode(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('validate-and-apply-codes', {
+        body: {
+          totalInitialPrice: initialTotalPrice,
+          discountCode: discountCodeInput,
+          affiliateCode: affiliateCodeInput,
+        }
+      });
+
+      if (error) throw error;
+      
+      setAppliedDiscount({ amount: data.discountAmount, code: data.appliedDiscountCode });
+      setAffiliateCodeToTie(data.affiliateCodeToTie);
+
+      toast({
+        title: 'Codes Processed',
+        description: data.message,
+      });
+
+    } catch (err) {
+      toast({
+        title: "Error applying code",
+        description: err.message,
+        variant: 'destructive'
+      });
+      setAppliedDiscount({ amount: 0, code: null });
+    } finally {
+      setIsApplyingCode(false);
+    }
+  };
 
   const handleCheckout = async () => {
     setIsLoading(true);
@@ -42,6 +87,7 @@ const Checkout = ({ programId, programName, programPrice, addons, onPaymentSucce
         description: 'You must be logged in to complete the purchase.',
         variant: 'destructive',
       });
+      setIsLoading(false);
       return;
     }
     
@@ -52,11 +98,13 @@ const Checkout = ({ programId, programName, programPrice, addons, onPaymentSucce
           programId,
           programName,
           programPrice,
-          totalPrice,
+          totalPrice: finalPrice,
           selectedAddons,
           userId: user.id,
           email: user.email,
-          affiliateCode, // Pass affiliate code to the edge function
+          affiliateCode: affiliateCodeToTie, // Pass the final affiliate code
+          appliedDiscountCode: appliedDiscount.code, // Pass the code that gave the discount
+          discountAmount: appliedDiscount.amount // Pass the discount amount
         },
       });
 
@@ -84,33 +132,60 @@ const Checkout = ({ programId, programName, programPrice, addons, onPaymentSucce
     <Card className="w-full">
       <CardHeader>
         <CardTitle>Review Your Order</CardTitle>
-        <CardDescription>Please confirm your purchase details before proceeding.</CardDescription>
+        <CardDescription>Confirm your purchase details and apply any codes before proceeding.</CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
+      <CardContent className="space-y-6">
+        <div className="space-y-2">
           <div className="flex justify-between">
-            <span>Program:</span>
             <span>{programName}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Program Price:</span>
             <span>${programPrice.toFixed(2)}</span>
           </div>
           {selectedAddons.map(addon => (
-            <div key={addon.id} className="flex justify-between">
-              <span>{addon.name} (Addon):</span>
+            <div key={addon.id} className="flex justify-between text-sm text-muted-foreground">
+              <span>+ {addon.name}</span>
               <span>${addon.price.toFixed(2)}</span>
             </div>
           ))}
-          <div className="flex justify-between font-semibold">
-            <span>Total:</span>
-            <span>${totalPrice.toFixed(2)}</span>
+        </div>
+        <Separator />
+        <div className="space-y-4">
+            <div className="space-y-2">
+                <label htmlFor="affiliate-code" className="text-sm font-medium">Affiliate Code (Optional)</label>
+                <div className="flex gap-2">
+                    <Input id="affiliate-code" placeholder="Enter affiliate code" value={affiliateCodeInput} onChange={(e) => setAffiliateCodeInput(e.target.value)} />
+                </div>
+            </div>
+            <div className="space-y-2">
+                <label htmlFor="discount-code" className="text-sm font-medium">Discount Code (Optional)</label>
+                <div className="flex gap-2">
+                    <Input id="discount-code" placeholder="Enter discount code" value={discountCodeInput} onChange={(e) => setDiscountCodeInput(e.target.value)} />
+                    <Button variant="outline" onClick={handleApplyCodes} disabled={isApplyingCode}>
+                        {isApplyingCode ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
+                    </Button>
+                </div>
+            </div>
+        </div>
+        <Separator />
+        <div className="space-y-2">
+          <div className="flex justify-between text-muted-foreground">
+            <span>Subtotal</span>
+            <span>${initialTotalPrice.toFixed(2)}</span>
+          </div>
+          {appliedDiscount.amount > 0 && (
+             <div className="flex justify-between text-green-600">
+               <span>Discount ({appliedDiscount.code})</span>
+               <span>-${appliedDiscount.amount.toFixed(2)}</span>
+             </div>
+          )}
+          <div className="flex justify-between font-bold text-lg">
+            <span>Total</span>
+            <span>${finalPrice.toFixed(2)}</span>
           </div>
         </div>
       </CardContent>
       <CardFooter>
         <Button onClick={handleCheckout} disabled={isLoading} className="w-full">
-          {isLoading ? 'Processing...' : 'Proceed to Payment'}
+          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Proceed to Payment'}
         </Button>
       </CardFooter>
     </Card>
