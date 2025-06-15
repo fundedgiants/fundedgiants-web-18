@@ -12,24 +12,37 @@ const PaymentSuccess = () => {
   const navigate = useNavigate();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('Verifying your payment...');
-  const orderId = searchParams.get('order_id');
+  const reference = searchParams.get('reference');
 
   useEffect(() => {
-    if (orderId) {
-      // The webhook will handle the final order confirmation. 
-      // This page provides immediate feedback to the user that the payment process has been initiated.
-      setStatus('success');
-      const successMessage = 'Your payment is being processed. You will be notified via email once your order is confirmed.';
-      setMessage(successMessage);
-      toast.success("Payment is being processed!");
-      setTimeout(() => navigate('/'), 7000); // Redirect after 7 seconds
-    } else {
+    if (!reference) {
       setStatus('error');
-      const errorMessage = 'No order information found. If you have been charged, please contact support with your transaction details.';
-      setMessage(errorMessage);
-      toast.error(errorMessage);
+      setMessage('No payment reference found. Please contact support if you have been charged.');
+      return;
     }
-  }, [orderId, navigate]);
+
+    const verifyPayment = async () => {
+      try {
+        // The webhook will handle the final update. This page is for user feedback.
+        // We can optionally call a verification function here for immediate feedback.
+        // For now, we'll assume success if they are redirected here with a reference.
+        // The webhook is the source of truth.
+        setStatus('success');
+        setMessage('Payment successful! Your order is being processed. You will be notified once it is confirmed.');
+        toast.success("Payment successful! Your order is being processed.");
+        setTimeout(() => navigate('/'), 5000);
+
+      } catch (err: any) {
+        setStatus('error');
+        const userFriendlyMessage = 'There was an issue confirming your payment. Please contact support.';
+        setMessage(userFriendlyMessage);
+        console.error('Verification error:', err);
+        toast.error(userFriendlyMessage);
+      }
+    };
+
+    verifyPayment();
+  }, [reference, navigate]);
 
   const renderContent = () => {
     switch (status) {
@@ -45,9 +58,8 @@ const PaymentSuccess = () => {
           <div className="flex flex-col items-center justify-center text-center">
             <CheckCircle className="h-12 w-12 text-green-500 mb-4" />
             <p className="text-white mb-6">{message}</p>
-            <p className="text-sm text-muted-foreground mb-4">Redirecting you to the homepage shortly...</p>
             <Button asChild>
-              <Link to="/">Go to Home Now</Link>
+              <Link to="/">Go to Home</Link>
             </Button>
           </div>
         );
@@ -56,8 +68,8 @@ const PaymentSuccess = () => {
           <div className="flex flex-col items-center justify-center text-center">
             <XCircle className="h-12 w-12 text-red-500 mb-4" />
             <p className="text-white mb-6">{message}</p>
-            <Button asChild variant="outline">
-              <Link to="/contact">Contact Support</Link>
+            <Button variant="outline" onClick={() => navigate('/contact')}>
+              Contact Support
             </Button>
           </div>
         );
