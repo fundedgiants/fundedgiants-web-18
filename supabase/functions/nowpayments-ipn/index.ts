@@ -1,4 +1,3 @@
-
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { crypto } from "https://deno.land/std@0.168.0/crypto/mod.ts";
@@ -98,6 +97,24 @@ serve(async (req) => {
     }
 
     console.log(`Order ${order_id} status updated to ${payment_status}`)
+
+    if (payment_status === 'finished') {
+      // Asynchronously invoke post-purchase functions.
+      supabaseAdmin.functions.invoke('send-purchase-to-crm', {
+        body: { order_id: order_id },
+      }).then(({ error }) => {
+        if (error) console.error(`Error invoking send-purchase-to-crm for order ${order_id}:`, error.message);
+        else console.log(`Successfully invoked send-purchase-to-crm for order ${order_id}`);
+      });
+
+      supabaseAdmin.functions.invoke('send-purchase-confirmation', {
+        body: { order_id: order_id },
+      }).then(({ error }) => {
+        if (error) console.error(`Error invoking send-purchase-confirmation for order ${order_id}:`, error.message);
+        else console.log(`Successfully invoked send-purchase-confirmation for order ${order_id}`);
+      });
+    }
+
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

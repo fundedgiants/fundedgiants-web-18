@@ -1,4 +1,3 @@
-
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { hmac } from 'https://deno.land/x/hmac@v2.0.1/mod.ts'
@@ -63,6 +62,25 @@ serve(async (req) => {
     }
     
     console.log(`Order ${orderId} status updated to ${payment_status}`);
+
+    if (payment_status === 'paid') {
+      // Asynchronously invoke post-purchase functions.
+      // We don't await these so the webhook can respond to Klasha faster.
+      supabaseClient.functions.invoke('send-purchase-to-crm', {
+        body: { order_id: orderId },
+      }).then(({ error }) => {
+        if (error) console.error(`Error invoking send-purchase-to-crm for order ${orderId}:`, error.message);
+        else console.log(`Successfully invoked send-purchase-to-crm for order ${orderId}`);
+      });
+
+      supabaseClient.functions.invoke('send-purchase-confirmation', {
+        body: { order_id: orderId },
+      }).then(({ error }) => {
+        if (error) console.error(`Error invoking send-purchase-confirmation for order ${orderId}:`, error.message);
+        else console.log(`Successfully invoked send-purchase-confirmation for order ${orderId}`);
+      });
+    }
+
     return new Response(JSON.stringify({ received: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })

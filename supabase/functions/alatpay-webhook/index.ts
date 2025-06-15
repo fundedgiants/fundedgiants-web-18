@@ -1,4 +1,3 @@
-
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
@@ -55,6 +54,21 @@ serve(async (req) => {
         console.error(`Failed to update order ${orderId} to succeeded:`, updateError);
       } else {
         console.log(`Successfully updated order ${orderId} to succeeded.`);
+        
+        // Asynchronously invoke post-purchase functions
+        supabaseClient.functions.invoke('send-purchase-to-crm', {
+          body: { order_id: orderId },
+        }).then(({ error }) => {
+          if (error) console.error(`Error invoking send-purchase-to-crm for order ${orderId}:`, error.message);
+          else console.log(`Successfully invoked send-purchase-to-crm for order ${orderId}`);
+        });
+
+        supabaseClient.functions.invoke('send-purchase-confirmation', {
+          body: { order_id: orderId },
+        }).then(({ error }) => {
+          if (error) console.error(`Error invoking send-purchase-confirmation for order ${orderId}:`, error.message);
+          else console.log(`Successfully invoked send-purchase-confirmation for order ${orderId}`);
+        });
       }
 
     } else if (status === 'failed' || status === 'expired') {
