@@ -1,4 +1,3 @@
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
 
@@ -110,6 +109,7 @@ Deno.serve(async (req) => {
         orderId: order.id,
         programName: order.program_name,
         accountSize: order.program_id,
+        platform: order.platform,
         totalPrice: order.total_price,
         addOns: order.selected_addons,
         paymentMethod: order.payment_method,

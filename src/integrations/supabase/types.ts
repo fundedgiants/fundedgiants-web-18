@@ -262,6 +262,7 @@ export type Database = {
           payment_provider: string | null
           payment_provider_invoice_id: string | null
           payment_status: string
+          platform: string | null
           program_id: string
           program_name: string
           program_price: number
@@ -279,6 +280,7 @@ export type Database = {
           payment_provider?: string | null
           payment_provider_invoice_id?: string | null
           payment_status?: string
+          platform?: string | null
           program_id: string
           program_name: string
           program_price: number
@@ -296,6 +298,7 @@ export type Database = {
           payment_provider?: string | null
           payment_provider_invoice_id?: string | null
           payment_status?: string
+          platform?: string | null
           program_id?: string
           program_name?: string
           program_price?: number

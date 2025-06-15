@@ -394,6 +394,7 @@ const Checkout = () => {
       user_id: sessionUser.id,
       program_id: checkoutData.accountSize,
       program_name: programs[checkoutData.program as keyof typeof programs].name,
+      platform: checkoutData.platform,
       program_price: basePrice,
       selected_addons: selectedAddOns,
       total_price: totalPrice,
