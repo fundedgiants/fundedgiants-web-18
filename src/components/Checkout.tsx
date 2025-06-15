@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { useScript } from '@/hooks/useScript';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 declare global {
   interface Window {
@@ -728,6 +729,24 @@ const Checkout = () => {
     );
   }
 
+  let buttonDisabledReason = '';
+  const isKlashaSelected = checkoutData.paymentMethod === 'klasha';
+  const isKlashaPaymentDisabled = isKlashaSelected && (klashaScript.loading || klashaConfigLoading || klashaScript.error);
+
+  if (isProcessing) {
+    buttonDisabledReason = 'Processing your request...';
+  } else if (isKlashaPaymentDisabled) {
+    if (klashaScript.loading) {
+      buttonDisabledReason = 'Initializing payment provider script...';
+    } else if (klashaConfigLoading) {
+      buttonDisabledReason = 'Initializing payment provider configuration...';
+    } else if (klashaScript.error) {
+      buttonDisabledReason = 'Error initializing payment provider. Please refresh or try another method.';
+    }
+  }
+
+  const isButtonDisabled = isProcessing || isKlashaPaymentDisabled;
+
   return (
     <div className="min-h-screen bg-background pt-20 pb-10">
       <div className="container mx-auto px-4">
@@ -808,14 +827,27 @@ const Checkout = () => {
                         <ArrowRight className="h-4 w-4 ml-2" />
                       </Button>
                     ) : (
-                      <Button
-                        onClick={handleCompletePurchase}
-                        className="bg-primary hover:bg-primary/90"
-                        disabled={isProcessing || (checkoutData.paymentMethod === 'klasha' && (klashaScript.loading || klashaConfigLoading || klashaScript.error))}
-                      >
-                        {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {purchaseButtonText()}
-                      </Button>
+                      <TooltipProvider>
+                        <Tooltip delayDuration={0}>
+                          <TooltipTrigger asChild>
+                            <div className="inline-block">
+                              <Button
+                                onClick={handleCompletePurchase}
+                                className="bg-primary hover:bg-primary/90"
+                                disabled={isButtonDisabled}
+                              >
+                                {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {purchaseButtonText()}
+                              </Button>
+                            </div>
+                          </TooltipTrigger>
+                          {buttonDisabledReason && (
+                            <TooltipContent>
+                              <p>{buttonDisabledReason}</p>
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
+                      </TooltipProvider>
                     )}
                   </div>
                 </CardContent>
