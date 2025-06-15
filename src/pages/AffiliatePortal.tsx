@@ -8,6 +8,8 @@ import ReferralsTable from '@/components/affiliate/ReferralsTable';
 import PayoutsTable from '@/components/affiliate/PayoutsTable';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Link } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 const AffiliatePortal = () => {
   const { data, isLoading, error } = useAffiliate();
@@ -34,11 +36,58 @@ const AffiliatePortal = () => {
 
   if (!data) {
     return (
-       <div className="text-center text-muted-foreground">No affiliate data found.</div>
+       <div className="container mx-auto max-w-2xl py-8 text-center">
+            <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
+                <CardHeader>
+                    <CardTitle className="text-2xl">Join our Affiliate Program</CardTitle>
+                    <CardDescription>
+                        Ready to earn by promoting us? Click the button below to start your application.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button asChild>
+                        <Link to="/become-affiliate">Become an Affiliate</Link>
+                    </Button>
+                </CardContent>
+            </Card>
+        </div>
     )
   }
 
   const { affiliate, stats, referrals, payouts, chartData } = data;
+
+  if (affiliate.status === 'pending') {
+    return (
+      <div className="container mx-auto max-w-2xl py-8 text-center">
+        <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
+          <CardHeader>
+            <CardTitle className="text-2xl">Application Pending</CardTitle>
+            <CardDescription>
+              Thank you for applying! Your affiliate application is currently under review. We'll notify you once a decision has been made.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
+  if (affiliate.status === 'rejected') {
+    return (
+      <div className="container mx-auto max-w-2xl py-8">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Application Status</AlertTitle>
+          <AlertDescription>
+            We regret to inform you that your affiliate application was not approved at this time.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+  
+  if (affiliate.status !== 'approved') {
+      return null;
+  }
 
   return (
     <div className="space-y-8">

@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./layouts/ProtectedRoute";
 import AffiliatePortal from "./pages/AffiliatePortal";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import BecomeAffiliate from "./pages/BecomeAffiliate";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
             
             <Route element={<ProtectedRoute />}>
               <Route path="/affiliate-portal" element={<AffiliatePortal />} />
+              <Route path="/become-affiliate" element={<BecomeAffiliate />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

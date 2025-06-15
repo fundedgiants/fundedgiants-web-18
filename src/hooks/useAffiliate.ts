@@ -16,7 +16,7 @@ type AffiliateData = {
   referrals: any[];
   payouts: Database['public']['Tables']['affiliate_payouts']['Row'][];
   chartData: { name: string; earnings: number }[];
-};
+} | null;
 
 async function fetchAffiliateData(userId: string): Promise<AffiliateData> {
   // 1. Get affiliate details
@@ -26,8 +26,14 @@ async function fetchAffiliateData(userId: string): Promise<AffiliateData> {
     .eq('user_id', userId)
     .single();
 
-  if (affiliateError) throw new Error(affiliateError.message);
-  if (!affiliate) throw new Error("Affiliate not found.");
+  if (affiliateError && affiliateError.code !== 'PGRST116') {
+    // PGRST116 means "No rows returned" which is not an error in our case
+    throw new Error(affiliateError.message);
+  }
+  
+  if (!affiliate) {
+    return null;
+  }
 
   // 2. Get stats
   const { count: totalClicks, error: clicksError } = await supabase
