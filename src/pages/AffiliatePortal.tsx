@@ -14,6 +14,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 const AffiliatePortal = () => {
   const { data, isLoading, error } = useAffiliate();
 
+  // Added for debugging
+  console.log({ affiliateData: data, isLoading, error });
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -122,7 +125,17 @@ const AffiliatePortal = () => {
   }
 
   // Fallback for any other unhandled status. This prevents the blank page.
-  return null;
+  return (
+    <div className="container mx-auto max-w-2xl py-8">
+      <Alert>
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Unknown Status</AlertTitle>
+        <AlertDescription>
+          Your affiliate account has an unrecognized status: <strong>{affiliate.status}</strong>. Please contact support if this seems incorrect.
+        </AlertDescription>
+      </Alert>
+    </div>
+  );
 };
 
 export default AffiliatePortal;
