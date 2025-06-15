@@ -1,4 +1,3 @@
-
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
@@ -47,7 +46,7 @@ serve(async (req) => {
 
     console.log('AlatPay Request Payload:', JSON.stringify(payload, null, 2));
 
-    const response = await fetch('https://live.alatpay.ng/api/v1/bank/transfer/charge', {
+    const response = await fetch('https://sandbox.alatpay.ng/api/v1/bank/transfer/charge', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
