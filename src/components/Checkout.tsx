@@ -308,7 +308,7 @@ const Checkout = () => {
     }
 
     // Combine phone number parts and update profile
-    const { phone, countryCode } = checkoutData.billingInfo;
+    const { phone, countryCode, firstName, lastName, email } = checkoutData.billingInfo;
     const numberPart = phone.replace(/^0+/, '');
     const fullPhoneNumber = `${countryCode}${numberPart}`;
 
@@ -398,8 +398,11 @@ const Checkout = () => {
             body: {
               orderId,
               totalPrice,
-              email: checkoutData.billingInfo.email,
-              redirectBaseUrl: window.location.origin
+              email: email,
+              redirectBaseUrl: window.location.origin,
+              firstName: firstName,
+              lastName: lastName,
+              phone: fullPhoneNumber
             },
         });
 

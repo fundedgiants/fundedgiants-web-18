@@ -10,13 +10,20 @@ serve(async (req) => {
   }
 
   try {
-    const { orderId, totalPrice, email, redirectBaseUrl } = await req.json()
+    const { orderId, totalPrice, email, redirectBaseUrl, firstName, lastName, phone } = await req.json()
 
-    if (!orderId || !totalPrice || !email || !redirectBaseUrl) {
-      return new Response(JSON.stringify({ error: 'Missing required payment details.' }), {
+    const requiredFields = { orderId, totalPrice, email, redirectBaseUrl, firstName, lastName, phone };
+    const missingFields = Object.entries(requiredFields)
+      .filter(([, value]) => !value)
+      .map(([key]) => key);
+
+    if (missingFields.length > 0) {
+      const errorMsg = `Missing required payment details: ${missingFields.join(', ')}`;
+      console.error(errorMsg);
+      return new Response(JSON.stringify({ error: errorMsg }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+      });
     }
     
     const successUrl = `${redirectBaseUrl}/payment-success?reference=${orderId}`;
@@ -28,9 +35,14 @@ serve(async (req) => {
       email: email,
       redirect_url: successUrl,
       narration: `Payment for order ${orderId}`,
+      kit: {
+        phone_number: phone,
+        first_name: firstName,
+        last_name: lastName,
+      }
     };
     
-    console.log("Klasha V2 Payload:", klashaPayload);
+    console.log("Klasha V2 Payload (with kit):", klashaPayload);
 
     const klashaPublicKey = Deno.env.get('KLASHA_PUBLIC_KEY')
     if (!klashaPublicKey) {
@@ -65,7 +77,10 @@ serve(async (req) => {
       status: 200,
     })
   } catch (error) {
-    console.error("Error creating Klasha checkout session:", error);
+    console.error("Error creating Klasha checkout session:", error.message, error.stack);
+    if (error.cause) {
+      console.error("Cause of error:", error.cause);
+    }
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
