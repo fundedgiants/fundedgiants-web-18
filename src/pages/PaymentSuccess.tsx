@@ -30,7 +30,7 @@ const PaymentSuccess = () => {
         setStatus('success');
         setMessage('Payment successful! Your order is being processed. You will be notified once it is confirmed.');
         toast.success("Payment successful! Your order is being processed.");
-        setTimeout(() => navigate('/dashboard'), 5000);
+        setTimeout(() => navigate('/'), 5000);
 
       } catch (err: any) {
         setStatus('error');
@@ -59,7 +59,7 @@ const PaymentSuccess = () => {
             <CheckCircle className="h-12 w-12 text-green-500 mb-4" />
             <p className="text-white mb-6">{message}</p>
             <Button asChild>
-              <Link to="/dashboard">Go to Dashboard</Link>
+              <Link to="/">Go to Home</Link>
             </Button>
           </div>
         );

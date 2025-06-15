@@ -1,14 +1,24 @@
 
-# supabase/config.toml
-[functions.create-nowpayments-invoice]
-verify_jwt = true
+project_id = "zbtmecjjqxahsyvdbdif"
 
+[api]
+enabled = true
+extra_headers = []
+max_rows = 1000
+
+[database]
+major_version = 15
+
+[functions.create-nowpayments-invoice]
 [functions.nowpayments-ipn]
 verify_jwt = false
 
-[functions.get-klasha-config]
-verify_jwt = false
-
+[functions.create-klasha-checkout-session]
 [functions.klasha-webhook]
 verify_jwt = false
 
+[functions.send-purchase-to-crm]
+verify_jwt = false
+
+[functions.send-purchase-confirmation]
+verify_jwt = false
