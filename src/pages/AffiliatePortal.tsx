@@ -14,6 +14,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 const AffiliatePortal = () => {
   const { data, isLoading, error } = useAffiliate();
 
+  // Added for debugging
+  console.log({ affiliateData: data, isLoading, error });
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -85,52 +88,52 @@ const AffiliatePortal = () => {
     );
   }
   
-  if (affiliate.status !== 'approved') {
-    console.warn("Unhandled affiliate status:", affiliate.status);
+  if (affiliate.status === 'approved') {
     return (
-       <div className="container mx-auto max-w-2xl py-8">
-        <Alert variant="default">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Application Status: {affiliate.status.charAt(0).toUpperCase() + affiliate.status.slice(1)}</AlertTitle>
-          <AlertDescription>
-            Your affiliate account status is currently being processed. If you believe this is an error, please contact support.
-          </AlertDescription>
-        </Alert>
+      <div className="space-y-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h1 className="text-3xl font-bold text-foreground">Affiliate Portal</h1>
+          <Button>
+            <DollarSign className="mr-2 h-4 w-4" /> Request Payout
+          </Button>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <StatCard title="Total Earnings" value={`$${stats.totalEarnings.toFixed(2)}`} icon={DollarSign} />
+          <StatCard title="Pending Commission" value={`$${stats.pendingCommission.toFixed(2)}`} icon={DollarSign} />
+          <StatCard title="Total Referrals" value={stats.totalReferrals.toString()} icon={Users} />
+          <StatCard title="Total Clicks" value={stats.totalClicks.toString()} icon={MousePointerClick} />
+          <StatCard title="Commission Rate" value={`${stats.commissionRate * 100}%`} icon={Percent} />
+          <StatCard title="Current Tier" value={affiliate.tier.charAt(0).toUpperCase() + affiliate.tier.slice(1)} icon={Award} />
+        </div>
+        
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-6">
+              <AffiliateLink affiliateCode={affiliate.affiliate_code} />
+              <EarningsChart data={chartData} />
+          </div>
+          <div className="lg:col-span-1 space-y-6">
+              <ReferralsTable referrals={referrals.slice(0, 5)} />
+          </div>
+        </div>
+        
+        <div>
+          <PayoutsTable payouts={payouts} />
+        </div>
       </div>
-    )
+    );
   }
 
+  // Fallback for any other unhandled status. This prevents the blank page.
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-3xl font-bold text-foreground">Affiliate Portal</h1>
-        <Button>
-          <DollarSign className="mr-2 h-4 w-4" /> Request Payout
-        </Button>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <StatCard title="Total Earnings" value={`$${stats.totalEarnings.toFixed(2)}`} icon={DollarSign} />
-        <StatCard title="Pending Commission" value={`$${stats.pendingCommission.toFixed(2)}`} icon={DollarSign} />
-        <StatCard title="Total Referrals" value={stats.totalReferrals.toString()} icon={Users} />
-        <StatCard title="Total Clicks" value={stats.totalClicks.toString()} icon={MousePointerClick} />
-        <StatCard title="Commission Rate" value={`${stats.commissionRate * 100}%`} icon={Percent} />
-        <StatCard title="Current Tier" value={affiliate.tier.charAt(0).toUpperCase() + affiliate.tier.slice(1)} icon={Award} />
-      </div>
-      
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-6">
-            <AffiliateLink affiliateCode={affiliate.affiliate_code} />
-            <EarningsChart data={chartData} />
-        </div>
-        <div className="lg:col-span-1 space-y-6">
-            <ReferralsTable referrals={referrals.slice(0, 5)} />
-        </div>
-      </div>
-      
-      <div>
-        <PayoutsTable payouts={payouts} />
-      </div>
+    <div className="container mx-auto max-w-2xl py-8">
+      <Alert>
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Unknown Status</AlertTitle>
+        <AlertDescription>
+          Your affiliate account has an unrecognized status: <strong>{affiliate.status}</strong>. Please contact support if this seems incorrect.
+        </AlertDescription>
+      </Alert>
     </div>
   );
 };

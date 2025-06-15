@@ -1,11 +1,11 @@
 
 import React from 'react';
 
-const Privacy: React.FC = () => {
+const Privacy = () => {
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold">Privacy Policy</h1>
-      <p className="mt-4 text-muted-foreground">Our privacy policy will be displayed here.</p>
+      <h1 className="text-4xl font-bold mb-4">Privacy Policy</h1>
+      <p>Our privacy policy will be listed here soon.</p>
     </div>
   );
 };

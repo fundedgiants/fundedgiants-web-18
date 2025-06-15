@@ -1,11 +1,11 @@
 
 import React from 'react';
 
-const Pricing: React.FC = () => {
+const Pricing = () => {
   return (
-    <div className="container mx-auto py-8 text-center">
-      <h1 className="text-3xl font-bold">Pricing</h1>
-      <p className="mt-4 text-muted-foreground">Our pricing plans will be displayed here soon.</p>
+    <div className="container mx-auto py-8">
+      <h1 className="text-4xl font-bold mb-4">Pricing</h1>
+      <p>Our pricing plans will be listed here soon.</p>
     </div>
   );
 };

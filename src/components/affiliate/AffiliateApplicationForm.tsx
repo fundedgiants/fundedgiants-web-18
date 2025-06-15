@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -10,7 +9,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import StepIndicator from "./application-steps/StepIndicator";
 import PersonalDetailsStep from "./application-steps/PersonalDetailsStep";
 import PromotionDetailsStep from "./application-steps/PromotionDetailsStep";
@@ -21,8 +20,8 @@ const formSchema = z.object({
   first_name: z.string().min(2, "First name must be at least 2 characters."),
   last_name: z.string().min(2, "Last name must be at least 2 characters."),
   email: z.string().email("Please enter a valid email address."),
-  password: z.string().min(6, "Password must be at least 6 characters."),
-  confirmPassword: z.string(),
+  password: z.string().min(6, "Password must be at least 6 characters.").optional(),
+  confirmPassword: z.string().optional(),
   phone: z.string().optional(),
   whatsapp: z.string().optional(),
   telegram: z.string().optional(),
@@ -41,7 +40,13 @@ const formSchema = z.object({
     required_error: "You need to select a payment network.",
   }),
   wallet_address: z.string().min(20, "Please enter a valid wallet address."),
-}).refine((data) => data.password === data.confirmPassword, {
+}).refine((data) => {
+    // Only validate password confirmation if a password is provided (for new users).
+    if (data.password) {
+        return data.password === data.confirmPassword;
+    }
+    return true;
+}, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
 })
@@ -103,31 +108,61 @@ const AffiliateApplicationForm = () => {
         mode: "onChange",
     });
 
-    async function onSubmit(values: FormValues) {
-        // 1. Sign up the user
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email: values.email,
-            password: values.password,
-            options: {
-                data: {
-                    first_name: values.first_name,
-                    last_name: values.last_name,
-                },
-                emailRedirectTo: `${window.location.origin}/affiliate-portal`,
-            },
-        });
+    useEffect(() => {
+        if (user) {
+            form.setValue('email', user.email || '');
+            // NOTE: The password fields will still be visible to logged-in users.
+            // This is a known UX issue that cannot be fixed without editing the read-only step components.
+            // Logged-in users should ignore these fields.
+        }
+    }, [user, form]);
 
-        if (signUpError) {
-            toast.error(signUpError.message);
-            return;
+    async function onSubmit(values: FormValues) {
+        let affiliateUserId = user?.id;
+        const isNewUser = !user;
+
+        // 1. Sign up the user if they are a new visitor
+        if (isNewUser) {
+            if (!values.password || values.password.length < 6) {
+                toast.error("Password must be at least 6 characters.");
+                return;
+            }
+             if (values.password !== values.confirmPassword) {
+                toast.error("Passwords do not match.");
+                return;
+            }
+
+            const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+                email: values.email,
+                password: values.password,
+                options: {
+                    data: {
+                        first_name: values.first_name,
+                        last_name: values.last_name,
+                    },
+                    emailRedirectTo: `${window.location.origin}/affiliate-portal`,
+                },
+            });
+
+            if (signUpError) {
+                toast.error(signUpError.message);
+                return;
+            }
+
+            if (!signUpData.user) {
+                toast.error("An unexpected error occurred during sign up. Please try again.");
+                return;
+            }
+            
+            affiliateUserId = signUpData.user.id;
         }
 
-        if (!signUpData.user) {
-            toast.error("An unexpected error occurred during sign up. Please try again.");
+        if (!affiliateUserId) {
+            toast.error("Could not create affiliate application: user is not identified.");
             return;
         }
         
-        const newUserId = signUpData.user.id;
+        const newUserId = affiliateUserId;
 
         // 2. Create the affiliate record
         const personal_info = {
@@ -155,7 +190,7 @@ const AffiliateApplicationForm = () => {
         };
 
         const { error: affiliateInsertError } = await supabase.from("affiliates").insert({
-            user_id: newUserId,
+            user_id: affiliateUserId,
             personal_info,
             affiliate_code: values.affiliate_code,
             social_media_urls: Object.keys(filtered_social_media_urls).length > 0 ? filtered_social_media_urls : null,
@@ -171,9 +206,13 @@ const AffiliateApplicationForm = () => {
                  toast.error(affiliateInsertError.message);
             }
         } else {
-            toast.success("Application submitted! Please check your email to verify your account and log in.");
-            await queryClient.invalidateQueries({ queryKey: ['affiliateData', newUserId] });
-            navigate("/");
+            toast.success(
+                isNewUser 
+                ? "Application submitted! Please check your email to verify your account."
+                : "Application submitted successfully! Your application is under review."
+            );
+            await queryClient.invalidateQueries({ queryKey: ['affiliateData', affiliateUserId] });
+            navigate("/affiliate-portal");
         }
     }
 
