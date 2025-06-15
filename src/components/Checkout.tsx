@@ -437,7 +437,9 @@ const Checkout = () => {
     const orderId = orderData.id;
 
     if (checkoutData.paymentMethod === 'paystack') {
-        if (paystackScript !== 'ready' || !window.PaystackPop) {
+        // The build error indicates `paystackScript` is an object, not a string.
+        // The check below is updated based on the error message.
+        if (paystackScript.status !== 'ready' || !window.PaystackPop) {
             toast.error("Paystack is not available at the moment. Please try again later.");
             setIsProcessing(false);
             return;
