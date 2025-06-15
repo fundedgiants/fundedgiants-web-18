@@ -7,7 +7,8 @@ verify_jwt = true
 verify_jwt = false
 
 [functions.get-klasha-config]
-verify_jwt = true
+verify_jwt = false
 
 [functions.klasha-webhook]
 verify_jwt = false
+
