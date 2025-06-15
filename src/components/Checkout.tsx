@@ -10,12 +10,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { useScript } from '@/hooks/useScript';
-import { AlatPayPaymentDetails } from './AlatPayPaymentDetails';
 
 declare global {
   interface Window {
     PaystackPop?: any;
     Startbutton?: any;
+    KlashaClient?: any;
   }
 }
 
@@ -56,7 +56,6 @@ const Checkout = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const { user, loading: authLoading } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [alatpayDetails, setAlatpayDetails] = useState<AlatPayTransactionDetails | null>(null);
   
   const [checkoutData, setCheckoutData] = useState<CheckoutState>({
     program: searchParams.get('program') || 'heracles',
@@ -70,10 +69,11 @@ const Checkout = () => {
       country: '', state: '', city: '', address: '', zipCode: '',
       password: '', confirmPassword: ''
     },
-    paymentMethod: 'alatpay'
+    paymentMethod: 'klasha'
   });
 
   const paystackScript = useScript('https://js.paystack.co/v1/inline.js');
+  const klashaScript = useScript('https://js.klasha.com/v2/inline.js');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -207,10 +207,22 @@ const Checkout = () => {
       }
       return data;
     },
-    enabled: checkoutData.paymentMethod === 'alatpay',
+    enabled: checkoutData.paymentMethod === 'klasha',
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
   const ngnRate = ngnRateData?.rate;
+
+  const { data: klashaConfig, isLoading: klashaConfigLoading } = useQuery({
+    queryKey: ['klasha-config'],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke('get-klasha-config');
+      if (error) throw new Error(error.message);
+      return data;
+    },
+    enabled: checkoutData.paymentMethod === 'klasha',
+    staleTime: Infinity, // Public key doesn't change
+  });
+  const klashaPublicKey = klashaConfig?.publicKey;
 
   const handleNext = () => {
     if (currentStep < 5) setCurrentStep(currentStep + 1);
@@ -218,7 +230,6 @@ const Checkout = () => {
 
   const handlePrevious = () => {
     if (currentStep > 1) {
-      setAlatpayDetails(null);
       setCurrentStep(currentStep - 1);
     }
   };
@@ -330,7 +341,7 @@ const Checkout = () => {
     }
 
     const payment_provider = checkoutData.paymentMethod === 'crypto' ? 'nowpayments' 
-                           : checkoutData.paymentMethod === 'alatpay' ? 'alatpay' 
+                           : checkoutData.paymentMethod === 'klasha' ? 'klasha' 
                            : null;
 
     const { data: orderData, error: orderError } = await supabase.from('orders').insert({
@@ -390,35 +401,51 @@ const Checkout = () => {
       toast.warning("This payment method is coming soon!");
       await supabase.from('orders').update({ payment_status: 'cancelled' }).eq('id', orderId);
       setIsProcessing(false);
-    } else if (checkoutData.paymentMethod === 'alatpay') {
+    } else if (checkoutData.paymentMethod === 'klasha') {
+      if (klashaScript.loading || klashaConfigLoading) {
+          toast.error("Payment provider is initializing. Please wait a moment and try again.");
+          setIsProcessing(false);
+          return;
+      }
+
+      if (!klashaPublicKey) {
+          toast.error("Could not retrieve payment configuration. Please try again.");
+          setIsProcessing(false);
+          return;
+      }
+      
       if (!ngnRate) {
-          toast.error("Payment provider not ready. Please wait a moment and try again.");
+          toast.error("Payment provider not ready. Could not determine NGN amount.");
           setIsProcessing(false);
           return;
       }
       
       setIsProcessing(true);
+      
+      const amountInNGN = Math.ceil(totalPrice * ngnRate);
+
       try {
-        const callbackUrl = `${window.location.origin}/payment-success?reference=${orderId}`;
-
-        const { data: transactionData, error: transactionError } = await supabase.functions.invoke('create-alatpay-transaction', {
-            body: { 
-                orderId, 
-                totalPrice, 
-                billingInfo: checkoutData.billingInfo, 
-                ngnRate,
-                callbackUrl
+        const klasha = new window.KlashaClient({
+            publicKey: klashaPublicKey,
+            tx_ref: orderId,
+            amount: amountInNGN,
+            currency: 'NGN',
+            email: checkoutData.billingInfo.email,
+            phone_number: `${checkoutData.billingInfo.countryCode}${checkoutData.billingInfo.phone}`,
+            fullname: `${checkoutData.billingInfo.firstName} ${checkoutData.billingInfo.lastName}`,
+            redirecturl: `${window.location.origin}/payment-success?reference=${orderId}`,
+            callback: (response: any) => {
+                console.log('Klasha modal closed.', response);
+                setIsProcessing(false); 
             },
+            payment_option: 'bank_transfer',
+            is_production: false,
         });
-
-        if (transactionError) throw new Error(transactionError.message);
-        
-        setAlatpayDetails(transactionData);
-
-      } catch (error: any) {
-          toast.error(`Payment initialization failed: ${error.message}`);
+        klasha.init();
+      } catch(e) {
+          console.error("Klasha initialization error:", e);
+          toast.error("Failed to initialize payment. Please try again.");
           await supabase.from('orders').update({ payment_status: 'failed' }).eq('id', orderId);
-      } finally {
           setIsProcessing(false);
       }
       return;
@@ -647,14 +674,10 @@ const Checkout = () => {
         );
 
       case 5:
-        if (alatpayDetails) {
-            return <AlatPayPaymentDetails details={alatpayDetails} orderId={alatpayDetails.reference} />;
-        }
-
         const paymentMethods = [
             { value: 'card', label: 'Credit/Debit Card', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> },
             { value: 'crypto', label: 'Cryptocurrency', subtitle: 'via NowPayments', icon: <Bitcoin className="h-8 w-8 text-primary mb-2" /> },
-            { value: 'alatpay', label: 'Bank Transfer (NGN)', subtitle: 'via AlatPay', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> }
+            { value: 'klasha', label: 'Bank Transfer (NGN)', subtitle: 'via Klasha', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> }
         ];
         return (
           <div className="space-y-6">
@@ -673,7 +696,7 @@ const Checkout = () => {
                   {method.icon}
                   <div className="font-medium text-white mt-1">{method.label}</div>
                    {method.subtitle && <div className="text-sm text-primary">{method.subtitle}</div>}
-                  {method.value === 'alatpay' && checkoutData.paymentMethod === method.value && ngnRate && (
+                  {method.value === 'klasha' && checkoutData.paymentMethod === method.value && ngnRate && (
                     <div className="text-xs text-muted-foreground mt-1">
                       (≈ ₦{Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')})
                     </div>
@@ -691,7 +714,7 @@ const Checkout = () => {
   
   const purchaseButtonText = () => {
     const baseText = `Complete Purchase - $${totalPrice.toFixed(2)}`;
-    if (checkoutData.paymentMethod === 'alatpay' && ngnRate) {
+    if (checkoutData.paymentMethod === 'klasha' && ngnRate) {
       return `${baseText} / ~₦${Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')}`;
     }
     return baseText;
@@ -772,7 +795,7 @@ const Checkout = () => {
                     <Button
                       variant="outline"
                       onClick={handlePrevious}
-                      disabled={currentStep === 1 || isProcessing || !!alatpayDetails}
+                      disabled={currentStep === 1 || isProcessing}
                       className="border-primary text-primary hover:bg-primary hover:text-white"
                     >
                       <ArrowLeft className="h-4 w-4 mr-2" />
@@ -785,18 +808,14 @@ const Checkout = () => {
                         <ArrowRight className="h-4 w-4 ml-2" />
                       </Button>
                     ) : (
-                      <>
-                        {!alatpayDetails ? (
-                          <Button
-                            onClick={handleCompletePurchase}
-                            className="bg-primary hover:bg-primary/90"
-                            disabled={isProcessing}
-                          >
-                            {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {purchaseButtonText()}
-                          </Button>
-                        ) : null}
-                      </>
+                      <Button
+                        onClick={handleCompletePurchase}
+                        className="bg-primary hover:bg-primary/90"
+                        disabled={isProcessing || (checkoutData.paymentMethod === 'klasha' && (klashaScript.loading || klashaConfigLoading || klashaScript.error))}
+                      >
+                        {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {purchaseButtonText()}
+                      </Button>
                     )}
                   </div>
                 </CardContent>

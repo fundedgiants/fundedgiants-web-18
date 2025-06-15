@@ -1,5 +1,12 @@
-
 import { useState, useEffect } from 'react';
+
+declare global {
+  interface Window {
+    PaystackPop?: any;
+    Startbutton?: any;
+    KlashaClient?: any;
+  }
+}
 
 /**
  * A hook to dynamically load an external script and track its status.
@@ -19,8 +26,9 @@ export const useScript = (src: string): { loading: boolean; error: boolean } => 
     }
 
     const isPaystackLoaded = src.includes('paystack') && !!window.PaystackPop;
+    const isKlashaLoaded = src.includes('klasha') && !!window.KlashaClient;
 
-    if (isPaystackLoaded) {
+    if (isPaystackLoaded || isKlashaLoaded) {
       console.log(`useScript: SDK already loaded for ${src}.`);
       setLoading(false);
       setError(false);

@@ -6,11 +6,8 @@ verify_jwt = true
 [functions.nowpayments-ipn]
 verify_jwt = false
 
-[functions.get-alatpay-config]
+[functions.get-klasha-config]
 verify_jwt = true
 
-[functions.create-alatpay-transaction]
-verify_jwt = true
-
-[functions.alatpay-webhook]
+[functions.klasha-webhook]
 verify_jwt = false
