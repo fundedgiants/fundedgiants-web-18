@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { useScript } from '@/hooks/useScript';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { AFFILIATE_CODE_STORAGE_KEY } from '@/hooks/useAffiliateTracking';
 
 declare global {
   interface Window {
@@ -57,6 +58,15 @@ const Checkout = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const { user, loading: authLoading } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isApplyingCode, setIsApplyingCode] = useState(false);
+  const [discountCode, setDiscountCode] = useState('');
+  const [affiliateCodeInput, setAffiliateCodeInput] = useState(localStorage.getItem(AFFILIATE_CODE_STORAGE_KEY) || '');
+  const [appliedDiscount, setAppliedDiscount] = useState<{
+    code: string | null;
+    discountAmount: number;
+    affiliateToCredit: string | null;
+    message: string;
+  } | null>(null);
   
   const [checkoutData, setCheckoutData] = useState<CheckoutState>({
     program: searchParams.get('program') || 'heracles',
@@ -189,9 +199,13 @@ const Checkout = () => {
 
   const selectedAccount = accountSizes.find(size => size.value === checkoutData.accountSize);
   const basePrice = selectedAccount?.price || 0;
+
+  const discountAmount = appliedDiscount?.discountAmount || 0;
+  const discountedBasePrice = basePrice > discountAmount ? basePrice - discountAmount : 0;
+
   const selectedAddOns = addOns.filter(addon => checkoutData.addOns.includes(addon.id));
   const addOnsPrice = selectedAddOns.reduce((sum, addon) => sum + (basePrice * (addon.pricePercent / 100)), 0);
-  const totalPrice = basePrice + addOnsPrice;
+  const totalPrice = discountedBasePrice + addOnsPrice;
 
   const { data: ngnRateData } = useQuery({
     queryKey: ['exchange_rate', 'USD_NGN'],
@@ -213,6 +227,45 @@ const Checkout = () => {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
   const ngnRate = ngnRateData?.rate;
+
+  const handleApplyCodes = async () => {
+    if (!discountCode && !affiliateCodeInput) {
+        toast.info("Please enter a discount or affiliate code.");
+        return;
+    }
+    setIsApplyingCode(true);
+    try {
+        const { data, error } = await supabase.functions.invoke('validate-and-apply-codes', {
+            body: { 
+                discountCode: discountCode || undefined, 
+                affiliateCode: affiliateCodeInput || undefined,
+                basePrice,
+                userId: user?.id
+            },
+        });
+
+        if (error) throw error;
+        
+        if (data.error) {
+            toast.error(data.error);
+            setAppliedDiscount(null);
+        } else {
+            toast.success(data.message);
+            setAppliedDiscount({
+                code: data.appliedCode,
+                discountAmount: data.discountAmount,
+                affiliateToCredit: data.affiliateToCredit,
+                message: data.message,
+            });
+        }
+
+    } catch (error: any) {
+        toast.error(error.message || "Failed to apply code.");
+        setAppliedDiscount(null);
+    } finally {
+        setIsApplyingCode(false);
+    }
+  };
 
   const handleNext = () => {
     if (currentStep < 5) setCurrentStep(currentStep + 1);
@@ -334,6 +387,9 @@ const Checkout = () => {
                            : checkoutData.paymentMethod === 'klasha' ? 'klasha' 
                            : null;
 
+    const trackedAffiliateCode = localStorage.getItem(AFFILIATE_CODE_STORAGE_KEY);
+    const finalAffiliateToCredit = appliedDiscount?.affiliateToCredit || trackedAffiliateCode;
+
     const { data: orderData, error: orderError } = await supabase.from('orders').insert({
       user_id: sessionUser.id,
       program_id: checkoutData.accountSize,
@@ -344,6 +400,9 @@ const Checkout = () => {
       payment_method: checkoutData.paymentMethod,
       payment_provider: payment_provider,
       payment_status: 'pending',
+      applied_discount_code: appliedDiscount?.code,
+      discount_amount: discountAmount,
+      affiliate_code: finalAffiliateToCredit,
     }).select().single();
 
     if (orderError) {
@@ -850,8 +909,42 @@ const Checkout = () => {
                   
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Base Price:</span>
-                    <span className="text-white">${selectedAccount?.price}</span>
+                    <span className={`text-white font-medium ${discountAmount > 0 ? 'line-through text-muted-foreground' : ''}`}>${basePrice.toFixed(2)}</span>
                   </div>
+
+                  {discountAmount > 0 && (
+                    <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Discount:</span>
+                        <span className="text-green-400 font-medium">-${discountAmount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  
+                  <div className="space-y-2 pt-2 pb-2">
+                    <div className="flex items-center gap-2">
+                        <Input
+                            placeholder="Discount Code"
+                            value={discountCode}
+                            onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                            className="bg-card/50 border-muted"
+                            disabled={isApplyingCode}
+                        />
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Input
+                            placeholder="Affiliate Code"
+                            value={affiliateCodeInput}
+                            onChange={(e) => setAffiliateCodeInput(e.target.value)}
+                            className="bg-card/50 border-muted"
+                            disabled={isApplyingCode}
+                        />
+                        <Button size="sm" onClick={handleApplyCodes} disabled={isApplyingCode}>
+                            {isApplyingCode ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
+                        </Button>
+                    </div>
+                    {appliedDiscount?.message && <p className="text-xs text-green-400 text-center px-2">{appliedDiscount.message}</p>}
+                  </div>
+
+                  <Separator className="bg-primary/20" />
                   
                   {selectedAddOns.map((addon) => (
                     <div key={addon.id} className="flex justify-between items-center">
