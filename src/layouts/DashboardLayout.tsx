@@ -1,8 +1,6 @@
 
 import React from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { AppSidebar } from '@/components/AppSidebar';
-import { SidebarProvider } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
 
@@ -18,7 +16,7 @@ const DashboardLayout = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+      <div className="flex items-center justify-center h-[calc(100vh-4rem)] bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
@@ -28,15 +26,13 @@ const DashboardLayout = () => {
     return null;
   }
 
+  // The sidebar has been removed for a full-width dashboard experience.
   return (
-    <SidebarProvider>
-      <div className="flex min-h-[calc(100vh-4rem)]">
-        <AppSidebar />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-background">
-          <Outlet />
-        </main>
-      </div>
-    </SidebarProvider>
+    <main className="min-h-[calc(100vh-4rem)] bg-background">
+        <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+            <Outlet />
+        </div>
+    </main>
   );
 };
 
