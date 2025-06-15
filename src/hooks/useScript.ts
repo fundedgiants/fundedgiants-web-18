@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+
+import { useState, useEffect, useCallback } from 'react';
 
 declare global {
   interface Window {
@@ -16,6 +17,18 @@ declare global {
 export const useScript = (src: string): { loading: boolean; error: boolean } => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+
+  const handleLoad = useCallback(() => {
+    console.log(`useScript: Script loaded successfully: ${src}`);
+    setLoading(false);
+    setError(false);
+  }, [src]);
+
+  const handleError = useCallback((event: Event | string) => {
+    console.error('useScript: Script loading failed:', { src, event });
+    setError(true);
+    setLoading(false);
+  }, [src]);
 
   useEffect(() => {
     console.log(`useScript effect started for: ${src}`);
@@ -37,29 +50,16 @@ export const useScript = (src: string): { loading: boolean; error: boolean } => 
 
     let script = document.querySelector(`script[src="${src}"]`) as HTMLScriptElement;
     
-    const handleLoad = () => {
-      console.log(`useScript: Script loaded successfully: ${src}`);
-      setLoading(false);
-      setError(false);
-    };
-    const handleError = (event: Event | string) => {
-      console.error('useScript: Script loading failed:', { src, event });
-      setError(true);
-      setLoading(false);
-    };
-
     if (!script) {
       console.log(`useScript: Creating new script tag for ${src}.`);
       script = document.createElement('script');
       script.src = src;
       script.async = true;
       document.body.appendChild(script);
-      script.addEventListener('load', handleLoad);
-      script.addEventListener('error', handleError);
-    } else {
-      script.addEventListener('load', handleLoad);
-      script.addEventListener('error', handleError);
     }
+    
+    script.addEventListener('load', handleLoad);
+    script.addEventListener('error', handleError);
 
     return () => {
       console.log(`useScript: Cleaning up effect for ${src}.`);
@@ -68,7 +68,7 @@ export const useScript = (src: string): { loading: boolean; error: boolean } => 
         script.removeEventListener('error', handleError);
       }
     };
-  }, [src]);
+  }, [src, handleLoad, handleError]);
 
   return { loading, error };
 };
