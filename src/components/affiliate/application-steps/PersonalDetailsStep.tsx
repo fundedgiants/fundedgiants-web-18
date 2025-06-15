@@ -64,12 +64,13 @@ const PersonalDetailsStep = ({ form }: PersonalDetailsStepProps) => {
           </FormItem>
         )}
       />
+      <p className="text-sm text-muted-foreground !mt-6">Please provide at least one of the following contact methods.</p>
       <FormField
         control={form.control}
         name="whatsapp"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>WhatsApp Number <span className="text-muted-foreground">(Optional)</span></FormLabel>
+            <FormLabel>WhatsApp Number</FormLabel>
             <FormControl>
               <Input placeholder="Your WhatsApp number" {...field} value={field.value ?? ""} />
             </FormControl>
@@ -82,7 +83,7 @@ const PersonalDetailsStep = ({ form }: PersonalDetailsStepProps) => {
         name="telegram"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Telegram Username <span className="text-muted-foreground">(Optional)</span></FormLabel>
+            <FormLabel>Telegram Username</FormLabel>
             <FormControl>
               <Input placeholder="@your_telegram" {...field} value={field.value ?? ""}/>
             </FormControl>

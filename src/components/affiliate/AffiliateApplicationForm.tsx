@@ -39,6 +39,20 @@ const formSchema = z.object({
     required_error: "You need to select a payment network.",
   }),
   wallet_address: z.string().min(20, "Please enter a valid wallet address."),
+}).superRefine((data, ctx) => {
+    if (!data.whatsapp?.trim() && !data.telegram?.trim()) {
+        const message = "Please provide either a WhatsApp number or a Telegram username.";
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["whatsapp"],
+            message,
+        });
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["telegram"],
+            message,
+        });
+    }
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -124,7 +138,7 @@ const AffiliateApplicationForm = () => {
 
     const steps = ["Personal Info", "Promotion Details", "Account & Payment"];
     const stepFields: Record<number, (keyof FormValues)[]> = {
-        1: ["first_name", "last_name", "email"],
+        1: ["first_name", "last_name", "email", "whatsapp", "telegram"],
         2: ["promotion_methods"],
     };
 
