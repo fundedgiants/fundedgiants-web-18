@@ -9,7 +9,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
-import { useScript } from '@/hooks/useScript';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AFFILIATE_CODE_STORAGE_KEY } from '@/hooks/useAffiliateTracking';
 
@@ -80,10 +79,10 @@ const Checkout = () => {
       country: '', state: '', city: '', address: '', zipCode: '',
       password: '', confirmPassword: ''
     },
-    paymentMethod: 'paystack'
+    paymentMethod: 'klasha'
   });
 
-  const paystackScript = useScript('https://js.paystack.co/v1/inline.js');
+  // Paystack script is no longer used
   // Klasha script is no longer loaded from the frontend
   // const klashaScript = useScript('https://js.klasha.com/v2/inline.js');
 
@@ -223,25 +222,10 @@ const Checkout = () => {
       }
       return data;
     },
-    enabled: ['klasha', 'paystack'].includes(checkoutData.paymentMethod),
+    enabled: checkoutData.paymentMethod === 'klasha',
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
   const ngnRate = ngnRateData?.rate;
-
-  const { data: paystackPublicKey } = useQuery({
-    queryKey: ['paystackPublicKey'],
-    queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke('get-paystack-public-key');
-      if (error) {
-        console.error('Failed to fetch Paystack public key:', error);
-        toast.error('Could not configure Paystack payment method.');
-        return null;
-      }
-      return data.publicKey;
-    },
-    enabled: checkoutData.paymentMethod === 'paystack',
-    staleTime: Infinity,
-  });
 
   const handleApplyCodes = async () => {
     if (!discountCode && !affiliateCodeInput) {
@@ -399,8 +383,7 @@ const Checkout = () => {
     }
 
     const payment_provider = checkoutData.paymentMethod === 'crypto' ? 'nowpayments' 
-                           : checkoutData.paymentMethod === 'klasha' ? 'klasha' 
-                           : checkoutData.paymentMethod === 'paystack' ? 'paystack'
+                           : checkoutData.paymentMethod === 'klasha' ? 'klasha'
                            : null;
 
     const trackedAffiliateCode = localStorage.getItem(AFFILIATE_CODE_STORAGE_KEY);
@@ -436,61 +419,7 @@ const Checkout = () => {
 
     const orderId = orderData.id;
 
-    if (checkoutData.paymentMethod === 'paystack') {
-        // The build error indicates `paystackScript` is an object, not a string.
-        // The check below is updated based on the error message.
-        if (paystackScript.status !== 'ready' || !window.PaystackPop) {
-            toast.error("Paystack is not available at the moment. Please try again later.");
-            setIsProcessing(false);
-            return;
-        }
-        if (!paystackPublicKey) {
-            toast.error("Could not configure Paystack. Please select another payment method.");
-            setIsProcessing(false);
-            return;
-        }
-        if (!ngnRate) {
-            toast.error("Could not determine NGN exchange rate. Please try again later.");
-            setIsProcessing(false);
-            return;
-        }
-
-        try {
-            const amountInKobo = Math.round(totalPrice * ngnRate * 100);
-
-            const { data: paymentData, error: paymentError } = await supabase.functions.invoke('create-paystack-payment', {
-                body: {
-                    orderId: orderId,
-                    email: checkoutData.billingInfo.email,
-                    amountInKobo: amountInKobo,
-                },
-            });
-            
-            if (paymentError) throw new Error(paymentError.message);
-            if (!paymentData || !paymentData.access_code) throw new Error('Could not get payment access code.');
-
-            const handler = window.PaystackPop.setup({
-                key: paystackPublicKey,
-                email: checkoutData.billingInfo.email,
-                amount: amountInKobo,
-                access_code: paymentData.access_code,
-                ref: orderId,
-                onClose: () => {
-                    toast.info("Payment window closed.");
-                    setIsProcessing(false);
-                },
-                callback: (response: { reference: string }) => {
-                    // Verification is handled by webhook. Just redirect.
-                    navigate(`/payment-success?reference=${response.reference}`);
-                }
-            });
-            handler.openIframe();
-        } catch (error: any) {
-            toast.error(`Paystack initialization failed: ${error.message}`);
-            await supabase.from('orders').update({ payment_status: 'failed' }).eq('id', orderId);
-            setIsProcessing(false);
-        }
-    } else if (checkoutData.paymentMethod === 'crypto') {
+    if (checkoutData.paymentMethod === 'crypto') {
       try {
         const { data: invoiceData, error: invoiceError } = await supabase.functions.invoke('create-nowpayments-invoice', {
             body: { orderId, totalPrice },
@@ -666,35 +595,38 @@ const Checkout = () => {
         return (
           <div className="space-y-6">
             <h3 className="text-lg font-semibold mb-4 text-white">Billing Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                placeholder="First Name"
-                value={checkoutData.billingInfo.firstName}
-                onChange={(e) => handleBillingChange('firstName', e.target.value)}
-                className="bg-card/50 border-muted"
-                required
-              />
-              <Input
-                placeholder="Last Name"
-                value={checkoutData.billingInfo.lastName}
-                onChange={(e) => handleBillingChange('lastName', e.target.value)}
-                className="bg-card/50 border-muted"
-                required
-              />
-              <Input
-                placeholder="Email"
-                type="email"
-                value={checkoutData.billingInfo.email}
-                onChange={(e) => handleBillingChange('email', e.target.value)}
-                className="bg-card/50 border-muted md:col-span-2"
-                required
-                disabled={!!user}
-              />
-              <div className="flex items-center gap-2">
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Input
+                  placeholder="First Name"
+                  value={checkoutData.billingInfo.firstName}
+                  onChange={(e) => handleBillingChange('firstName', e.target.value)}
+                  className="bg-card/50 border-muted"
+                  required
+                />
+                <Input
+                  placeholder="Last Name"
+                  value={checkoutData.billingInfo.lastName}
+                  onChange={(e) => handleBillingChange('lastName', e.target.value)}
+                  className="bg-card/50 border-muted"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-10 gap-4 items-center">
+                <Input
+                  placeholder="Email"
+                  type="email"
+                  value={checkoutData.billingInfo.email}
+                  onChange={(e) => handleBillingChange('email', e.target.value)}
+                  className="bg-card/50 border-muted md:col-span-4"
+                  required
+                  disabled={!!user}
+                />
                 <select
                   value={checkoutData.billingInfo.countryCode}
                   onChange={(e) => handleBillingChange('countryCode', e.target.value)}
-                  className="bg-card/50 border border-muted rounded-md px-2 py-2 h-10 w-40 text-white"
+                  className="bg-card/50 border border-muted rounded-md px-2 h-10 text-white md:col-span-2"
                   style={{ colorScheme: 'dark' }}
                 >
                   <option value="+234">NG (+234)</option>
@@ -708,40 +640,47 @@ const Checkout = () => {
                   type="tel"
                   value={checkoutData.billingInfo.phone}
                   onChange={(e) => handleBillingChange('phone', e.target.value)}
-                  className="bg-card/50 border-muted flex-1"
+                  className="bg-card/50 border-muted md:col-span-4"
                   required
                 />
               </div>
-              <Input
-                placeholder="Country"
-                value={checkoutData.billingInfo.country}
-                onChange={(e) => handleBillingChange('country', e.target.value)}
-                className="bg-card/50 border-muted"
-              />
-              <Input
-                placeholder="State"
-                value={checkoutData.billingInfo.state}
-                onChange={(e) => handleBillingChange('state', e.target.value)}
-                className="bg-card/50 border-muted"
-              />
-              <Input
-                placeholder="City"
-                value={checkoutData.billingInfo.city}
-                onChange={(e) => handleBillingChange('city', e.target.value)}
-                className="bg-card/50 border-muted"
-              />
+
               <Input
                 placeholder="Address"
                 value={checkoutData.billingInfo.address}
                 onChange={(e) => handleBillingChange('address', e.target.value)}
-                className="bg-card/50 border-muted md:col-span-2"
-              />
-              <Input
-                placeholder="ZIP Code"
-                value={checkoutData.billingInfo.zipCode}
-                onChange={(e) => handleBillingChange('zipCode', e.target.value)}
                 className="bg-card/50 border-muted"
               />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    placeholder="City"
+                    value={checkoutData.billingInfo.city}
+                    onChange={(e) => handleBillingChange('city', e.target.value)}
+                    className="bg-card/50 border-muted"
+                  />
+                  <Input
+                    placeholder="State"
+                    value={checkoutData.billingInfo.state}
+                    onChange={(e) => handleBillingChange('state', e.target.value)}
+                    className="bg-card/50 border-muted"
+                  />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Input
+                  placeholder="ZIP Code"
+                  value={checkoutData.billingInfo.zipCode}
+                  onChange={(e) => handleBillingChange('zipCode', e.target.value)}
+                  className="bg-card/50 border-muted"
+                />
+                <Input
+                  placeholder="Country"
+                  value={checkoutData.billingInfo.country}
+                  onChange={(e) => handleBillingChange('country', e.target.value)}
+                  className="bg-card/50 border-muted"
+                />
+              </div>
             </div>
             {!user && (
               <>
@@ -779,8 +718,7 @@ const Checkout = () => {
         const paymentMethods = [
             { value: 'card', label: 'Credit/Debit Card', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> },
             { value: 'crypto', label: 'Cryptocurrency', subtitle: 'via NowPayments', icon: <Bitcoin className="h-8 w-8 text-primary mb-2" /> },
-            { value: 'klasha', label: 'Bank Transfer (NGN)', subtitle: 'via Klasha', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> },
-            { value: 'paystack', label: 'Card, Bank, USSD (NGN)', subtitle: 'via Paystack', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> }
+            { value: 'klasha', label: 'NGN Bank Transfer', subtitle: 'via Klasha', icon: <div className="h-8 w-8 text-primary mb-2 flex items-center justify-center text-3xl font-bold">₦</div> },
         ];
         return (
           <div className="space-y-6">
@@ -799,7 +737,7 @@ const Checkout = () => {
                   {method.icon}
                   <div className="font-medium text-white mt-1">{method.label}</div>
                    {method.subtitle && <div className="text-sm text-primary">{method.subtitle}</div>}
-                  {['klasha', 'paystack'].includes(method.value) && checkoutData.paymentMethod === method.value && ngnRate && (
+                  {method.value === 'klasha' && checkoutData.paymentMethod === method.value && ngnRate && (
                     <div className="text-xs text-muted-foreground mt-1">
                       (≈ ₦{Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')})
                     </div>
@@ -817,7 +755,7 @@ const Checkout = () => {
   
   const purchaseButtonText = () => {
     const baseText = `Complete Purchase - $${totalPrice.toFixed(2)}`;
-    if (['klasha', 'paystack'].includes(checkoutData.paymentMethod) && ngnRate) {
+    if (checkoutData.paymentMethod === 'klasha' && ngnRate) {
       return `${baseText} / ~₦${Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')}`;
     }
     return baseText;
