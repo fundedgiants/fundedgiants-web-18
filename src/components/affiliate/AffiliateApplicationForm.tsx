@@ -1,3 +1,4 @@
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -19,6 +20,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const formSchema = z.object({
   affiliate_code: z.string().min(4, "Code must be at least 4 characters.").max(20, "Code must be at most 20 characters.").regex(/^[a-zA-Z0-9_]+$/, "Only letters, numbers, and underscores are allowed."),
@@ -28,6 +30,10 @@ const formSchema = z.object({
   facebook_url: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
   youtube_url: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
   promotion_methods: z.string().min(10, "Please describe your promotion methods in at least 10 characters."),
+  payment_network: z.enum(["TRC20", "Arbitrum"], {
+    required_error: "You need to select a payment network.",
+  }),
+  wallet_address: z.string().min(20, "Please enter a valid wallet address."),
 });
 
 const AffiliateApplicationForm = () => {
@@ -45,6 +51,7 @@ const AffiliateApplicationForm = () => {
             facebook_url: "",
             youtube_url: "",
             promotion_methods: "",
+            wallet_address: "",
         },
     });
 
@@ -64,11 +71,17 @@ const AffiliateApplicationForm = () => {
         
         const filtered_social_media_urls = Object.fromEntries(Object.entries(social_media_urls).filter(([_, v]) => v && v.length > 0));
 
+        const payment_info = {
+            network: values.payment_network,
+            address: values.wallet_address,
+        };
+
         const { error } = await supabase.from("affiliates").insert({
             user_id: user.id,
             affiliate_code: values.affiliate_code,
             social_media_urls: Object.keys(filtered_social_media_urls).length > 0 ? filtered_social_media_urls : null,
             promotion_methods: values.promotion_methods,
+            payment_info,
         });
 
         if (error) {
@@ -168,6 +181,59 @@ const AffiliateApplicationForm = () => {
                                 <FormLabel>YouTube Channel URL</FormLabel>
                                 <FormControl>
                                     <Input placeholder="https://youtube.com/c/yourchannel" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+                <div className="space-y-4 rounded-lg border p-4 bg-background/50">
+                    <h3 className="text-lg font-medium">Payment Information</h3>
+                    <p className="text-sm text-muted-foreground">
+                        How would you like to receive your commissions? Payouts are in USDT.
+                    </p>
+                    <FormField
+                        control={form.control}
+                        name="payment_network"
+                        render={({ field }) => (
+                            <FormItem className="space-y-3">
+                                <FormLabel>USDT Network</FormLabel>
+                                <FormControl>
+                                    <RadioGroup
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                        className="flex flex-col space-y-1"
+                                    >
+                                        <FormItem className="flex items-center space-x-3 space-y-0">
+                                            <FormControl>
+                                                <RadioGroupItem value="TRC20" />
+                                            </FormControl>
+                                            <FormLabel className="font-normal">
+                                                Tron (TRC20)
+                                            </FormLabel>
+                                        </FormItem>
+                                        <FormItem className="flex items-center space-x-3 space-y-0">
+                                            <FormControl>
+                                                <RadioGroupItem value="Arbitrum" />
+                                            </FormControl>
+                                            <FormLabel className="font-normal">
+                                                Arbitrum (ARB)
+                                            </FormLabel>
+                                        </FormItem>
+                                    </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="wallet_address"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>USDT Wallet Address</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Your USDT wallet address" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
