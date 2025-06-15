@@ -1,5 +1,5 @@
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'
 import { corsHeaders } from '../_shared/cors.ts'
 
 const KLASHA_API_URL = 'https://ktest.klasha.com/checkout/v2/checkout/charge'; // Using V2 endpoint
@@ -35,14 +35,15 @@ serve(async (req) => {
       email: email,
       redirect_url: successUrl,
       narration: `Payment for order ${orderId}`,
-      kit: {
-        phone_number: phone,
-        first_name: firstName,
-        last_name: lastName,
-      }
+      // Temporarily removing the 'kit' object to isolate the network issue.
+      // kit: {
+      //   phone_number: phone,
+      //   first_name: firstName,
+      //   last_name: lastName,
+      // }
     };
     
-    console.log("Klasha V2 Payload (with kit):", klashaPayload);
+    console.log("Klasha V2 Payload (SIMPLIFIED for debugging):", klashaPayload);
 
     const klashaPublicKey = Deno.env.get('KLASHA_PUBLIC_KEY')
     if (!klashaPublicKey) {
