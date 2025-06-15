@@ -6,8 +6,11 @@ verify_jwt = true
 [functions.nowpayments-ipn]
 verify_jwt = false
 
-[functions.startbutton-webhook]
-verify_jwt = false
-
-[functions.get-startbutton-config]
+[functions.get-alatpay-config]
 verify_jwt = true
+
+[functions.create-alatpay-transaction]
+verify_jwt = true
+
+[functions.alatpay-webhook]
+verify_jwt = false

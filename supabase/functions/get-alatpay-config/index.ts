@@ -9,16 +9,17 @@ serve(async (_req) => {
   }
 
   try {
-    const publicKey = Deno.env.get('STARTBUTTON_PUBLIC_KEY');
-    if (!publicKey) {
-      throw new Error('StartButton public key not configured in secrets.');
+    const publicKey = Deno.env.get('ALATPAY_PRIMARY_KEY');
+    const businessId = Deno.env.get('ALATPAY_BUSINESS_ID');
+    if (!publicKey || !businessId) {
+      throw new Error('AlatPay config not found in secrets.');
     }
-    return new Response(JSON.stringify({ publicKey }), {
+    return new Response(JSON.stringify({ publicKey, businessId }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })
   } catch (error) {
-    console.error('get-startbutton-config error:', error.message);
+    console.error('get-alatpay-config error:', error.message);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,

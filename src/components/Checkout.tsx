@@ -9,8 +9,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
-import StartButtonPaymentButton from './StartButtonPaymentButton';
 import { useScript } from '@/hooks/useScript';
+import { AlatPayPaymentDetails } from './AlatPayPaymentDetails';
 
 declare global {
   interface Window {
@@ -42,14 +42,21 @@ interface CheckoutState {
   paymentMethod: string;
 }
 
+interface AlatPayTransactionDetails {
+  account_name: string;
+  account_number: string;
+  bank_name: string;
+  amount_expected: number;
+  reference: string;
+}
+
 const Checkout = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const { user, loading: authLoading } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [showStartButton, setShowStartButton] = useState(false);
-  const [startButtonConfig, setStartButtonConfig] = useState<any>(null);
+  const [alatpayDetails, setAlatpayDetails] = useState<AlatPayTransactionDetails | null>(null);
   
   const [checkoutData, setCheckoutData] = useState<CheckoutState>({
     program: searchParams.get('program') || 'heracles',
@@ -63,18 +70,10 @@ const Checkout = () => {
       country: '', state: '', city: '', address: '', zipCode: '',
       password: '', confirmPassword: ''
     },
-    paymentMethod: 'card'
+    paymentMethod: 'alatpay'
   });
 
-  // Use the new hook to manage payment scripts
   const paystackScript = useScript('https://js.paystack.co/v1/inline.js');
-  const startbuttonScript = useScript('https://js.startbutton.tech/v1/startbutton.js');
-
-  useEffect(() => {
-    if (startbuttonScript.error) {
-      toast.error("A payment provider script failed to load. Please refresh and try again.");
-    }
-  }, [startbuttonScript.error]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -208,26 +207,10 @@ const Checkout = () => {
       }
       return data;
     },
-    enabled: checkoutData.paymentMethod === 'startbutton',
+    enabled: checkoutData.paymentMethod === 'alatpay',
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
   const ngnRate = ngnRateData?.rate;
-
-  const { data: startButtonConfigData, isLoading: isLoadingStartButtonConfig } = useQuery({
-    queryKey: ['startButtonConfig'],
-    queryFn: async () => {
-        const { data, error } = await supabase.functions.invoke('get-startbutton-config');
-        if (error) {
-            toast.error("Could not fetch payment configuration.");
-            console.error("StartButton config fetch error:", error);
-            return null;
-        }
-        return data;
-    },
-    enabled: checkoutData.paymentMethod === 'startbutton',
-    staleTime: Infinity,
-    retry: false,
-  });
 
   const handleNext = () => {
     if (currentStep < 5) setCurrentStep(currentStep + 1);
@@ -235,8 +218,7 @@ const Checkout = () => {
 
   const handlePrevious = () => {
     if (currentStep > 1) {
-      setShowStartButton(false);
-      setStartButtonConfig(null);
+      setAlatpayDetails(null);
       setCurrentStep(currentStep - 1);
     }
   };
@@ -348,7 +330,7 @@ const Checkout = () => {
     }
 
     const payment_provider = checkoutData.paymentMethod === 'crypto' ? 'nowpayments' 
-                           : checkoutData.paymentMethod === 'startbutton' ? 'startbutton' 
+                           : checkoutData.paymentMethod === 'alatpay' ? 'alatpay' 
                            : null;
 
     const { data: orderData, error: orderError } = await supabase.from('orders').insert({
@@ -408,46 +390,37 @@ const Checkout = () => {
       toast.warning("This payment method is coming soon!");
       await supabase.from('orders').update({ payment_status: 'cancelled' }).eq('id', orderId);
       setIsProcessing(false);
-    } else if (checkoutData.paymentMethod === 'startbutton') {
-      if (startbuttonScript.loading) {
-        toast.info("Payment provider is still initializing. Please wait a moment.");
-        setIsProcessing(false);
-        return;
-      }
-
-      if (startbuttonScript.error || !window.Startbutton) {
-        toast.error("Payment provider script could not be loaded. Please refresh the page and try again.");
-        setIsProcessing(false);
-        return;
-      }
-
-      if (!ngnRate || !startButtonConfigData?.publicKey) {
+    } else if (checkoutData.paymentMethod === 'alatpay') {
+      if (!ngnRate) {
           toast.error("Payment provider not ready. Please wait a moment and try again.");
           setIsProcessing(false);
           return;
       }
-
-      const amountInKobo = Math.round(totalPrice * ngnRate * 100);
-
-      const config = {
-        publicKey: startButtonConfigData.publicKey,
-        amount: amountInKobo,
-        email: checkoutData.billingInfo.email,
-        reference: orderId,
-        onSuccess: (response: any) => {
-          console.log("StartButton success callback:", response);
-          navigate(`/payment-success?reference=${orderId}`);
-        },
-        onClose: () => {
-          toast.info("Payment window closed.");
-          setShowStartButton(false);
-          setIsProcessing(false);
-        },
-      };
       
-      setStartButtonConfig(config);
-      setShowStartButton(true);
-      setIsProcessing(false);
+      setIsProcessing(true);
+      try {
+        const callbackUrl = `${window.location.origin}/payment-success?reference=${orderId}`;
+
+        const { data: transactionData, error: transactionError } = await supabase.functions.invoke('create-alatpay-transaction', {
+            body: { 
+                orderId, 
+                totalPrice, 
+                billingInfo: checkoutData.billingInfo, 
+                ngnRate,
+                callbackUrl
+            },
+        });
+
+        if (transactionError) throw new Error(transactionError.message);
+        
+        setAlatpayDetails(transactionData);
+
+      } catch (error: any) {
+          toast.error(`Payment initialization failed: ${error.message}`);
+          await supabase.from('orders').update({ payment_status: 'failed' }).eq('id', orderId);
+      } finally {
+          setIsProcessing(false);
+      }
       return;
     } else {
       toast.error("Please select a payment method.");
@@ -674,10 +647,14 @@ const Checkout = () => {
         );
 
       case 5:
+        if (alatpayDetails) {
+            return <AlatPayPaymentDetails details={alatpayDetails} orderId={alatpayDetails.reference} />;
+        }
+
         const paymentMethods = [
             { value: 'card', label: 'Credit/Debit Card', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> },
             { value: 'crypto', label: 'Cryptocurrency', subtitle: 'via NowPayments', icon: <Bitcoin className="h-8 w-8 text-primary mb-2" /> },
-            { value: 'startbutton', label: 'Bank Transfer (NGN)', subtitle: 'via StartButton', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> }
+            { value: 'alatpay', label: 'Bank Transfer (NGN)', subtitle: 'via AlatPay', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> }
         ];
         return (
           <div className="space-y-6">
@@ -696,7 +673,7 @@ const Checkout = () => {
                   {method.icon}
                   <div className="font-medium text-white mt-1">{method.label}</div>
                    {method.subtitle && <div className="text-sm text-primary">{method.subtitle}</div>}
-                  {method.value === 'startbutton' && checkoutData.paymentMethod === method.value && ngnRate && (
+                  {method.value === 'alatpay' && checkoutData.paymentMethod === method.value && ngnRate && (
                     <div className="text-xs text-muted-foreground mt-1">
                       (≈ ₦{Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')})
                     </div>
@@ -711,16 +688,10 @@ const Checkout = () => {
         return null;
     }
   };
-
-  const isPaymentProviderBusy =
-    (checkoutData.paymentMethod === 'startbutton' && (isLoadingStartButtonConfig || startbuttonScript.loading || startbuttonScript.error));
   
   const purchaseButtonText = () => {
-    if (checkoutData.paymentMethod === 'startbutton' && startbuttonScript.loading) return 'Initializing StartButton...';
-    if (isPaymentProviderBusy) return 'Payment Provider Error';
-
     const baseText = `Complete Purchase - $${totalPrice.toFixed(2)}`;
-    if (checkoutData.paymentMethod === 'startbutton' && ngnRate) {
+    if (checkoutData.paymentMethod === 'alatpay' && ngnRate) {
       return `${baseText} / ~₦${Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')}`;
     }
     return baseText;
@@ -801,7 +772,7 @@ const Checkout = () => {
                     <Button
                       variant="outline"
                       onClick={handlePrevious}
-                      disabled={currentStep === 1 || isProcessing}
+                      disabled={currentStep === 1 || isProcessing || !!alatpayDetails}
                       className="border-primary text-primary hover:bg-primary hover:text-white"
                     >
                       <ArrowLeft className="h-4 w-4 mr-2" />
@@ -815,22 +786,15 @@ const Checkout = () => {
                       </Button>
                     ) : (
                       <>
-                        {!showStartButton ? (
+                        {!alatpayDetails ? (
                           <Button
                             onClick={handleCompletePurchase}
                             className="bg-primary hover:bg-primary/90"
-                            disabled={isProcessing || isPaymentProviderBusy}
+                            disabled={isProcessing}
                           >
                             {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {purchaseButtonText()}
                           </Button>
-                        ) : showStartButton ? (
-                           startButtonConfig && (
-                            <StartButtonPaymentButton 
-                              config={startButtonConfig}
-                              isProcessing={isProcessing}
-                            />
-                           )
                         ) : null}
                       </>
                     )}

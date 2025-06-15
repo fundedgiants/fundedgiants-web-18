@@ -9,61 +9,46 @@ serve(async (req) => {
   }
 
   try {
-    const signature = req.headers.get('x-startbutton-signature');
-    const secret = Deno.env.get('STARTBUTTON_SECRET_KEY');
+    const signature = req.headers.get('x-alatpay-signature');
+    const secret = Deno.env.get('ALATPAY_WEBHOOK_SECRET');
     const body = await req.text();
 
     if (!secret) {
-      throw new Error('STARTBUTTON_SECRET_KEY is not set in environment variables.');
-    }
-
-    if (!signature) {
+      console.warn('ALATPAY_WEBHOOK_SECRET is not set. Skipping signature verification. This is insecure for production.');
+    } else if (!signature) {
       console.error('Webhook Error: No signature found in request headers.');
       return new Response('No signature', { status: 400, headers: corsHeaders });
-    }
+    } else {
+      const signingKey = await crypto.subtle.importKey(
+        'raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+      );
+      const computedSignature = await crypto.subtle.sign('HMAC', signingKey, new TextEncoder().encode(body));
+      const computedHash = Array.from(new Uint8Array(computedSignature)).map(b => b.toString(16).padStart(2, '0')).join('');
 
-    const cryptoKey = await crypto.subtle.importKey(
-      'raw',
-      new TextEncoder().encode(secret),
-      { name: 'HMAC', hash: 'SHA-512' },
-      false,
-      ['sign']
-    );
-
-    const signed = await crypto.subtle.sign(
-      'HMAC',
-      cryptoKey,
-      new TextEncoder().encode(body)
-    );
-
-    const hash = Array.from(new Uint8Array(signed))
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('');
-
-    if (hash !== signature) {
-      console.error('Webhook Error: Invalid signature.');
-      return new Response('Invalid signature', { status: 401, headers: corsHeaders });
+      if (computedHash !== signature) {
+        console.error('Webhook Error: Invalid signature.');
+        return new Response('Invalid signature', { status: 401, headers: corsHeaders });
+      }
+      console.log('Webhook signature verified successfully.');
     }
     
-    console.log('Webhook signature verified successfully.');
-
     const payload = JSON.parse(body);
-    console.log('Webhook payload:', JSON.stringify(payload, null, 2));
+    console.log('AlatPay Webhook payload:', JSON.stringify(payload, null, 2));
 
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     );
     
-    const { event, data } = payload;
-    const orderId = data.reference;
+    const { status, reference, transaction_reference } = payload.data;
+    const orderId = reference;
 
-    if (event === 'charge.success') {
+    if (status === 'success') {
       console.log(`Processing successful charge for order: ${orderId}`);
       
       const { error: updateError } = await supabaseClient
         .from('orders')
-        .update({ payment_status: 'succeeded', payment_provider_invoice_id: data.id })
+        .update({ payment_status: 'succeeded', payment_provider_invoice_id: transaction_reference })
         .eq('id', orderId);
 
       if (updateError) {
@@ -72,8 +57,8 @@ serve(async (req) => {
         console.log(`Successfully updated order ${orderId} to succeeded.`);
       }
 
-    } else if (event === 'charge.failed') {
-      console.log(`Processing failed charge for order: ${orderId}`);
+    } else if (status === 'failed' || status === 'expired') {
+      console.log(`Processing failed/expired charge for order: ${orderId}`);
 
       const { error: updateError } = await supabaseClient
         .from('orders')
@@ -86,7 +71,7 @@ serve(async (req) => {
         console.log(`Successfully updated order ${orderId} to failed.`);
       }
     } else {
-      console.log(`Received unhandled event type: ${event}`);
+      console.log(`Received unhandled event status: ${status}`);
     }
 
     return new Response(JSON.stringify({ received: true }), {
@@ -101,4 +86,3 @@ serve(async (req) => {
     });
   }
 });
-

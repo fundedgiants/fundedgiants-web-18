@@ -18,13 +18,9 @@ export const useScript = (src: string): { loading: boolean; error: boolean } => 
       return;
     }
 
-    // Check if the SDK is already available on the window object, which is the
-    // most reliable check for readiness.
     const isPaystackLoaded = src.includes('paystack') && !!window.PaystackPop;
-    const isStartButtonLoaded = src.includes('startbutton') && !!window.Startbutton;
 
-
-    if (isPaystackLoaded || isStartButtonLoaded) {
+    if (isPaystackLoaded) {
       console.log(`useScript: SDK already loaded for ${src}.`);
       setLoading(false);
       setError(false);
@@ -53,9 +49,6 @@ export const useScript = (src: string): { loading: boolean; error: boolean } => 
       script.addEventListener('load', handleLoad);
       script.addEventListener('error', handleError);
     } else {
-      // If script tag already exists, just add event listeners.
-      // The check for the window object at the top of the hook will handle
-      // the case where the script has already loaded on a subsequent render.
       script.addEventListener('load', handleLoad);
       script.addEventListener('error', handleError);
     }
