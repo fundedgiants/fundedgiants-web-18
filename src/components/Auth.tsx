@@ -31,7 +31,6 @@ const Auth: React.FC<AuthProps> = ({ embedded = false }) => {
 
     let authError = null;
     let successMessage = '';
-    let redirectPath = '/';
 
     if (isLogin) {
       const { error } = await supabase.auth.signInWithPassword({
@@ -39,10 +38,7 @@ const Auth: React.FC<AuthProps> = ({ embedded = false }) => {
         password: formData.password,
       });
       authError = error;
-      if (!error) {
-        successMessage = 'Logged in successfully!';
-        redirectPath = '/affiliate-portal';
-      }
+      if (!error) successMessage = 'Logged in successfully!';
     } else {
       if (formData.password !== formData.confirmPassword) {
         toast.error("Passwords do not match.");
@@ -71,7 +67,7 @@ const Auth: React.FC<AuthProps> = ({ embedded = false }) => {
     } else {
       toast.success(successMessage);
       if (!embedded) {
-        navigate(redirectPath);
+        navigate('/');
       }
     }
   };
