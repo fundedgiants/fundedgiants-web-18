@@ -22,6 +22,7 @@ import Profile from "./pages/Profile"
 import AffiliatePortal from "./pages/AffiliatePortal"
 import BecomeAffiliate from "./pages/BecomeAffiliate"
 import AffiliateProgram from "./pages/AffiliateProgram"
+import CheckoutPage from "./pages/CheckoutPage"
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
                   <Route path="/affiliate-portal" element={<AffiliatePortal />} />
                   <Route path="/become-affiliate" element={<BecomeAffiliate />} />
                   <Route path="/affiliate-program" element={<AffiliateProgram />} />
+                  <Route path="/checkout" element={<CheckoutPage />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
