@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
@@ -32,11 +33,11 @@ const Checkout = ({ programId, programName, programPrice, addons, onPaymentSucce
   const { toast } = useToast();
   const { affiliateCode: affiliateCodeFromUrl } = useAffiliateContext();
 
-  const [promoCode, setPromoCode] = useState(affiliateCodeFromUrl || '');
+  const [promoCode, setPromoCode] = useState('');
   
   const [isApplyingCode, setIsApplyingCode] = useState(false);
   const [appliedDiscount, setAppliedDiscount] = useState<{ amount: number; code: string | null }>({ amount: 0, code: null });
-  const [affiliateCodeToTie, setAffiliateCodeToTie] = useState<string | null>(affiliateCodeFromUrl);
+  const affiliateCodeToTie = affiliateCodeFromUrl;
 
   const selectedAddons = addons.filter(addon => addon.selected);
   const addonsTotal = selectedAddons.reduce((acc, addon) => acc + addon.price, 0);
@@ -50,17 +51,13 @@ const Checkout = ({ programId, programName, programPrice, addons, onPaymentSucce
       const { data, error } = await supabase.functions.invoke('validate-and-apply-codes', {
         body: {
           totalInitialPrice: initialTotalPrice,
-          discountCode: promoCode,
-          affiliateCode: promoCode,
+          promoCode: promoCode,
         }
       });
 
       if (error) throw error;
       
       setAppliedDiscount({ amount: data.discountAmount, code: data.appliedDiscountCode });
-      if (data.affiliateCodeToTie) {
-        setAffiliateCodeToTie(data.affiliateCodeToTie);
-      }
 
       toast({
         title: 'Code Processed',
@@ -150,16 +147,16 @@ const Checkout = ({ programId, programName, programPrice, addons, onPaymentSucce
         </div>
         <Separator />
         <div className="space-y-2">
-          <label htmlFor="promo-code" className="text-sm font-medium">Discount or Affiliate Code</label>
+          <label htmlFor="promo-code" className="text-sm font-medium">Discount Code</label>
           <div className="flex gap-2">
             <Input id="promo-code" placeholder="Enter code" value={promoCode} onChange={(e) => setPromoCode(e.target.value)} />
             <Button variant="outline" onClick={handleApplyCode} disabled={isApplyingCode || !promoCode}>
               {isApplyingCode ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
             </Button>
           </div>
-          {affiliateCodeToTie && !appliedDiscount.code && (
+          {affiliateCodeToTie && (
             <p className="text-sm text-muted-foreground pt-2">
-              Affiliate code <span className="font-semibold text-primary">{affiliateCodeToTie}</span> will be applied.
+              Affiliate code <span className="font-semibold text-primary">{affiliateCodeToTie}</span> will be tracked for this purchase.
             </p>
           )}
         </div>
