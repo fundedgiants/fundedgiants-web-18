@@ -80,7 +80,7 @@ const Checkout = () => {
       country: '', state: '', city: '', address: '', zipCode: '',
       password: '', confirmPassword: ''
     },
-    paymentMethod: 'klasha'
+    paymentMethod: 'paystack'
   });
 
   const paystackScript = useScript('https://js.paystack.co/v1/inline.js');
@@ -223,10 +223,25 @@ const Checkout = () => {
       }
       return data;
     },
-    enabled: checkoutData.paymentMethod === 'klasha',
+    enabled: ['klasha', 'paystack'].includes(checkoutData.paymentMethod),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
   const ngnRate = ngnRateData?.rate;
+
+  const { data: paystackPublicKey } = useQuery({
+    queryKey: ['paystackPublicKey'],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke('get-paystack-public-key');
+      if (error) {
+        console.error('Failed to fetch Paystack public key:', error);
+        toast.error('Could not configure Paystack payment method.');
+        return null;
+      }
+      return data.publicKey;
+    },
+    enabled: checkoutData.paymentMethod === 'paystack',
+    staleTime: Infinity,
+  });
 
   const handleApplyCodes = async () => {
     if (!discountCode && !affiliateCodeInput) {
@@ -385,6 +400,7 @@ const Checkout = () => {
 
     const payment_provider = checkoutData.paymentMethod === 'crypto' ? 'nowpayments' 
                            : checkoutData.paymentMethod === 'klasha' ? 'klasha' 
+                           : checkoutData.paymentMethod === 'paystack' ? 'paystack'
                            : null;
 
     const trackedAffiliateCode = localStorage.getItem(AFFILIATE_CODE_STORAGE_KEY);
@@ -420,7 +436,59 @@ const Checkout = () => {
 
     const orderId = orderData.id;
 
-    if (checkoutData.paymentMethod === 'crypto') {
+    if (checkoutData.paymentMethod === 'paystack') {
+        if (paystackScript !== 'ready' || !window.PaystackPop) {
+            toast.error("Paystack is not available at the moment. Please try again later.");
+            setIsProcessing(false);
+            return;
+        }
+        if (!paystackPublicKey) {
+            toast.error("Could not configure Paystack. Please select another payment method.");
+            setIsProcessing(false);
+            return;
+        }
+        if (!ngnRate) {
+            toast.error("Could not determine NGN exchange rate. Please try again later.");
+            setIsProcessing(false);
+            return;
+        }
+
+        try {
+            const amountInKobo = Math.round(totalPrice * ngnRate * 100);
+
+            const { data: paymentData, error: paymentError } = await supabase.functions.invoke('create-paystack-payment', {
+                body: {
+                    orderId: orderId,
+                    email: checkoutData.billingInfo.email,
+                    amountInKobo: amountInKobo,
+                },
+            });
+            
+            if (paymentError) throw new Error(paymentError.message);
+            if (!paymentData || !paymentData.access_code) throw new Error('Could not get payment access code.');
+
+            const handler = window.PaystackPop.setup({
+                key: paystackPublicKey,
+                email: checkoutData.billingInfo.email,
+                amount: amountInKobo,
+                access_code: paymentData.access_code,
+                ref: orderId,
+                onClose: () => {
+                    toast.info("Payment window closed.");
+                    setIsProcessing(false);
+                },
+                callback: (response: { reference: string }) => {
+                    // Verification is handled by webhook. Just redirect.
+                    navigate(`/payment-success?reference=${response.reference}`);
+                }
+            });
+            handler.openIframe();
+        } catch (error: any) {
+            toast.error(`Paystack initialization failed: ${error.message}`);
+            await supabase.from('orders').update({ payment_status: 'failed' }).eq('id', orderId);
+            setIsProcessing(false);
+        }
+    } else if (checkoutData.paymentMethod === 'crypto') {
       try {
         const { data: invoiceData, error: invoiceError } = await supabase.functions.invoke('create-nowpayments-invoice', {
             body: { orderId, totalPrice },
@@ -709,7 +777,8 @@ const Checkout = () => {
         const paymentMethods = [
             { value: 'card', label: 'Credit/Debit Card', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> },
             { value: 'crypto', label: 'Cryptocurrency', subtitle: 'via NowPayments', icon: <Bitcoin className="h-8 w-8 text-primary mb-2" /> },
-            { value: 'klasha', label: 'Bank Transfer (NGN)', subtitle: 'via Klasha', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> }
+            { value: 'klasha', label: 'Bank Transfer (NGN)', subtitle: 'via Klasha', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> },
+            { value: 'paystack', label: 'Card, Bank, USSD (NGN)', subtitle: 'via Paystack', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> }
         ];
         return (
           <div className="space-y-6">
@@ -728,7 +797,7 @@ const Checkout = () => {
                   {method.icon}
                   <div className="font-medium text-white mt-1">{method.label}</div>
                    {method.subtitle && <div className="text-sm text-primary">{method.subtitle}</div>}
-                  {method.value === 'klasha' && checkoutData.paymentMethod === method.value && ngnRate && (
+                  {['klasha', 'paystack'].includes(method.value) && checkoutData.paymentMethod === method.value && ngnRate && (
                     <div className="text-xs text-muted-foreground mt-1">
                       (≈ ₦{Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')})
                     </div>
@@ -746,7 +815,7 @@ const Checkout = () => {
   
   const purchaseButtonText = () => {
     const baseText = `Complete Purchase - $${totalPrice.toFixed(2)}`;
-    if (checkoutData.paymentMethod === 'klasha' && ngnRate) {
+    if (['klasha', 'paystack'].includes(checkoutData.paymentMethod) && ngnRate) {
       return `${baseText} / ~₦${Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')}`;
     }
     return baseText;
