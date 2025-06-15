@@ -30,13 +30,13 @@ const Navigation = () => {
                     {user ? (
                         <>
                             <Button asChild variant="ghost" className="text-white hover:bg-primary/10 hover:text-primary">
-                                <Link to="/dashboard">Dashboard</Link>
+                                <Link to="/affiliate-portal">Dashboard</Link>
                             </Button>
                             <Button onClick={() => supabase.auth.signOut()} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">Logout</Button>
                         </>
                     ) : (
                         <Button asChild className="bg-primary hover:bg-primary/90">
-                            <Link to="/auth">Register / Login</Link>
+                            <Link to="/auth">Dashboard</Link>
                         </Button>
                     )}
                     <Button asChild className="bg-primary hover:bg-primary/90">
@@ -61,12 +61,12 @@ const Navigation = () => {
                             <Separator className="my-2 bg-primary/20" />
                             {user ? (
                                 <>
-                                    <Link to="/dashboard" className="text-muted-foreground hover:text-white transition-colors">Dashboard</Link>
+                                    <Link to="/affiliate-portal" className="text-muted-foreground hover:text-white transition-colors">Dashboard</Link>
                                     <Button onClick={() => supabase.auth.signOut()} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white w-full">Logout</Button>
                                 </>
                             ) : (
                                 <Button asChild className="bg-primary hover:bg-primary/90 w-full">
-                                    <Link to="/auth">Register / Login</Link>
+                                    <Link to="/auth">Dashboard</Link>
                                 </Button>
                             )}
                             <Button asChild className="bg-primary hover:bg-primary/90 w-full">

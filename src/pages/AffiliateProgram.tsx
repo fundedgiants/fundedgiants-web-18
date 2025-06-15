@@ -9,9 +9,9 @@ const tiers = [
     icon: Award,
     title: "Tier 1: Bronze Partner",
     commission: "5% recurrent commission",
-    sales: "$0 - $5,000 in sales",
+    sales: "$0 - $5,000",
     bonus: "$5,000 Zeus Trader account bonus",
-    promotion: "Upon completion, graduate to Tier 3!",
+    promotion: "Upon completion, graduate to Tier 2!",
     withdrawal: "Monthly withdrawals",
     color: "bg-orange-400/10 border-orange-400/40",
     iconColor: "text-orange-400"
@@ -20,9 +20,9 @@ const tiers = [
     icon: TrendingUp,
     title: "Tier 2: Silver Partner",
     commission: "7.5% recurrent commission",
-    sales: "$5,001 - $10,000 in sales",
+    sales: "$5,001 - $10,000",
     bonus: "$10,000 Orion Challenge account bonus",
-    promotion: "Complete this tier to unlock more rewards.",
+    promotion: "Upon completion, graduate to Tier 3!",
     withdrawal: "Bi-weekly withdrawals",
     color: "bg-slate-400/10 border-slate-400/40",
     iconColor: "text-slate-400"
@@ -31,7 +31,7 @@ const tiers = [
     icon: Rocket,
     title: "Tier 3: Gold Partner",
     commission: "10% recurrent commission",
-    sales: "$10,001 - $25,000 in sales",
+    sales: "$10,001 - $25,000",
     bonus: "$10,000 Heracles Program account bonus",
     promotion: "Reach this tier to be considered for exclusive partnership.",
     withdrawal: "Weekly withdrawals",
@@ -73,7 +73,7 @@ const AffiliateProgram = () => {
               </CardHeader>
               <CardContent className="flex-grow space-y-3">
                 <p className="flex items-start"><CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" /> <span><strong>Commission:</strong> {tier.commission}</span></p>
-                <p className="flex items-start"><CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" /> <span><strong>Sales Target:</strong> {tier.sales} (monthly or 3-month cumulative)</span></p>
+                <p className="flex items-start"><CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" /> <span><strong>Sales Target:</strong> {tier.sales} in sales (within any 3-month period)</span></p>
                 <p className="flex items-start"><CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" /> <span><strong>Bonus:</strong> {tier.bonus}</span></p>
                 <p className="flex items-start"><CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" /> <span><strong>Withdrawal:</strong> {tier.withdrawal}</span></p>
                 <p className="flex items-start"><CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" /> {tier.promotion}</p>
