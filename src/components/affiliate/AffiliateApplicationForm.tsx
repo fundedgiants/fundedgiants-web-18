@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -51,6 +50,25 @@ const formSchema = z.object({
             code: z.ZodIssueCode.custom,
             path: ["telegram"],
             message,
+        });
+    }
+}).superRefine((data, ctx) => {
+    const socialUrls = [
+        data.x_url,
+        data.tiktok_url,
+        data.instagram_url,
+        data.facebook_url,
+        data.youtube_url,
+    ];
+    const providedUrlsCount = socialUrls.filter(url => url?.trim()).length;
+
+    if (providedUrlsCount < 3) {
+        // Add a single, clear error message. Attaching it to x_url.
+        // The UI will highlight the X/Twitter field, and the user will see the message.
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["x_url"],
+            message: "Please provide at least 3 social media links.",
         });
     }
 });
@@ -139,7 +157,7 @@ const AffiliateApplicationForm = () => {
     const steps = ["Personal Info", "Promotion Details", "Account & Payment"];
     const stepFields: Record<number, (keyof FormValues)[]> = {
         1: ["first_name", "last_name", "email", "whatsapp", "telegram"],
-        2: ["promotion_methods"],
+        2: ["promotion_methods", "x_url", "tiktok_url", "instagram_url", "facebook_url", "youtube_url"],
     };
 
     const handleNext = async () => {

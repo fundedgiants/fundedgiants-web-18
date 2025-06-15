@@ -14,7 +14,7 @@ const PromotionDetailsStep = ({ form }: PromotionDetailsStepProps) => {
       <div className="space-y-4 rounded-lg border p-4 bg-background/50">
           <h3 className="text-lg font-medium">Social Media Presence</h3>
           <p className="text-sm text-muted-foreground">
-              Provide links to your social media profiles where you plan to promote us. (Optional)
+              Provide links to at least 3 of your social media profiles. We especially recommend including X (Twitter) and YouTube if you have them.
           </p>
           <FormField
               control={form.control}
