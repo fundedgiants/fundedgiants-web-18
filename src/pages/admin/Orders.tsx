@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +12,7 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, MoreHorizontal, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { format } from 'date-fns';
 import {
   Pagination,
@@ -98,6 +99,8 @@ const OrdersPage: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [sortConfig, setSortConfig] = useState<{ key: keyof Order; direction: 'ascending' | 'descending' }>({ key: 'created_at', direction: 'descending' });
+
 
   const updateStatusMutation = useMutation({
     mutationFn: updateOrderStatus,
@@ -126,13 +129,41 @@ const OrdersPage: React.FC = () => {
     });
   }, [orders, searchQuery, statusFilter]);
 
+  const requestSort = (key: keyof Order) => {
+    let direction: 'ascending' | 'descending' = 'ascending';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedOrders = useMemo(() => {
+    if (!filteredOrders) return [];
+    let sortableOrders = [...filteredOrders];
+    if (sortConfig !== null) {
+        sortableOrders.sort((a, b) => {
+            if (a[sortConfig.key] === null || a[sortConfig.key] === undefined) return 1;
+            if (b[sortConfig.key] === null || b[sortConfig.key] === undefined) return -1;
+            
+            if (a[sortConfig.key] < b[sortConfig.key]) {
+                return sortConfig.direction === 'ascending' ? -1 : 1;
+            }
+            if (a[sortConfig.key] > b[sortConfig.key]) {
+                return sortConfig.direction === 'ascending' ? 1 : -1;
+            }
+            return 0;
+        });
+    }
+    return sortableOrders;
+  }, [filteredOrders, sortConfig]);
+
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 10;
   
-  const totalPages = filteredOrders ? Math.ceil(filteredOrders.length / ordersPerPage) : 0;
+  const totalPages = sortedOrders ? Math.ceil(sortedOrders.length / ordersPerPage) : 0;
   const indexOfLastOrder = currentPage * ordersPerPage;
   const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-  const currentOrders = filteredOrders ? filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder) : [];
+  const currentOrders = sortedOrders ? sortedOrders.slice(indexOfFirstOrder, indexOfLastOrder) : [];
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -242,12 +273,40 @@ const OrdersPage: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow className="border-primary/20 hover:bg-muted/20">
-                <TableHead>User</TableHead>
-                <TableHead>Program</TableHead>
-                <TableHead>Amount</TableHead>
+                <TableHead>
+                  <Button variant="ghost" onClick={() => requestSort('user_email')}>
+                    User
+                    {sortConfig?.key === 'user_email' ? (
+                        sortConfig.direction === 'ascending' ? <ArrowUp className="ml-2 inline h-4 w-4" /> : <ArrowDown className="ml-2 inline h-4 w-4" />
+                    ) : <ArrowUpDown className="ml-2 inline h-4 w-4 opacity-30" />}
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button variant="ghost" onClick={() => requestSort('program_name')}>
+                    Program
+                    {sortConfig?.key === 'program_name' ? (
+                        sortConfig.direction === 'ascending' ? <ArrowUp className="ml-2 inline h-4 w-4" /> : <ArrowDown className="ml-2 inline h-4 w-4" />
+                    ) : <ArrowUpDown className="ml-2 inline h-4 w-4 opacity-30" />}
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button variant="ghost" onClick={() => requestSort('total_price')}>
+                    Amount
+                    {sortConfig?.key === 'total_price' ? (
+                        sortConfig.direction === 'ascending' ? <ArrowUp className="ml-2 inline h-4 w-4" /> : <ArrowDown className="ml-2 inline h-4 w-4" />
+                    ) : <ArrowUpDown className="ml-2 inline h-4 w-4 opacity-30" />}
+                  </Button>
+                </TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Payment</TableHead>
-                <TableHead>Date</TableHead>
+                <TableHead>
+                  <Button variant="ghost" onClick={() => requestSort('created_at')}>
+                    Date
+                    {sortConfig?.key === 'created_at' ? (
+                        sortConfig.direction === 'ascending' ? <ArrowUp className="ml-2 inline h-4 w-4" /> : <ArrowDown className="ml-2 inline h-4 w-4" />
+                    ) : <ArrowUpDown className="ml-2 inline h-4 w-4 opacity-30" />}
+                  </Button>
+                </TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
