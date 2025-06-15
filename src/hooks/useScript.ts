@@ -11,7 +11,9 @@ export const useScript = (src: string): { loading: boolean; error: boolean } => 
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    console.log(`useScript effect started for: ${src}`);
     if (!src) {
+      console.log(`useScript: No src provided, exiting.`);
       setLoading(false);
       return;
     }
@@ -22,39 +24,52 @@ export const useScript = (src: string): { loading: boolean; error: boolean } => 
     const isPaystackLoaded = src.includes('paystack') && !!window.PaystackPop;
 
     if (isKlashaLoaded || isPaystackLoaded) {
+      console.log(`useScript: SDK already loaded for ${src}.`);
       setLoading(false);
       return;
     }
 
     let script = document.querySelector(`script[src="${src}"]`) as HTMLScriptElement;
+    if (script) {
+        console.log(`useScript: Found existing script tag for ${src}.`);
+    }
 
     // If a script tag with the same src exists, but the SDK is not on the window,
     // it might be a broken script from a previous attempt. Remove it.
     if (script && ((src.includes('klasha') && !isKlashaLoaded) || (src.includes('paystack') && !isPaystackLoaded))) {
+      console.log(`useScript: Existing script for ${src} seems broken, removing it.`);
       script.remove();
       script = null;
     }
 
-    const handleLoad = () => setLoading(false);
+    const handleLoad = () => {
+      console.log(`useScript: Script loaded successfully: ${src}`);
+      setLoading(false);
+    };
     const handleError = (event: Event | string) => {
-      console.error('Script loading failed:', { src, event });
+      console.error('useScript: Script loading failed:', { src, event });
       setError(true);
       setLoading(false);
     };
 
     if (!script) {
+      console.log(`useScript: Creating new script tag for ${src}.`);
       script = document.createElement('script');
       script.src = src;
       script.async = true;
       document.body.appendChild(script);
     }
 
+    console.log(`useScript: Adding event listeners for ${src}.`);
     script.addEventListener('load', handleLoad);
     script.addEventListener('error', handleError);
 
     return () => {
-      script.removeEventListener('load', handleLoad);
-      script.removeEventListener('error', handleError);
+      console.log(`useScript: Cleaning up effect for ${src}.`);
+      if (script) {
+        script.removeEventListener('load', handleLoad);
+        script.removeEventListener('error', handleError);
+      }
     };
   }, [src]);
 
