@@ -11,6 +11,13 @@ import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import KlashaPaymentButton from './KlashaPaymentButton';
 
+declare global {
+  interface Window {
+    KlashaClient?: any;
+    PaystackPop?: any;
+  }
+}
+
 interface CheckoutState {
   program: string;
   accountSize: string;
@@ -408,6 +415,12 @@ const Checkout = () => {
       await supabase.from('orders').update({ payment_status: 'cancelled' }).eq('id', orderId);
       setIsProcessing(false);
     } else if (checkoutData.paymentMethod === 'klasha') {
+      if (!window.KlashaClient) {
+        toast.error("Payment provider script is still loading. Please wait a moment and try again.");
+        setIsProcessing(false);
+        return;
+      }
+
       if (!ngnRate || !klashaConfigData?.publicKey) {
           toast.error("Payment provider not ready. Please wait a moment and try again.");
           setIsProcessing(false);
@@ -669,7 +682,7 @@ const Checkout = () => {
         const paymentMethods = [
             { value: 'card', label: 'Credit/Debit Card', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> },
             { value: 'crypto', label: 'Cryptocurrency', subtitle: 'via NowPayments', icon: <Bitcoin className="h-8 w-8 text-primary mb-2" /> },
-            { value: 'klasha', label: 'Nigerian Naira', subtitle: 'via Klasha', icon: <span className="text-primary text-3xl font-bold mb-1">K</span> }
+            { value: 'klasha', label: 'Nigerian Naira', subtitle: 'via Klasha', icon: <span className="text-primary text-3xl font-bold mb-1">₦</span> }
         ];
         return (
           <div className="space-y-6">
