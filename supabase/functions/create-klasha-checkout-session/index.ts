@@ -1,85 +1,89 @@
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
-import { corsHeaders } from '../_shared/cors.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-serve(async (req: Request) => {
+import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'
+import { corsHeaders } from '../_shared/cors.ts'
+
+const KLASHA_API_URL = 'https://gate.klasha.com/checkout/v2/checkout/charge'; // Using V2 LIVE endpoint
+
+serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const { programId, programName, programPrice, totalPrice, selectedAddons, userId, email, affiliateCode } = await req.json();
-    const klashaSecretKey = Deno.env.get('KLASHA_SECRET_KEY');
+    const { orderId, totalPrice, email, redirectBaseUrl, firstName, lastName, phone } = await req.json()
+
+    const requiredFields = { orderId, totalPrice, email, redirectBaseUrl, firstName, lastName, phone };
+    const missingFields = Object.entries(requiredFields)
+      .filter(([, value]) => !value)
+      .map(([key]) => key);
+
+    if (missingFields.length > 0) {
+      const errorMsg = `Missing required payment details: ${missingFields.join(', ')}`;
+      console.error(errorMsg);
+      return new Response(JSON.stringify({ error: errorMsg }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     
-    if (!klashaSecretKey) throw new Error("Klasha secret key not found.");
-
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
-
-    const { data: order, error: orderError } = await supabaseAdmin
-      .from('orders')
-      .insert({
-        program_id: programId,
-        program_name: programName,
-        program_price: programPrice,
-        total_price: totalPrice,
-        selected_addons: selectedAddons,
-        user_id: userId,
-        payment_provider: 'klasha',
-        affiliate_code: affiliateCode, // Save the affiliate code
-      })
-      .select()
-      .single();
-
-    if (orderError) throw orderError;
-    
-    const klashaApiUrl = 'https://api.klasha.com/v1/checkouts';
-    const callbackUrl = `${Deno.env.get('SUPABASE_URL')}/api/klasha-callback?orderId=${order.id}`;
+    const successUrl = `${redirectBaseUrl}/payment-success?reference=${orderId}`;
 
     const klashaPayload = {
-      amount: totalPrice,
-      currency: 'USD',
+      tx_ref: orderId,
+      amount: Math.round(totalPrice * 100), // V2 API expects amount in the smallest currency unit (cents)
+      currency: "USD",
       email: email,
-      phone_number: '', // Klasha requires a phone number, you might need to fetch it from user profile
-      firstname: '', // Klasha requires a firstname, you might need to fetch it from user profile
-      lastname: '', // Klasha requires a lastname, you might need to fetch it from user profile
-      redirect_url: callbackUrl,
-      payment_options: ['card', 'bank', 'ussd', 'qr_code'],
+      redirect_url: successUrl,
+      narration: `Payment for order ${orderId}`,
+      kit: {
+        phone_number: phone,
+        first_name: firstName,
+        last_name: lastName,
+      }
     };
+    
+    console.log("Klasha V2 LIVE Payload:", klashaPayload);
 
-    const klashaResponse = await fetch(klashaApiUrl, {
+    const klashaPublicKey = Deno.env.get('KLASHA_PUBLIC_KEY')
+    if (!klashaPublicKey) {
+      throw new Error('Klasha public key not found in secrets.');
+    }
+
+    const klashaResponse = await fetch(KLASHA_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${klashaSecretKey}`,
+        'x-api-key': klashaPublicKey, // V2 checkout uses the public key
       },
       body: JSON.stringify(klashaPayload),
     });
+    
+    const responseData = await klashaResponse.json();
+    console.log("Klasha API V2 LIVE Response:", responseData);
 
-    const klashaData = await klashaResponse.json();
-
-    if (!klashaResponse.ok) {
-      console.error('Klasha API Error:', klashaData);
-      throw new Error(klashaData.message || 'Failed to create Klasha checkout session');
+    if (!klashaResponse.ok || responseData.status !== 'success') {
+        const errorMessage = responseData.message || 'Failed to create Klasha checkout session.';
+        console.error("Klasha API Error:", errorMessage, responseData);
+        throw new Error(errorMessage);
+    }
+    
+    if (!responseData.data || !responseData.data.checkout_url) {
+        console.error("Klasha API Error: No checkout_url in response", responseData);
+        throw new Error('Could not retrieve payment URL from Klasha.');
     }
 
-    return new Response(
-      JSON.stringify({
-        checkout_url: klashaData.data.checkout_url,
-        order_id: order.id,
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      }
-    );
-
+    return new Response(JSON.stringify({ redirectUrl: responseData.data.checkout_url }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200,
+    })
   } catch (error) {
+    console.error("Error creating Klasha checkout session:", error.message, error.stack);
+    if (error.cause) {
+      console.error("Cause of error:", error.cause);
+    }
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
-    });
+    })
   }
-});
+})

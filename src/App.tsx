@@ -1,67 +1,53 @@
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Navigation from "./components/Navigation";
+import Index from "./pages/Index";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import FAQ from "./pages/FAQ";
+import AuthPage from "./pages/AuthPage";
+import Checkout from "./components/Checkout";
+import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./layouts/ProtectedRoute";
+import AffiliatePortal from "./pages/AffiliatePortal";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import BecomeAffiliate from "./pages/BecomeAffiliate";
+import AffiliateProgram from "./pages/AffiliateProgram";
 
-import { Toaster } from "@/components/ui/sonner"
-import { TooltipProvider } from "@/components/ui/tooltip"
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom"
-import Navigation from "@/components/Navigation"
-import { ThemeProvider } from "@/contexts/theme-provider"
-import { AffiliateProvider } from "@/contexts/AffiliateContext"
-import Index from "@/pages/Index"
-import About from "@/pages/About"
-import NotFound from "@/pages/NotFound"
-import Pricing from "@/pages/Pricing"
-import Contact from "@/pages/Contact"
-import Terms from "@/pages/Terms"
-import Privacy from "@/pages/Privacy"
-import FAQ from "@/pages/FAQ"
-import ProtectedRoute from "@/layouts/ProtectedRoute"
-import Footer from "@/components/Footer"
-import Programs from "@/pages/Programs"
-import ProgramDetails from "@/pages/ProgramDetails"
-import TradingAccount from "@/pages/TradingAccount"
-import Profile from "@/pages/Profile"
-import AffiliatePortal from "@/pages/AffiliatePortal"
-import BecomeAffiliate from "@/pages/BecomeAffiliate"
-import AffiliateProgram from "@/pages/AffiliateProgram"
-import AuthPage from "@/pages/AuthPage"
+const queryClient = new QueryClient();
 
-function App() {
-  return (
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <TooltipProvider>
-        <Toaster />
-        <Router>
-          <AffiliateProvider> {/* Wrap routes with the provider */}
-            <div className="flex flex-col min-h-screen">
-              <Navigation />
-              <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/pricing" element={<Pricing />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/terms" element={<Terms />} />
-                  <Route path="/privacy" element={<Privacy />} />
-                  <Route path="/faq" element={<FAQ />} />
-                  <Route path="/programs" element={<Programs />} />
-                  <Route path="/programs/:programId" element={<ProgramDetails />} />
-                  <Route path="/auth" element={<AuthPage />} />
-                  <Route element={<ProtectedRoute />}>
-                    <Route path="/trading-account/:id" element={<TradingAccount />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/affiliate-portal" element={<AffiliatePortal />} />
-                    <Route path="/become-affiliate" element={<BecomeAffiliate />} />
-                  </Route>
-                  <Route path="/affiliate-program" element={<AffiliateProgram />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </main>
-              <Footer />
-            </div>
-          </AffiliateProvider>
-        </Router>
-      </TooltipProvider>
-    </ThemeProvider>
-  )
-}
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner richColors />
+      <BrowserRouter>
+        <Navigation />
+        <div className="pt-16">
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/affiliate-program" element={<AffiliateProgram />} />
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route path="/become-affiliate" element={<BecomeAffiliate />} />
+            
+            <Route element={<ProtectedRoute />}>
+              <Route path="/affiliate-portal" element={<AffiliatePortal />} />
+            </Route>
 
-export default App
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
+
+export default App;
