@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -35,6 +34,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Order {
     id: string;
@@ -89,6 +96,9 @@ const OrdersPage: React.FC = () => {
     queryFn: fetchOrders,
   });
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
   const updateStatusMutation = useMutation({
     mutationFn: updateOrderStatus,
     onSuccess: () => {
@@ -101,19 +111,38 @@ const OrdersPage: React.FC = () => {
     },
   });
 
+  const filteredOrders = useMemo(() => {
+    if (!orders) return [];
+    return orders.filter(order => {
+      const searchLower = searchQuery.toLowerCase();
+      const matchesSearch =
+        order.user_email.toLowerCase().includes(searchLower) ||
+        order.program_name.toLowerCase().includes(searchLower) ||
+        order.id.toLowerCase().includes(searchLower);
+      
+      const matchesStatus = statusFilter === 'all' || order.payment_status === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [orders, searchQuery, statusFilter]);
+
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 10;
   
-  const totalPages = orders ? Math.ceil(orders.length / ordersPerPage) : 0;
+  const totalPages = filteredOrders ? Math.ceil(filteredOrders.length / ordersPerPage) : 0;
   const indexOfLastOrder = currentPage * ordersPerPage;
   const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-  const currentOrders = orders ? orders.slice(indexOfFirstOrder, indexOfLastOrder) : [];
+  const currentOrders = filteredOrders ? filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder) : [];
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
   };
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
 
   const renderPagination = () => {
     if (totalPages <= 1) return null;
@@ -188,6 +217,27 @@ const OrdersPage: React.FC = () => {
     <div>
       <h1 className="text-3xl font-bold mb-6">Manage Orders</h1>
       <Card className="bg-card/30 border-primary/30">
+        <div className="flex items-center gap-4 p-4 border-b border-primary/20">
+          <Input
+            placeholder="Search by email, program, or order ID..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="max-w-sm"
+          />
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="failed">Failed</SelectItem>
+              <SelectItem value="refunded">Refunded</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
@@ -202,64 +252,72 @@ const OrdersPage: React.FC = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {currentOrders.map((order) => (
-                <TableRow key={order.id} className="border-primary/20 hover:bg-muted/20">
-                  <TableCell className="font-medium">{order.user_email}</TableCell>
-                  <TableCell>{order.program_name}</TableCell>
-                  <TableCell>${order.total_price.toFixed(2)}</TableCell>
-                  <TableCell>
-                    <Badge variant={getStatusBadgeVariant(order.payment_status)} className={cn("capitalize", {
-                      "bg-green-500/20 text-green-500 border-green-500/30": order.payment_status === 'completed',
-                    })}>
-                      {order.payment_status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{order.payment_provider || 'N/A'}</TableCell>
-                  <TableCell>{format(new Date(order.created_at), 'PPP')}</TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'completed' })}
-                          disabled={order.payment_status === 'completed' || updateStatusMutation.isPending}
-                        >
-                          Mark as Completed
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'pending' })}
-                          disabled={order.payment_status === 'pending' || updateStatusMutation.isPending}
-                        >
-                          Mark as Pending
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'failed' })}
-                          disabled={order.payment_status === 'failed' || updateStatusMutation.isPending}
-                        >
-                          Mark as Failed
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'refunded' })}
-                          disabled={order.payment_status === 'refunded' || updateStatusMutation.isPending}
-                        >
-                          Mark as Refunded
-                        </DropdownMenuItem>
-                         <DropdownMenuItem
-                          onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'cancelled' })}
-                          disabled={order.payment_status === 'cancelled' || updateStatusMutation.isPending}
-                        >
-                          Mark as Cancelled
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+              {currentOrders.length > 0 ? (
+                currentOrders.map((order) => (
+                  <TableRow key={order.id} className="border-primary/20 hover:bg-muted/20">
+                    <TableCell className="font-medium">{order.user_email}</TableCell>
+                    <TableCell>{order.program_name}</TableCell>
+                    <TableCell>${order.total_price.toFixed(2)}</TableCell>
+                    <TableCell>
+                      <Badge variant={getStatusBadgeVariant(order.payment_status)} className={cn("capitalize", {
+                        "bg-green-500/20 text-green-500 border-green-500/30": order.payment_status === 'completed',
+                      })}>
+                        {order.payment_status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{order.payment_provider || 'N/A'}</TableCell>
+                    <TableCell>{format(new Date(order.created_at), 'PPP')}</TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'completed' })}
+                            disabled={order.payment_status === 'completed' || updateStatusMutation.isPending}
+                          >
+                            Mark as Completed
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'pending' })}
+                            disabled={order.payment_status === 'pending' || updateStatusMutation.isPending}
+                          >
+                            Mark as Pending
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'failed' })}
+                            disabled={order.payment_status === 'failed' || updateStatusMutation.isPending}
+                          >
+                            Mark as Failed
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'refunded' })}
+                            disabled={order.payment_status === 'refunded' || updateStatusMutation.isPending}
+                          >
+                            Mark as Refunded
+                          </DropdownMenuItem>
+                           <DropdownMenuItem
+                            onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'cancelled' })}
+                            disabled={order.payment_status === 'cancelled' || updateStatusMutation.isPending}
+                          >
+                            Mark as Cancelled
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={7} className="h-24 text-center">
+                    No orders found.
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </CardContent>
