@@ -1,3 +1,4 @@
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -20,6 +21,8 @@ const formSchema = z.object({
   first_name: z.string().min(2, "First name must be at least 2 characters."),
   last_name: z.string().min(2, "Last name must be at least 2 characters."),
   email: z.string().email("Please enter a valid email address."),
+  password: z.string().min(6, "Password must be at least 6 characters."),
+  confirmPassword: z.string(),
   phone: z.string().optional(),
   whatsapp: z.string().optional(),
   telegram: z.string().optional(),
@@ -38,7 +41,11 @@ const formSchema = z.object({
     required_error: "You need to select a payment network.",
   }),
   wallet_address: z.string().min(20, "Please enter a valid wallet address."),
-}).refine((data) => !!data.whatsapp?.trim() || !!data.telegram?.trim(), {
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+})
+.refine((data) => !!data.whatsapp?.trim() || !!data.telegram?.trim(), {
     message: "Please provide either a WhatsApp number or a Telegram username.",
     path: ["whatsapp"],
 })
@@ -79,6 +86,8 @@ const AffiliateApplicationForm = () => {
             first_name: "",
             last_name: "",
             email: user?.email || "",
+            password: "",
+            confirmPassword: "",
             phone: "",
             whatsapp: "",
             telegram: "",
@@ -95,11 +104,32 @@ const AffiliateApplicationForm = () => {
     });
 
     async function onSubmit(values: FormValues) {
-        if (!user) {
-            toast.error("You must be logged in to apply.");
+        // 1. Sign up the user
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+            email: values.email,
+            password: values.password,
+            options: {
+                data: {
+                    first_name: values.first_name,
+                    last_name: values.last_name,
+                },
+                emailRedirectTo: `${window.location.origin}/affiliate-portal`,
+            },
+        });
+
+        if (signUpError) {
+            toast.error(signUpError.message);
             return;
         }
 
+        if (!signUpData.user) {
+            toast.error("An unexpected error occurred during sign up. Please try again.");
+            return;
+        }
+        
+        const newUserId = signUpData.user.id;
+
+        // 2. Create the affiliate record
         const personal_info = {
             first_name: values.first_name,
             last_name: values.last_name,
@@ -124,31 +154,32 @@ const AffiliateApplicationForm = () => {
             address: values.wallet_address,
         };
 
-        const { error } = await supabase.from("affiliates").insert({
-            user_id: user.id,
+        const { error: affiliateInsertError } = await supabase.from("affiliates").insert({
+            user_id: newUserId,
             personal_info,
             affiliate_code: values.affiliate_code,
             social_media_urls: Object.keys(filtered_social_media_urls).length > 0 ? filtered_social_media_urls : null,
             promotion_methods: values.promotion_methods,
             payment_info,
+            status: 'approved', // Auto-approve the affiliate
         });
 
-        if (error) {
-            if (error.code === '23505') { // unique constraint violation
+        if (affiliateInsertError) {
+            if (affiliateInsertError.code === '23505') { // unique constraint violation
                  toast.error("This affiliate code is already taken. Please choose another one.");
             } else {
-                 toast.error(error.message);
+                 toast.error(affiliateInsertError.message);
             }
         } else {
-            toast.success("Application submitted successfully! We will review it shortly.");
-            await queryClient.invalidateQueries({ queryKey: ['affiliateData', user.id] });
-            navigate("/affiliate-portal");
+            toast.success("Application submitted! Please check your email to verify your account and log in.");
+            await queryClient.invalidateQueries({ queryKey: ['affiliateData', newUserId] });
+            navigate("/");
         }
     }
 
     const steps = ["Personal Info", "Promotion Details", "Account & Payment"];
     const stepFields: Record<number, (keyof FormValues)[]> = {
-        1: ["first_name", "last_name", "email", "whatsapp", "telegram"],
+        1: ["first_name", "last_name", "email", "password", "confirmPassword", "whatsapp", "telegram"],
         2: ["promotion_methods", "x_url", "tiktok_url", "instagram_url", "facebook_url", "youtube_url"],
     };
 

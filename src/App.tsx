@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -37,10 +36,10 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route path="/become-affiliate" element={<BecomeAffiliate />} />
             
             <Route element={<ProtectedRoute />}>
               <Route path="/affiliate-portal" element={<AffiliatePortal />} />
-              <Route path="/become-affiliate" element={<BecomeAffiliate />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
