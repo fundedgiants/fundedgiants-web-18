@@ -6,12 +6,6 @@ verify_jwt = true
 [functions.nowpayments-ipn]
 verify_jwt = false
 
-[functions.klasha-webhook]
-verify_jwt = false
-
-[functions.get-klasha-config]
-verify_jwt = true
-
 [functions.startbutton-webhook]
 verify_jwt = false
 

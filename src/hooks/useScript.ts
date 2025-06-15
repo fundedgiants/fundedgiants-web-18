@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 
 /**
@@ -20,12 +19,11 @@ export const useScript = (src: string): { loading: boolean; error: boolean } => 
 
     // Check if the SDK is already available on the window object, which is the
     // most reliable check for readiness.
-    const isKlashaLoaded = src.includes('klasha') && !!window.KlashaClient;
     const isPaystackLoaded = src.includes('paystack') && !!window.PaystackPop;
     const isStartButtonLoaded = src.includes('startbutton') && !!window.Startbutton;
 
 
-    if (isKlashaLoaded || isPaystackLoaded || isStartButtonLoaded) {
+    if (isPaystackLoaded || isStartButtonLoaded) {
       console.log(`useScript: SDK already loaded for ${src}.`);
       setLoading(false);
       return;
@@ -39,7 +37,6 @@ export const useScript = (src: string): { loading: boolean; error: boolean } => 
     // If a script tag with the same src exists, but the SDK is not on the window,
     // it might be a broken script from a previous attempt. Remove it.
     if (script && (
-        (src.includes('klasha') && !isKlashaLoaded) || 
         (src.includes('paystack') && !isPaystackLoaded) ||
         (src.includes('startbutton') && !isStartButtonLoaded)
     )) {
