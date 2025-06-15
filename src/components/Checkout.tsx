@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, CreditCard, Loader2 } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,16 +11,6 @@ import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AFFILIATE_CODE_STORAGE_KEY } from '@/hooks/useAffiliateTracking';
-import QorePayPaymentDetails from './QorePayPaymentDetails';
-
-interface QorePayDetails {
-  bank_name: string;
-  account_number: string;
-  account_name: string;
-  amount: string;
-  currency: string;
-  expires_at: string;
-}
 
 interface CheckoutState {
   program: string;
@@ -60,7 +50,6 @@ const Checkout = () => {
     affiliateToCredit: string | null;
     message: string;
   } | null>(null);
-  const [qorePayDetails, setQorePayDetails] = useState<QorePayDetails | null>(null);
   
   const [checkoutData, setCheckoutData] = useState<CheckoutState>({
     program: searchParams.get('program') || 'heracles',
@@ -82,7 +71,7 @@ const Checkout = () => {
       password: '',
       confirmPassword: ''
     },
-    paymentMethod: 'qorepay' // Default to QorePay
+    paymentMethod: 'credit-card' // Default to Credit Card
   });
 
   useEffect(() => {
@@ -205,27 +194,6 @@ const Checkout = () => {
   const addOnsPrice = selectedAddOns.reduce((sum, addon) => sum + (basePrice * (addon.pricePercent / 100)), 0);
   const totalPrice = discountedBasePrice + addOnsPrice;
 
-  const { data: ngnRateData } = useQuery({
-    queryKey: ['exchange_rate', 'USD_NGN'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('exchange_rates')
-        .select('rate')
-        .eq('currency_pair', 'USD_NGN')
-        .single();
-      
-      if (error) {
-        console.error("Failed to fetch NGN exchange rate:", error.message);
-        toast.error("Could not fetch NGN exchange rate.");
-        return null;
-      }
-      return data;
-    },
-    enabled: checkoutData.paymentMethod === 'qorepay',
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-  const ngnRate = ngnRateData?.rate;
-
   const handleApplyCodes = async () => {
     if (!discountCode && !affiliateCodeInput) {
         toast.info("Please enter a discount or affiliate code.");
@@ -270,10 +238,6 @@ const Checkout = () => {
   };
 
   const handlePrevious = () => {
-    if (qorePayDetails) {
-      setQorePayDetails(null); // Go back from payment details to payment selection
-      return;
-    }
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
@@ -385,7 +349,7 @@ const Checkout = () => {
       toast.warning(`Could not save billing info: ${profileError.message}`);
     }
 
-    const payment_provider = 'qorepay';
+    const payment_provider = checkoutData.paymentMethod === 'nowpayments' ? 'nowpayments' : 'credit-card';
 
     const trackedAffiliateCode = localStorage.getItem(AFFILIATE_CODE_STORAGE_KEY);
     const finalAffiliateToCredit = appliedDiscount?.affiliateToCredit || trackedAffiliateCode;
@@ -420,39 +384,26 @@ const Checkout = () => {
 
     const orderId = orderData.id;
 
-    if (checkoutData.paymentMethod === 'qorepay') {
-      if (!ngnRate) {
-        toast.error("Could not fetch NGN exchange rate. Please try again.");
-        setIsProcessing(false);
-        return;
-      }
+    if (checkoutData.paymentMethod === 'nowpayments') {
       try {
-        const { data: paymentData, error: paymentError } = await supabase.functions.invoke('create-qorepay-payment', {
-            body: { 
-              orderId,
-              totalPrice: Math.ceil(totalPrice * ngnRate),
-              currency: 'NGN',
-              customer: {
-                name: `${checkoutData.billingInfo.firstName} ${checkoutData.billingInfo.lastName}`,
-                email: checkoutData.billingInfo.email,
-                phone_number: checkoutData.billingInfo.phone,
-              },
-              redirectUrl: `${window.location.origin}/payment-success?order_id=${orderId}`
-            },
+        const { data: invoiceData, error: invoiceError } = await supabase.functions.invoke('create-nowpayments-invoice', {
+            body: { orderId, totalPrice },
         });
 
-        if (paymentError) {
-            throw new Error(paymentError.message);
-        }
-        
-        setQorePayDetails(paymentData);
+        if (invoiceError) throw invoiceError;
+        if (invoiceData.error) throw new Error(invoiceData.error.details?.message || invoiceData.error);
+        if (!invoiceData.invoice_url) throw new Error("Failed to get payment URL.");
 
+        window.location.href = invoiceData.invoice_url;
       } catch (error: any) {
-          toast.error(`Payment initialization failed: ${error.message}`);
+          toast.error(`Crypto payment failed: ${error.message}`);
           await supabase.from('orders').update({ payment_status: 'failed' }).eq('id', orderId);
-      } finally {
-        setIsProcessing(false);
+          setIsProcessing(false);
       }
+    } else if (checkoutData.paymentMethod === 'credit-card') {
+        toast.info("Credit/Debit Card payment option is coming soon.");
+        await supabase.from('orders').update({ payment_status: 'failed' }).eq('id', orderId);
+        setIsProcessing(false);
     } else {
       toast.error("Please select a valid payment method.");
       setIsProcessing(false);
@@ -688,11 +639,9 @@ const Checkout = () => {
         );
 
       case 5:
-        if (qorePayDetails) {
-          return <QorePayPaymentDetails details={qorePayDetails} />;
-        }
         const paymentMethods = [
-            { value: 'qorepay', label: 'NGN Bank Transfer', subtitle: 'via QorePay', icon: <div className="h-8 w-8 text-primary mb-2 flex items-center justify-center text-3xl font-bold">₦</div> },
+            { value: 'credit-card', label: 'Credit/Debit Card', subtitle: 'Stripe, etc.', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> },
+            { value: 'nowpayments', label: 'Cryptocurrency', subtitle: 'via NowPayments', icon: <img src="https://nowpayments.io/images/logo/nowpayments-logo.svg" alt="NowPayments" className="h-8 mb-2" /> },
         ];
         return (
           <div className="space-y-6">
@@ -711,14 +660,12 @@ const Checkout = () => {
                   {method.icon}
                   <div className="font-medium text-white mt-1">{method.label}</div>
                    {method.subtitle && <div className="text-sm text-primary">{method.subtitle}</div>}
-                  {method.value === 'qorepay' && checkoutData.paymentMethod === method.value && ngnRate && (
-                    <div className="text-xs text-muted-foreground mt-1">
-                      (≈ ₦{Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')})
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
+            {checkoutData.paymentMethod === 'credit-card' && (
+              <p className="text-center text-muted-foreground pt-4">Credit/Debit card payments are currently under development. Please select another option or check back soon.</p>
+            )}
           </div>
         );
 
@@ -727,13 +674,7 @@ const Checkout = () => {
     }
   };
   
-  const purchaseButtonText = () => {
-    const baseText = `Complete Purchase - $${totalPrice.toFixed(2)}`;
-    if (checkoutData.paymentMethod === 'qorepay' && ngnRate) {
-      return `${baseText} / ~₦${Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')}`;
-    }
-    return baseText;
-  }
+  const purchaseButtonText = `Complete Purchase - $${totalPrice.toFixed(2)}`;
 
   if (authLoading) {
     return (
@@ -746,26 +687,11 @@ const Checkout = () => {
   let buttonDisabledReason = '';
   if (isProcessing) {
     buttonDisabledReason = 'Processing your request...';
-  } else if (checkoutData.paymentMethod === 'qorepay' && !ngnRate) {
-    buttonDisabledReason = 'Loading exchange rate...';
+  } else if (checkoutData.paymentMethod === 'credit-card') {
+    buttonDisabledReason = 'Card payments are coming soon.';
   }
   
-  const isButtonDisabled = isProcessing || (checkoutData.paymentMethod === 'qorepay' && !ngnRate);
-
-  if (qorePayDetails) {
-    return (
-       <div className="min-h-screen bg-background pt-20 pb-10">
-          <div className="container mx-auto px-4">
-            <div className="max-w-xl mx-auto">
-              <QorePayPaymentDetails details={qorePayDetails} />
-              <div className="text-center mt-4">
-                <Button variant="outline" onClick={() => navigate('/')}>Back to Home</Button>
-              </div>
-            </div>
-          </div>
-        </div>
-    )
-  }
+  const isButtonDisabled = isProcessing || checkoutData.paymentMethod === 'credit-card';
 
   return (
     <div className="min-h-screen bg-background pt-20 pb-10">
@@ -834,7 +760,7 @@ const Checkout = () => {
                     <Button
                       variant="outline"
                       onClick={handlePrevious}
-                      disabled={(currentStep === 1 && !qorePayDetails) || isProcessing}
+                      disabled={currentStep === 1 || isProcessing}
                       className="border-primary text-primary hover:bg-primary hover:text-white"
                     >
                       <ArrowLeft className="h-4 w-4 mr-2" />
@@ -857,7 +783,7 @@ const Checkout = () => {
                                 disabled={isButtonDisabled}
                               >
                                 {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {purchaseButtonText()}
+                                {purchaseButtonText}
                               </Button>
                             </div>
                           </TooltipTrigger>

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,9 +19,9 @@ const PaymentSuccess = () => {
       // The webhook will handle the final order confirmation. 
       // This page provides immediate feedback to the user that the payment process has been initiated.
       setStatus('success');
-      const successMessage = 'Payment initiated! Your order is being processed. You will be notified via email once your payment is confirmed by the bank.';
+      const successMessage = 'Your payment is being processed. You will be notified via email once your order is confirmed.';
       setMessage(successMessage);
-      toast.success("Payment initiated successfully!");
+      toast.success("Payment is being processed!");
       setTimeout(() => navigate('/'), 7000); // Redirect after 7 seconds
     } else {
       setStatus('error');
