@@ -9,73 +9,74 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { totalInitialPrice, promoCode } = await req.json();
+    const { totalInitialPrice, discountCode, affiliateCode } = await req.json();
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    if (!promoCode) {
-      return new Response(JSON.stringify({ error: 'Please enter a code.' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
-      });
-    }
-
     let discountFromDiscountCode = 0;
     let discountFromAffiliate = 0;
+    let appliedDiscountCode = null;
+    let affiliateForAttribution = affiliateCode || null;
 
-    // 1. Validate as a standard discount code
-    const { data: dc, error: dcError } = await supabaseAdmin
-      .from('discount_codes')
-      .select('*')
-      .eq('code', promoCode)
-      .eq('is_active', true)
-      .single();
+    // 1. Validate Discount Code
+    if (discountCode) {
+      const { data: dc, error: dcError } = await supabaseAdmin
+        .from('discount_codes')
+        .select('*')
+        .eq('code', discountCode)
+        .eq('is_active', true)
+        .single();
 
-    if (dc && (!dc.expires_at || new Date(dc.expires_at) > new Date())) {
-      if (dc.discount_type === 'percentage') {
-        discountFromDiscountCode = totalInitialPrice * (dc.discount_value / 100);
-      } else {
-        discountFromDiscountCode = dc.discount_value;
+      if (dc && (!dc.expires_at || new Date(dc.expires_at) > new Date())) {
+        if (dc.discount_type === 'percentage') {
+          discountFromDiscountCode = totalInitialPrice * (dc.discount_value / 100);
+        } else {
+          discountFromDiscountCode = dc.discount_value;
+        }
       }
     }
 
-    // 2. Validate as an affiliate code that provides a discount
-    const { data: af, error: afError } = await supabaseAdmin
-      .from('affiliates')
-      .select('*')
-      .eq('affiliate_code', promoCode)
-      .eq('status', 'approved')
-      .single();
-    
-    if (af && af.has_discount && af.affiliate_discount_value) {
-      if (af.affiliate_discount_type === 'percentage') {
-        discountFromAffiliate = totalInitialPrice * (af.affiliate_discount_value / 100);
-      } else {
-        discountFromAffiliate = af.affiliate_discount_value;
+    // 2. Validate Affiliate Code and check for its discount
+    if (affiliateCode) {
+      const { data: af, error: afError } = await supabaseAdmin
+        .from('affiliates')
+        .select('*')
+        .eq('affiliate_code', affiliateCode)
+        .eq('status', 'approved')
+        .single();
+      
+      if (af && af.has_discount && af.affiliate_discount_value) {
+        if (af.affiliate_discount_type === 'percentage') {
+          discountFromAffiliate = totalInitialPrice * (af.affiliate_discount_value / 100);
+        } else {
+          discountFromAffiliate = af.affiliate_discount_value;
+        }
       }
     }
 
-    // 3. Determine the best discount to apply from the single entered code
-    const finalDiscountAmount = Math.max(discountFromDiscountCode, discountFromAffiliate);
-    const appliedDiscountCode = finalDiscountAmount > 0 ? promoCode : null;
+    // 3. Determine the best discount to apply
+    let finalDiscountAmount = 0;
+    if (discountFromDiscountCode > discountFromAffiliate) {
+      finalDiscountAmount = discountFromDiscountCode;
+      appliedDiscountCode = discountCode;
+    } else if (discountFromAffiliate > 0) {
+      finalDiscountAmount = discountFromAffiliate;
+      appliedDiscountCode = affiliateCode;
+    }
 
     // Ensure discount doesn't exceed total price
-    const cappedDiscount = Math.min(finalDiscountAmount, totalInitialPrice);
+    finalDiscountAmount = Math.min(finalDiscountAmount, totalInitialPrice);
     
-    const finalPrice = totalInitialPrice - cappedDiscount;
-
-    let message = 'Invalid code entered.';
-    if(appliedDiscountCode) {
-        message = `Code ${appliedDiscountCode} applied successfully.`;
-    }
+    const finalPrice = totalInitialPrice - finalDiscountAmount;
 
     return new Response(JSON.stringify({
-      discountAmount: cappedDiscount,
+      discountAmount: finalDiscountAmount,
       finalPrice: finalPrice,
       appliedDiscountCode: appliedDiscountCode,
-      message: message
+      affiliateCodeToTie: affiliateForAttribution,
+      message: appliedDiscountCode ? `Code ${appliedDiscountCode} applied.` : (affiliateCode ? 'Affiliate code accepted.' : 'No valid code entered.')
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,34 +7,8 @@ import { useNavigate } from 'react-router-dom';
 const TradingPrograms = () => {
   const navigate = useNavigate();
   
-  const handleGetFunded = (programKey: string, accountSizeValue: string) => {
-    const programData = programs.find(p => p.programKey === programKey);
-    if (!programData) {
-      console.error("Selected program not found.");
-      return;
-    }
-
-    const accountIndex = programData.accountValues.indexOf(accountSizeValue);
-    if (accountIndex === -1) {
-      console.error("Selected account size not found.");
-      return;
-    }
-
-    const priceString = programData.prices[accountIndex];
-    const price = Number(priceString.replace('$', ''));
-
-    const programForCheckout = {
-      id: `prog_${programKey}_${accountSizeValue}`,
-      name: `${programData.name} (${programData.accountSizes[accountIndex]} Account)`,
-      price,
-    };
-
-    navigate('/checkout', {
-      state: {
-        program: programForCheckout,
-        addons: [],
-      },
-    });
+  const handleGetFunded = (program: string, accountSize: string) => {
+    navigate(`/checkout?program=${program}&size=${accountSize}`);
   };
 
   const programs = [

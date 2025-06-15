@@ -7,7 +7,7 @@ import { useToast } from './ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAffiliateContext } from '@/contexts/AffiliateContext';
 import { Input } from './ui/input';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Tag } from 'lucide-react';
 import { Separator } from './ui/separator';
 
 interface Addon {
@@ -33,38 +33,40 @@ const Checkout = ({ programId, programName, programPrice, addons, onPaymentSucce
   const { toast } = useToast();
   const { affiliateCode: affiliateCodeFromUrl } = useAffiliateContext();
 
-  const [promoCode, setPromoCode] = useState('');
+  const [discountCodeInput, setDiscountCodeInput] = useState('');
+  const [affiliateCodeInput, setAffiliateCodeInput] = useState(affiliateCodeFromUrl || '');
   
   const [isApplyingCode, setIsApplyingCode] = useState(false);
   const [appliedDiscount, setAppliedDiscount] = useState<{ amount: number; code: string | null }>({ amount: 0, code: null });
-  const affiliateCodeToTie = affiliateCodeFromUrl;
+  const [affiliateCodeToTie, setAffiliateCodeToTie] = useState<string | null>(affiliateCodeFromUrl);
 
   const selectedAddons = addons.filter(addon => addon.selected);
   const addonsTotal = selectedAddons.reduce((acc, addon) => acc + addon.price, 0);
   const initialTotalPrice = programPrice + addonsTotal;
   const finalPrice = initialTotalPrice - appliedDiscount.amount;
 
-  const handleApplyCode = async () => {
-    if (!promoCode) return;
+  const handleApplyCodes = async () => {
     setIsApplyingCode(true);
     try {
       const { data, error } = await supabase.functions.invoke('validate-and-apply-codes', {
         body: {
           totalInitialPrice: initialTotalPrice,
-          promoCode: promoCode,
+          discountCode: discountCodeInput,
+          affiliateCode: affiliateCodeInput,
         }
       });
 
       if (error) throw error;
       
       setAppliedDiscount({ amount: data.discountAmount, code: data.appliedDiscountCode });
+      setAffiliateCodeToTie(data.affiliateCodeToTie);
 
       toast({
-        title: 'Code Processed',
+        title: 'Codes Processed',
         description: data.message,
       });
 
-    } catch (err: any) {
+    } catch (err) {
       toast({
         title: "Error applying code",
         description: err.message,
@@ -146,19 +148,22 @@ const Checkout = ({ programId, programName, programPrice, addons, onPaymentSucce
           ))}
         </div>
         <Separator />
-        <div className="space-y-2">
-          <label htmlFor="promo-code" className="text-sm font-medium">Discount Code</label>
-          <div className="flex gap-2">
-            <Input id="promo-code" placeholder="Enter code" value={promoCode} onChange={(e) => setPromoCode(e.target.value)} />
-            <Button variant="outline" onClick={handleApplyCode} disabled={isApplyingCode || !promoCode}>
-              {isApplyingCode ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
-            </Button>
-          </div>
-          {affiliateCodeToTie && (
-            <p className="text-sm text-muted-foreground pt-2">
-              Affiliate code <span className="font-semibold text-primary">{affiliateCodeToTie}</span> will be tracked for this purchase.
-            </p>
-          )}
+        <div className="space-y-4">
+            <div className="space-y-2">
+                <label htmlFor="affiliate-code" className="text-sm font-medium">Affiliate Code (Optional)</label>
+                <div className="flex gap-2">
+                    <Input id="affiliate-code" placeholder="Enter affiliate code" value={affiliateCodeInput} onChange={(e) => setAffiliateCodeInput(e.target.value)} />
+                </div>
+            </div>
+            <div className="space-y-2">
+                <label htmlFor="discount-code" className="text-sm font-medium">Discount Code (Optional)</label>
+                <div className="flex gap-2">
+                    <Input id="discount-code" placeholder="Enter discount code" value={discountCodeInput} onChange={(e) => setDiscountCodeInput(e.target.value)} />
+                    <Button variant="outline" onClick={handleApplyCodes} disabled={isApplyingCode}>
+                        {isApplyingCode ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
+                    </Button>
+                </div>
+            </div>
         </div>
         <Separator />
         <div className="space-y-2">
