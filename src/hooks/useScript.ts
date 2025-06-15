@@ -5,7 +5,6 @@ declare global {
   interface Window {
     PaystackPop?: any;
     Startbutton?: any;
-    KlashaClient?: any;
     Klasha?: any;
   }
 }
@@ -39,13 +38,15 @@ export const useScript = (src: string): { loading: boolean; error: boolean } => 
       return;
     }
 
-    const isPaystackLoaded = src.includes('paystack') && !!window.PaystackPop;
-    const isKlashaLoaded = src.includes('klasha') && (!!window.KlashaClient || !!window.Klasha);
+    const isSdkLoaded = () => {
+        if (src.includes('paystack')) return !!window.PaystackPop;
+        if (src.includes('klasha')) return !!window.Klasha; // Klasha V2 SDK uses window.Klasha
+        return false;
+    };
 
-    if (isPaystackLoaded || isKlashaLoaded) {
+    if (isSdkLoaded()) {
       console.log(`useScript: SDK already loaded for ${src}.`);
-      setLoading(false);
-      setError(false);
+      handleLoad();
       return;
     }
 
@@ -63,6 +64,12 @@ export const useScript = (src: string): { loading: boolean; error: boolean } => 
     
     script.addEventListener('load', handleLoad);
     script.addEventListener('error', handleError);
+
+    // Final check in case script loaded before listener was attached
+    if (isSdkLoaded()) {
+        console.log(`useScript: SDK loaded before listener was attached for ${src}.`);
+        handleLoad();
+    }
 
     return () => {
       console.log(`useScript: Cleaning up effect for ${src}.`);
