@@ -128,6 +128,7 @@ export type Database = {
           created_at: string
           id: string
           payment_info: Json | null
+          personal_info: Json | null
           promotion_methods: string | null
           social_media_urls: Json | null
           status: string
@@ -139,6 +140,7 @@ export type Database = {
           created_at?: string
           id?: string
           payment_info?: Json | null
+          personal_info?: Json | null
           promotion_methods?: string | null
           social_media_urls?: Json | null
           status?: string
@@ -150,6 +152,7 @@ export type Database = {
           created_at?: string
           id?: string
           payment_info?: Json | null
+          personal_info?: Json | null
           promotion_methods?: string | null
           social_media_urls?: Json | null
           status?: string
