@@ -25,11 +25,11 @@ const formSchema = z.object({
   telegram: z.string().optional(),
 
   // Step 2: Promotion
-  x_url: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
+  x_url: z.string().min(1, "X (Twitter) Profile URL is required.").url("Please enter a valid URL."),
   tiktok_url: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
   instagram_url: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
   facebook_url: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
-  youtube_url: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
+  youtube_url: z.string().min(1, "YouTube Channel URL is required.").url("Please enter a valid URL."),
   promotion_methods: z.string().min(10, "Please describe your promotion methods in at least 10 characters."),
   
   // Step 3: Account & Payment
@@ -38,21 +38,15 @@ const formSchema = z.object({
     required_error: "You need to select a payment network.",
   }),
   wallet_address: z.string().min(20, "Please enter a valid wallet address."),
-}).superRefine((data, ctx) => {
-    if (!data.whatsapp?.trim() && !data.telegram?.trim()) {
-        const message = "Please provide either a WhatsApp number or a Telegram username.";
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ["whatsapp"],
-            message,
-        });
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ["telegram"],
-            message,
-        });
-    }
-}).superRefine((data, ctx) => {
+}).refine((data) => !!data.whatsapp?.trim() || !!data.telegram?.trim(), {
+    message: "Please provide either a WhatsApp number or a Telegram username.",
+    path: ["whatsapp"],
+})
+.refine((data) => !!data.whatsapp?.trim() || !!data.telegram?.trim(), {
+    message: "Please provide either a WhatsApp number or a Telegram username.",
+    path: ["telegram"],
+})
+.superRefine((data, ctx) => {
     const socialUrls = [
         data.x_url,
         data.tiktok_url,
@@ -63,12 +57,10 @@ const formSchema = z.object({
     const providedUrlsCount = socialUrls.filter(url => url?.trim()).length;
 
     if (providedUrlsCount < 3) {
-        // Add a single, clear error message. Attaching it to x_url.
-        // The UI will highlight the X/Twitter field, and the user will see the message.
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            path: ["x_url"],
-            message: "Please provide at least 3 social media links.",
+            path: ["tiktok_url"],
+            message: "Please provide at least 3 social media links in total.",
         });
     }
 });

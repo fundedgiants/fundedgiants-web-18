@@ -14,14 +14,14 @@ const PromotionDetailsStep = ({ form }: PromotionDetailsStepProps) => {
       <div className="space-y-4 rounded-lg border p-4 bg-background/50">
           <h3 className="text-lg font-medium">Social Media Presence</h3>
           <p className="text-sm text-muted-foreground">
-              Provide links to at least 3 of your social media profiles. We especially recommend including X (Twitter) and YouTube if you have them.
+              Provide links to at least 3 of your social media profiles. X (Twitter) and YouTube profiles are required.
           </p>
           <FormField
               control={form.control}
               name="x_url"
               render={({ field }) => (
                   <FormItem>
-                      <FormLabel>X (Twitter) Profile URL</FormLabel>
+                      <FormLabel>X (Twitter) Profile URL <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                           <Input placeholder="https://x.com/yourprofile" {...field} />
                       </FormControl>
@@ -73,7 +73,7 @@ const PromotionDetailsStep = ({ form }: PromotionDetailsStepProps) => {
               name="youtube_url"
               render={({ field }) => (
                   <FormItem>
-                      <FormLabel>YouTube Channel URL</FormLabel>
+                      <FormLabel>YouTube Channel URL <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                           <Input placeholder="https://youtube.com/c/yourchannel" {...field} />
                       </FormControl>
