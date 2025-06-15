@@ -17,6 +17,7 @@ declare global {
     PaystackPop?: any;
     Startbutton?: any;
     KlashaClient?: any;
+    Klasha?: any;
   }
 }
 
@@ -74,7 +75,7 @@ const Checkout = () => {
   });
 
   const paystackScript = useScript('https://js.paystack.co/v1/inline.js');
-  const klashaScript = useScript('https://klastatic.fra1.digitaloceanspaces.com/test/klasha-inline.js');
+  const klashaScript = useScript('https://js.klasha.com/v2/inline.js');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -415,36 +416,37 @@ const Checkout = () => {
           return;
       }
       
-      if (!ngnRate) {
-          toast.error("Payment provider not ready. Could not determine NGN amount.");
-          setIsProcessing(false);
-          return;
+      if (!window.Klasha) {
+        toast.error("Payment provider SDK could not be loaded. Please refresh the page or try another method.");
+        console.error("Klasha SDK (window.Klasha) not found.");
+        setIsProcessing(false);
+        return;
       }
       
       setIsProcessing(true);
       
-      const amountInNGN = Math.ceil(totalPrice * ngnRate);
-
       try {
-        const klasha = new window.KlashaClient({
-            publicKey: klashaPublicKey,
+        const klasha = new window.Klasha({
+            isTestMode: true,
+            merchantKey: klashaPublicKey,
+            amount: totalPrice,
+            currency: 'USD',
             tx_ref: orderId,
-            amount: amountInNGN,
-            currency: 'NGN',
             email: checkoutData.billingInfo.email,
             phone_number: `${checkoutData.billingInfo.countryCode}${checkoutData.billingInfo.phone}`,
             fullname: `${checkoutData.billingInfo.firstName} ${checkoutData.billingInfo.lastName}`,
-            redirecturl: `${window.location.origin}/payment-success?reference=${orderId}`,
-            callback: (response: any) => {
-                console.log('Klasha modal closed.', response);
+            callback: (tx_ref: string) => {
+                console.log('Klasha V2 Success Callback. Ref:', tx_ref);
+                navigate(`/payment-success?reference=${orderId}`);
+            },
+            onclose: () => {
+                console.log('Klasha modal closed by user.');
                 setIsProcessing(false); 
             },
-            payment_option: 'bank_transfer',
-            is_production: false,
         });
-        klasha.init();
+        klasha.open();
       } catch(e) {
-          console.error("Klasha initialization error:", e);
+          console.error("Klasha V2 SDK initialization error:", e);
           toast.error("Failed to initialize payment. Please try again.");
           await supabase.from('orders').update({ payment_status: 'failed' }).eq('id', orderId);
           setIsProcessing(false);
@@ -731,7 +733,7 @@ const Checkout = () => {
 
   let buttonDisabledReason = '';
   const isKlashaSelected = checkoutData.paymentMethod === 'klasha';
-  const isKlashaPaymentDisabled = isKlashaSelected && (klashaScript.loading || klashaConfigLoading || klashaScript.error);
+  const isKlashaPaymentDisabled = isKlashaSelected && (klashaScript.loading || klashaConfigLoading || klashaScript.error || !window.Klasha);
 
   if (isProcessing) {
     buttonDisabledReason = 'Processing your request...';
@@ -742,6 +744,8 @@ const Checkout = () => {
       buttonDisabledReason = 'Initializing payment provider configuration...';
     } else if (klashaScript.error) {
       buttonDisabledReason = 'Error initializing payment provider. Please refresh or try another method.';
+    } else if (!window.Klasha) {
+      buttonDisabledReason = 'Payment provider failed to load. Please refresh the page.';
     }
   }
 

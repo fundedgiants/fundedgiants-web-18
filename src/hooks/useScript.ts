@@ -6,6 +6,7 @@ declare global {
     PaystackPop?: any;
     Startbutton?: any;
     KlashaClient?: any;
+    Klasha?: any;
   }
 }
 
@@ -39,7 +40,7 @@ export const useScript = (src: string): { loading: boolean; error: boolean } => 
     }
 
     const isPaystackLoaded = src.includes('paystack') && !!window.PaystackPop;
-    const isKlashaLoaded = src.includes('klasha') && !!window.KlashaClient;
+    const isKlashaLoaded = src.includes('klasha') && (!!window.KlashaClient || !!window.Klasha);
 
     if (isPaystackLoaded || isKlashaLoaded) {
       console.log(`useScript: SDK already loaded for ${src}.`);
@@ -56,6 +57,8 @@ export const useScript = (src: string): { loading: boolean; error: boolean } => 
       script.src = src;
       script.async = true;
       document.body.appendChild(script);
+    } else {
+      console.log(`useScript: Script tag for ${src} already exists in DOM.`);
     }
     
     script.addEventListener('load', handleLoad);
