@@ -28,6 +28,13 @@ export const useScript = (src: string): { loading: boolean; error: boolean } => 
 
     let script = document.querySelector(`script[src="${src}"]`) as HTMLScriptElement;
 
+    // If a script tag with the same src exists, but the SDK is not on the window,
+    // it might be a broken script from a previous attempt. Remove it.
+    if (script && ((src.includes('klasha') && !isKlashaLoaded) || (src.includes('paystack') && !isPaystackLoaded))) {
+      script.remove();
+      script = null;
+    }
+
     const handleLoad = () => setLoading(false);
     const handleError = () => {
       setError(true);
