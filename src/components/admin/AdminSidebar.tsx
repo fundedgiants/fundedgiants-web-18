@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 
 const AdminSidebar: React.FC = () => {
   const navItems = [
-    { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/faith', label: 'Dashboard', icon: LayoutDashboard },
     // More items will be added in later phases
   ];
 
@@ -17,7 +17,7 @@ const AdminSidebar: React.FC = () => {
   return (
     <aside className="hidden w-64 flex-col border-r border-primary/20 bg-muted/20 md:flex">
       <div className="flex h-16 items-center border-b border-primary/20 px-6">
-        <NavLink to="/admin" className="flex items-center gap-2 font-semibold">
+        <NavLink to="/faith" className="flex items-center gap-2 font-semibold">
           <LayoutDashboard className="h-6 w-6 text-primary" />
           <span>Admin Panel</span>
         </NavLink>
@@ -29,7 +29,7 @@ const AdminSidebar: React.FC = () => {
               key={item.label}
               to={item.href}
               className={({ isActive }) => cn(baseClasses, isActive ? activeClasses : inactiveClasses)}
-              end={item.href === '/admin'}
+              end={item.href === '/faith'}
             >
               <item.icon className="h-4 w-4" />
               {item.label}

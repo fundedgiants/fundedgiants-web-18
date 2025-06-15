@@ -58,7 +58,7 @@ const Navigation = () => {
                             </DropdownMenuItem>
                             {isAdmin && (
                                 <DropdownMenuItem asChild className="cursor-pointer focus:bg-accent/50">
-                                    <Link to="/admin">Admin Panel</Link>
+                                    <Link to="/faith">Admin Panel</Link>
                                 </DropdownMenuItem>
                             )}
                         </DropdownMenuContent>
@@ -98,7 +98,7 @@ const Navigation = () => {
                             <Link to={user ? "/affiliate-portal" : "/auth"} className="text-muted-foreground hover:text-white transition-colors">Affiliate Portal</Link>
                             
                             {isAdmin && (
-                                <Link to="/admin" className="text-muted-foreground hover:text-white transition-colors">Admin Panel</Link>
+                                <Link to="/faith" className="text-muted-foreground hover:text-white transition-colors">Admin Panel</Link>
                             )}
                             
                             <Separator className="my-2 bg-primary/20" />

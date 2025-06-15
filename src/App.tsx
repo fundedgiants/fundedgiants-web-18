@@ -49,7 +49,7 @@ const App = () => (
             </Route>
 
             <Route element={<AdminRoute />}>
-              <Route path="/admin" element={<AdminLayout />}>
+              <Route path="/faith" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
               </Route>
             </Route>
