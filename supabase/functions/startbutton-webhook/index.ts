@@ -2,7 +2,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
-import crypto from 'https://deno.land/std@0.201.0/node/crypto.ts';
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -23,7 +22,23 @@ serve(async (req) => {
       return new Response('No signature', { status: 400, headers: corsHeaders });
     }
 
-    const hash = crypto.createHmac('sha512', secret).update(body).digest('hex');
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      new TextEncoder().encode(secret),
+      { name: 'HMAC', hash: 'SHA-512' },
+      false,
+      ['sign']
+    );
+
+    const signed = await crypto.subtle.sign(
+      'HMAC',
+      cryptoKey,
+      new TextEncoder().encode(body)
+    );
+
+    const hash = Array.from(new Uint8Array(signed))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
 
     if (hash !== signature) {
       console.error('Webhook Error: Invalid signature.');
@@ -86,3 +101,4 @@ serve(async (req) => {
     });
   }
 });
+
