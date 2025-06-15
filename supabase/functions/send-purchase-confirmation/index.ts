@@ -57,11 +57,24 @@ Deno.serve(async (req) => {
     const userEmail = authUser.user.email;
     const firstName = profile?.first_name || 'there';
 
+    let emailBody = `<h1>Thank you for your purchase, ${firstName}!</h1><p>We've received your payment for the ${order.program_name} - ${order.program_id} challenge.</p><p>Your total price was $${order.total_price}.</p>`;
+
+    if (order.discount_amount && order.discount_amount > 0 && order.applied_discount_code) {
+      emailBody += `<p>You saved $${Number(order.discount_amount).toFixed(2)} with the code: <strong>${order.applied_discount_code}</strong>.</p>`;
+    }
+
+    if (order.affiliate_code) {
+      emailBody += `<p>This purchase was credited to affiliate: <strong>${order.affiliate_code}</strong>.</p>`;
+    }
+    
+    emailBody += `<p>We are setting up your account and will notify you shortly when it's ready.</p><p>Best regards,<br>The AudaXious FX Team</p>`;
+
+
     const { data, error: emailError } = await resend.emails.send({
       from: 'AudaXious FX <onboarding@resend.dev>',
       to: [userEmail],
       subject: 'Your Purchase Confirmation',
-      html: `<h1>Thank you for your purchase, ${firstName}!</h1><p>We've received your payment for the ${order.program_name} - ${order.program_id} challenge.</p><p>Your total price was $${order.total_price}.</p><p>We are setting up your account and will notify you shortly when it's ready.</p><p>Best regards,<br>The AudaXious FX Team</p>`,
+      html: emailBody,
     });
 
     if (emailError) {
@@ -77,7 +90,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Error sending confirmation email:', error.message);
     return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Tfype': 'application/json' },
       status: 500,
     });
   }

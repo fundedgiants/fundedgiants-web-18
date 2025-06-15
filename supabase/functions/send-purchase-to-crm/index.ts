@@ -43,6 +43,56 @@ Deno.serve(async (req) => {
     
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.getUserById(order.user_id);
     if(authError) throw authError;
+    
+    // --- Commission Alert Logic ---
+    if (order.payment_status === 'completed' && order.affiliate_code) {
+        console.log(`Order ${order_id} has affiliate code, preparing commission alert.`);
+
+        const { data: referral, error: referralError } = await supabaseAdmin
+            .from('affiliate_referrals')
+            .select('commission_amount, affiliate_id')
+            .eq('order_id', order_id)
+            .single();
+
+        if (referralError) {
+            console.error(`Error fetching referral for order ${order_id}:`, referralError.message);
+        } else if (referral) {
+            const { data: affiliate, error: affiliateError } = await supabaseAdmin
+                .from('affiliates')
+                .select('user_id, personal_info')
+                .eq('id', referral.affiliate_id)
+                .single();
+
+            if (affiliateError) {
+                console.error(`Error fetching affiliate ${referral.affiliate_id}:`, affiliateError.message);
+            } else if (affiliate) {
+                const { data: affiliateUser, error: affiliateUserError } = await supabaseAdmin.auth.admin.getUserById(affiliate.user_id);
+                
+                const customerName = profile?.first_name || 'A customer';
+
+                if (!affiliateUserError && affiliateUser?.user?.email) {
+                    const affiliateEmail = affiliateUser.user.email;
+                    const affiliateFirstName = (affiliate.personal_info as any)?.firstName || 'Affiliate';
+
+                    console.log(`Invoking send-commission-alert for affiliate ${affiliateEmail}`);
+                    supabaseAdmin.functions.invoke('send-commission-alert', {
+                        body: {
+                            affiliateEmail,
+                            affiliateFirstName,
+                            commissionAmount: referral.commission_amount,
+                            customerName
+                        }
+                    }).then(({error}) => {
+                        if (error) console.error('Error invoking send-commission-alert:', error);
+                        else console.log('Successfully invoked send-commission-alert.');
+                    });
+                } else if (affiliateUserError) {
+                    console.error(`Error fetching affiliate user data for ${affiliate.user_id}:`, affiliateUserError.message);
+                }
+            }
+        }
+    }
+    // --- End Commission Alert Logic ---
 
     const crmPayload = {
       user: {
