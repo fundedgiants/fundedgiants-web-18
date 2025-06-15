@@ -139,6 +139,7 @@ export type Database = {
           promotion_methods: string | null
           social_media_urls: Json | null
           status: string
+          tier: string
           user_id: string
         }
         Insert: {
@@ -151,6 +152,7 @@ export type Database = {
           promotion_methods?: string | null
           social_media_urls?: Json | null
           status?: string
+          tier?: string
           user_id: string
         }
         Update: {
@@ -163,6 +165,7 @@ export type Database = {
           promotion_methods?: string | null
           social_media_urls?: Json | null
           status?: string
+          tier?: string
           user_id?: string
         }
         Relationships: []

@@ -1,6 +1,5 @@
-
 import { useAffiliate } from '@/hooks/useAffiliate';
-import { Loader2, DollarSign, Users, MousePointerClick, Percent, AlertCircle } from 'lucide-react';
+import { Loader2, DollarSign, Users, MousePointerClick, Percent, AlertCircle, Award } from 'lucide-react';
 import StatCard from '@/components/affiliate/StatCard';
 import AffiliateLink from '@/components/affiliate/AffiliateLink';
 import EarningsChart from '@/components/affiliate/EarningsChart';
@@ -98,12 +97,13 @@ const AffiliatePortal = () => {
         </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-        <StatCard title="Total Earnings" value={`$${stats.totalEarnings.toFixed(2)}`} icon={DollarSign} className="lg:col-span-1" />
-        <StatCard title="Pending Commission" value={`$${stats.pendingCommission.toFixed(2)}`} icon={DollarSign} className="lg:col-span-1" />
-        <StatCard title="Total Referrals" value={stats.totalReferrals.toString()} icon={Users} className="lg:col-span-1" />
-        <StatCard title="Total Clicks" value={stats.totalClicks.toString()} icon={MousePointerClick} className="lg:col-span-1" />
-        <StatCard title="Commission Rate" value={`${stats.commissionRate * 100}%`} icon={Percent} className="lg:col-span-1" />
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <StatCard title="Total Earnings" value={`$${stats.totalEarnings.toFixed(2)}`} icon={DollarSign} />
+        <StatCard title="Pending Commission" value={`$${stats.pendingCommission.toFixed(2)}`} icon={DollarSign} />
+        <StatCard title="Total Referrals" value={stats.totalReferrals.toString()} icon={Users} />
+        <StatCard title="Total Clicks" value={stats.totalClicks.toString()} icon={MousePointerClick} />
+        <StatCard title="Commission Rate" value={`${stats.commissionRate * 100}%`} icon={Percent} />
+        <StatCard title="Current Tier" value={affiliate.tier.charAt(0).toUpperCase() + affiliate.tier.slice(1)} icon={Award} />
       </div>
       
       <div className="grid gap-6 lg:grid-cols-3">
