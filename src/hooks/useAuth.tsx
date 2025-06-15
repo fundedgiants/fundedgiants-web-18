@@ -10,35 +10,34 @@ export const useAuth = () => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const checkAdminStatus = async () => {
-      const { data, error } = await supabase.rpc('is_current_user_admin');
-      if (error) {
-        console.error('Error checking admin status:', error);
-        setIsAdmin(false);
-      } else {
-        setIsAdmin(data);
-      }
-    };
+    setLoading(true);
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          checkAdminStatus();
-        } else {
+    const updateUserAndAdminStatus = async (session: Session | null) => {
+      setSession(session);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+
+      if (currentUser) {
+        try {
+          const { data, error } = await supabase.rpc('is_current_user_admin');
+          if (error) throw error;
+          setIsAdmin(data);
+        } catch (error) {
+          console.error('Error checking admin status:', error);
           setIsAdmin(false);
         }
-        setLoading(false);
+      } else {
+        setIsAdmin(false);
+      }
+      setLoading(false);
+    };
+
+    // Handle initial session fetch and subsequent auth state changes
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        updateUserAndAdminStatus(session);
       }
     );
-    
-    // Check session on initial load
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        setLoading(false);
-      }
-    });
 
     return () => {
       authListener.subscription.unsubscribe();
