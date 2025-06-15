@@ -430,6 +430,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_all_users_with_profiles: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          user_id: string
+          email: string
+          created_at: string
+          first_name: string
+          last_name: string
+          phone: string
+          country: string
+        }[]
+      }
       get_total_users_count: {
         Args: Record<PropertyKey, never>
         Returns: number

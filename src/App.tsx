@@ -21,6 +21,7 @@ import AffiliateProgram from "./pages/AffiliateProgram";
 import AdminRoute from "./layouts/AdminRoute";
 import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
+import UsersPage from "./pages/admin/Users";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ const App = () => (
             <Route element={<AdminRoute />}>
               <Route path="/faith" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
+                <Route path="users" element={<UsersPage />} />
               </Route>
             </Route>
 
