@@ -1,4 +1,5 @@
 
+import { useAuth } from '@/hooks/useAuth';
 import { useAffiliate } from '@/hooks/useAffiliate';
 import { Loader2, DollarSign, Users, MousePointerClick, Percent, AlertCircle, Award } from 'lucide-react';
 import StatCard from '@/components/affiliate/StatCard';
@@ -10,15 +11,41 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import AffiliateLogin from '@/components/affiliate/AffiliateLogin';
 
 const AffiliatePortal = () => {
-  const { data, isLoading, error } = useAffiliate();
+  const { user, loading: authLoading } = useAuth();
+  const { data, isLoading: affiliateLoading, error } = useAffiliate();
+
+  const isLoading = authLoading || affiliateLoading;
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
+    );
+  }
+
+  // If user is not logged in, show Login and Register options
+  if (!user) {
+    return (
+        <div className="container mx-auto max-w-4xl py-8 grid gap-8 md:grid-cols-2 items-start">
+            <AffiliateLogin />
+            <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
+                <CardHeader>
+                    <CardTitle className="text-2xl">Not an Affiliate Yet?</CardTitle>
+                    <CardDescription>
+                        Join our program to earn commissions by promoting our products. Click the button below to start your application.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button asChild className="w-full">
+                        <Link to="/become-affiliate">Become an Affiliate</Link>
+                    </Button>
+                </CardContent>
+            </Card>
+        </div>
     );
   }
 
@@ -34,6 +61,7 @@ const AffiliatePortal = () => {
     );
   }
 
+  // If user is logged in, but not yet an affiliate (no affiliate data found)
   if (!data) {
     return (
        <div className="container mx-auto max-w-2xl py-8 text-center">
@@ -41,7 +69,7 @@ const AffiliatePortal = () => {
                 <CardHeader>
                     <CardTitle className="text-2xl">Join our Affiliate Program</CardTitle>
                     <CardDescription>
-                        Ready to earn by promoting us? Click the button below to start your application.
+                        You're logged in, but you haven't joined our affiliate program yet. Ready to earn by promoting us?
                     </CardDescription>
                 </CardHeader>
                 <CardContent>

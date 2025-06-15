@@ -36,7 +36,7 @@ const Navigation = () => {
                         </>
                     ) : (
                         <Button asChild className="bg-primary hover:bg-primary/90">
-                            <Link to="/auth">Dashboard</Link>
+                            <Link to="/affiliate-portal">Dashboard</Link>
                         </Button>
                     )}
                     <Button asChild className="bg-primary hover:bg-primary/90">
@@ -66,7 +66,7 @@ const Navigation = () => {
                                 </>
                             ) : (
                                 <Button asChild className="bg-primary hover:bg-primary/90 w-full">
-                                    <Link to="/auth">Dashboard</Link>
+                                    <Link to="/affiliate-portal">Dashboard</Link>
                                 </Button>
                             )}
                             <Button asChild className="bg-primary hover:bg-primary/90 w-full">
