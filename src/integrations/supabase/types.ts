@@ -9,6 +9,142 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      affiliate_clicks: {
+        Row: {
+          affiliate_id: string
+          clicked_at: string
+          id: number
+          ip_address: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          affiliate_id: string
+          clicked_at?: string
+          id?: number
+          ip_address?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          affiliate_id?: string
+          clicked_at?: string
+          id?: number
+          ip_address?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_clicks_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_payouts: {
+        Row: {
+          affiliate_id: string
+          amount: number
+          id: string
+          processed_at: string | null
+          requested_at: string
+          status: string
+        }
+        Insert: {
+          affiliate_id: string
+          amount: number
+          id?: string
+          processed_at?: string | null
+          requested_at?: string
+          status?: string
+        }
+        Update: {
+          affiliate_id?: string
+          amount?: number
+          id?: string
+          processed_at?: string | null
+          requested_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_payouts_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_referrals: {
+        Row: {
+          affiliate_id: string
+          commission_amount: number
+          created_at: string
+          id: string
+          order_id: string
+          referred_user_id: string
+          status: string
+        }
+        Insert: {
+          affiliate_id: string
+          commission_amount: number
+          created_at?: string
+          id?: string
+          order_id: string
+          referred_user_id: string
+          status?: string
+        }
+        Update: {
+          affiliate_id?: string
+          commission_amount?: number
+          created_at?: string
+          id?: string
+          order_id?: string
+          referred_user_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_referrals_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_referrals_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliates: {
+        Row: {
+          affiliate_code: string
+          commission_rate: number
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          affiliate_code: string
+          commission_rate?: number
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          affiliate_code?: string
+          commission_rate?: number
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       exchange_rates: {
         Row: {
           created_at: string
@@ -35,6 +171,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          affiliate_code: string | null
           created_at: string
           id: string
           payment_method: string | null
@@ -49,6 +186,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          affiliate_code?: string | null
           created_at?: string
           id?: string
           payment_method?: string | null
@@ -63,6 +201,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          affiliate_code?: string | null
           created_at?: string
           id?: string
           payment_method?: string | null
