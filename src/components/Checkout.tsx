@@ -49,6 +49,7 @@ const Checkout = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showKlashaButton, setShowKlashaButton] = useState(false);
   const [klashaConfig, setKlashaConfig] = useState<any>(null);
+  const [klashaScriptLoaded, setKlashaScriptLoaded] = useState(false);
   
   const [checkoutData, setCheckoutData] = useState<CheckoutState>({
     program: searchParams.get('program') || 'heracles',
@@ -74,6 +75,13 @@ const Checkout = () => {
     const klashaScript = document.createElement('script');
     klashaScript.src = 'https://js.klasha.com/v2/klasha-inline.js';
     klashaScript.async = true;
+    klashaScript.onload = () => {
+      console.log("Klasha script loaded.");
+      setKlashaScriptLoaded(true);
+    };
+    klashaScript.onerror = () => {
+      toast.error("Failed to load payment provider script. Please refresh and try again.");
+    };
     document.body.appendChild(klashaScript);
 
     return () => {
@@ -415,7 +423,7 @@ const Checkout = () => {
       await supabase.from('orders').update({ payment_status: 'cancelled' }).eq('id', orderId);
       setIsProcessing(false);
     } else if (checkoutData.paymentMethod === 'klasha') {
-      if (!window.KlashaClient) {
+      if (!klashaScriptLoaded || !window.KlashaClient) {
         toast.error("Payment provider script is still loading. Please wait a moment and try again.");
         setIsProcessing(false);
         return;
