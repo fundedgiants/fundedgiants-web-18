@@ -74,7 +74,7 @@ const Checkout = () => {
   });
 
   const paystackScript = useScript('https://js.paystack.co/v1/inline.js');
-  const klashaScript = useScript('https://js.klasha.com/v2/inline.js');
+  const klashaScript = useScript('https://klastatic.fra1.digitaloceanspaces.com/test/klasha-inline.js');
 
   useEffect(() => {
     const fetchProfile = async () => {
