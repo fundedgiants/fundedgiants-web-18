@@ -40,7 +40,7 @@ export const useScript = (src: string): { loading: boolean; error: boolean } => 
 
     const isSdkLoaded = () => {
         if (src.includes('paystack')) return !!window.PaystackPop;
-        if (src.includes('klasha')) return !!window.Klasha; // Klasha V2 SDK uses window.Klasha
+        // Klasha no longer loaded via this hook
         return false;
     };
 

@@ -16,8 +16,7 @@ declare global {
   interface Window {
     PaystackPop?: any;
     Startbutton?: any;
-    KlashaClient?: any;
-    Klasha?: any;
+    Klasha?: any; // Kept for type safety, but not actively used for initialization
   }
 }
 
@@ -75,7 +74,8 @@ const Checkout = () => {
   });
 
   const paystackScript = useScript('https://js.paystack.co/v1/inline.js');
-  const klashaScript = useScript('https://js.klasha.com/v2/inline.js');
+  // Klasha script is no longer loaded from the frontend
+  // const klashaScript = useScript('https://js.klasha.com/v2/inline.js');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -213,18 +213,6 @@ const Checkout = () => {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
   const ngnRate = ngnRateData?.rate;
-
-  const { data: klashaConfig, isLoading: klashaConfigLoading } = useQuery({
-    queryKey: ['klasha-config'],
-    queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke('get-klasha-config');
-      if (error) throw new Error(error.message);
-      return data;
-    },
-    enabled: checkoutData.paymentMethod === 'klasha',
-    staleTime: Infinity, // Public key doesn't change
-  });
-  const klashaPublicKey = klashaConfig?.publicKey;
 
   const handleNext = () => {
     if (currentStep < 5) setCurrentStep(currentStep + 1);
@@ -404,54 +392,32 @@ const Checkout = () => {
       await supabase.from('orders').update({ payment_status: 'cancelled' }).eq('id', orderId);
       setIsProcessing(false);
     } else if (checkoutData.paymentMethod === 'klasha') {
-      if (klashaScript.loading || klashaConfigLoading) {
-          toast.error("Payment provider is initializing. Please wait a moment and try again.");
-          setIsProcessing(false);
-          return;
-      }
-
-      if (!klashaPublicKey) {
-          toast.error("Could not retrieve payment configuration. Please try again.");
-          setIsProcessing(false);
-          return;
-      }
-      
-      if (!window.Klasha) {
-        toast.error("Payment provider SDK could not be loaded. Please refresh the page or try another method.");
-        console.error("Klasha SDK (window.Klasha) not found.");
-        setIsProcessing(false);
-        return;
-      }
-      
       setIsProcessing(true);
-      
       try {
-        const klasha = new window.Klasha({
-            isTestMode: true,
-            merchantKey: klashaPublicKey,
-            amount: totalPrice,
-            currency: 'USD',
-            tx_ref: orderId,
-            email: checkoutData.billingInfo.email,
-            phone_number: `${checkoutData.billingInfo.countryCode}${checkoutData.billingInfo.phone}`,
-            fullname: `${checkoutData.billingInfo.firstName} ${checkoutData.billingInfo.lastName}`,
-            callback: (tx_ref: string) => {
-                console.log('Klasha V2 Success Callback. Ref:', tx_ref);
-                navigate(`/payment-success?reference=${orderId}`);
-            },
-            onclose: () => {
-                console.log('Klasha modal closed by user.');
-                setIsProcessing(false); 
+        const { data: checkoutSessionData, error: checkoutSessionError } = await supabase.functions.invoke('create-klasha-checkout-session', {
+            body: {
+              orderId,
+              totalPrice,
+              email: checkoutData.billingInfo.email,
+              redirectBaseUrl: window.location.origin
             },
         });
-        klasha.open();
-      } catch(e) {
-          console.error("Klasha V2 SDK initialization error:", e);
-          toast.error("Failed to initialize payment. Please try again.");
+
+        if (checkoutSessionError) {
+            throw new Error(checkoutSessionError.message);
+        }
+
+        if (checkoutSessionData.redirectUrl) {
+            window.location.href = checkoutSessionData.redirectUrl;
+        } else {
+            throw new Error('Could not retrieve payment URL.');
+        }
+      } catch (error: any) {
+          toast.error(`Payment initialization failed: ${error.message}`);
           await supabase.from('orders').update({ payment_status: 'failed' }).eq('id', orderId);
           setIsProcessing(false);
       }
-      return;
+      return; // Return to prevent further execution
     } else {
       toast.error("Please select a payment method.");
       setIsProcessing(false);
@@ -733,23 +699,13 @@ const Checkout = () => {
 
   let buttonDisabledReason = '';
   const isKlashaSelected = checkoutData.paymentMethod === 'klasha';
-  const isKlashaPaymentDisabled = isKlashaSelected && (klashaScript.loading || klashaConfigLoading || klashaScript.error || !window.Klasha);
 
   if (isProcessing) {
     buttonDisabledReason = 'Processing your request...';
-  } else if (isKlashaPaymentDisabled) {
-    if (klashaScript.loading) {
-      buttonDisabledReason = 'Initializing payment provider script...';
-    } else if (klashaConfigLoading) {
-      buttonDisabledReason = 'Initializing payment provider configuration...';
-    } else if (klashaScript.error) {
-      buttonDisabledReason = 'Error initializing payment provider. Please refresh or try another method.';
-    } else if (!window.Klasha) {
-      buttonDisabledReason = 'Payment provider failed to load. Please refresh the page.';
-    }
   }
-
-  const isButtonDisabled = isProcessing || isKlashaPaymentDisabled;
+  
+  // We can simplify this now
+  const isButtonDisabled = isProcessing;
 
   return (
     <div className="min-h-screen bg-background pt-20 pb-10">
