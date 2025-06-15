@@ -11,15 +11,9 @@ import Contact from "./pages/Contact";
 import FAQ from "./pages/FAQ";
 import AuthPage from "./pages/AuthPage";
 import Checkout from "./components/Checkout";
-import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
-import DashboardLayout from "./layouts/DashboardLayout";
-import TradingAccounts from "./pages/TradingAccounts";
+import ProtectedRoute from "./layouts/ProtectedRoute";
 import AffiliatePortal from "./pages/AffiliatePortal";
-import Certificates from "./pages/Certificates";
-import Profile from "./pages/Profile";
-import Billing from "./pages/Billing";
-import ExchangeRate from "./pages/ExchangeRate";
 import PaymentSuccess from "./pages/PaymentSuccess";
 
 const queryClient = new QueryClient();
@@ -36,19 +30,13 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/faq" element={<FAQ />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             
-            <Route element={<DashboardLayout />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/trading-accounts" element={<TradingAccounts />} />
+            <Route element={<ProtectedRoute />}>
               <Route path="/affiliate-portal" element={<AffiliatePortal />} />
-              <Route path="/certificates" element={<Certificates />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/billing" element={<Billing />} />
-              <Route path="/faq" element={<FAQ />} />
-              <Route path="/exchange-rate" element={<ExchangeRate />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

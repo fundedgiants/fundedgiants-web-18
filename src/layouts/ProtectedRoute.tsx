@@ -4,7 +4,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
 
-const DashboardLayout = () => {
+const ProtectedRoute = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -26,7 +26,6 @@ const DashboardLayout = () => {
     return null;
   }
 
-  // The sidebar has been removed for a full-width dashboard experience.
   return (
     <main className="min-h-[calc(100vh-4rem)] bg-background">
         <div className="container mx-auto p-4 sm:p-6 lg:p-8">
@@ -36,4 +35,4 @@ const DashboardLayout = () => {
   );
 };
 
-export default DashboardLayout;
+export default ProtectedRoute;
