@@ -23,6 +23,7 @@ const Navigation = () => {
                     <Link to="/about" className="text-muted-foreground hover:text-white transition-colors">About Us</Link>
                     <Link to="/contact" className="text-muted-foreground hover:text-white transition-colors">Contact</Link>
                     <Link to="/faq" className="text-muted-foreground hover:text-white transition-colors">FAQ</Link>
+                    <Link to="/affiliate-program" className="text-muted-foreground hover:text-white transition-colors">Affiliate Program</Link>
                 </nav>
 
                 <div className="hidden md:flex items-center gap-4">
@@ -56,6 +57,7 @@ const Navigation = () => {
                             <Link to="/about" className="text-muted-foreground hover:text-white transition-colors">About Us</Link>
                             <Link to="/contact" className="text-muted-foreground hover:text-white transition-colors">Contact</Link>
                             <Link to="/faq" className="text-muted-foreground hover:text-white transition-colors">FAQ</Link>
+                            <Link to="/affiliate-program" className="text-muted-foreground hover:text-white transition-colors">Affiliate Program</Link>
                             <Separator className="my-2 bg-primary/20" />
                             {user ? (
                                 <>

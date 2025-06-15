@@ -16,6 +16,7 @@ import ProtectedRoute from "./layouts/ProtectedRoute";
 import AffiliatePortal from "./pages/AffiliatePortal";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import BecomeAffiliate from "./pages/BecomeAffiliate";
+import AffiliateProgram from "./pages/AffiliateProgram";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/faq" element={<FAQ />} />
+            <Route path="/affiliate-program" element={<AffiliateProgram />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
