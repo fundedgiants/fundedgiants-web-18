@@ -1,6 +1,7 @@
 
 import AffiliateApplicationForm from "@/components/affiliate/AffiliateApplicationForm";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Link } from "react-router-dom";
 
 const BecomeAffiliate = () => {
     return (
@@ -15,6 +16,12 @@ const BecomeAffiliate = () => {
                 </CardHeader>
                 <CardContent>
                     <AffiliateApplicationForm />
+                     <p className="text-center text-sm text-muted-foreground mt-4">
+                        Already have an account?{' '}
+                        <Link to="/auth" className="underline text-primary hover:text-primary/80">
+                            Login
+                        </Link>
+                    </p>
                 </CardContent>
             </Card>
         </div>

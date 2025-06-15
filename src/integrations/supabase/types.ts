@@ -131,8 +131,13 @@ export type Database = {
       affiliates: {
         Row: {
           affiliate_code: string
+          affiliate_discount_type:
+            | Database["public"]["Enums"]["discount_type"]
+            | null
+          affiliate_discount_value: number | null
           commission_rate: number
           created_at: string
+          has_discount: boolean
           id: string
           payment_info: Json | null
           personal_info: Json | null
@@ -144,8 +149,13 @@ export type Database = {
         }
         Insert: {
           affiliate_code: string
+          affiliate_discount_type?:
+            | Database["public"]["Enums"]["discount_type"]
+            | null
+          affiliate_discount_value?: number | null
           commission_rate?: number
           created_at?: string
+          has_discount?: boolean
           id?: string
           payment_info?: Json | null
           personal_info?: Json | null
@@ -157,8 +167,13 @@ export type Database = {
         }
         Update: {
           affiliate_code?: string
+          affiliate_discount_type?:
+            | Database["public"]["Enums"]["discount_type"]
+            | null
+          affiliate_discount_value?: number | null
           commission_rate?: number
           created_at?: string
+          has_discount?: boolean
           id?: string
           payment_info?: Json | null
           personal_info?: Json | null
@@ -167,6 +182,48 @@ export type Database = {
           status?: string
           tier?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      discount_codes: {
+        Row: {
+          code: string
+          created_at: string
+          discount_type: Database["public"]["Enums"]["discount_type"]
+          discount_value: number
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          specific_user_ids: string[] | null
+          times_used: number
+          usage_limit: number | null
+          user_segment: Database["public"]["Enums"]["user_segment_type"]
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          discount_type: Database["public"]["Enums"]["discount_type"]
+          discount_value: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          specific_user_ids?: string[] | null
+          times_used?: number
+          usage_limit?: number | null
+          user_segment?: Database["public"]["Enums"]["user_segment_type"]
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          discount_type?: Database["public"]["Enums"]["discount_type"]
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          specific_user_ids?: string[] | null
+          times_used?: number
+          usage_limit?: number | null
+          user_segment?: Database["public"]["Enums"]["user_segment_type"]
         }
         Relationships: []
       }
@@ -197,7 +254,9 @@ export type Database = {
       orders: {
         Row: {
           affiliate_code: string | null
+          applied_discount_code: string | null
           created_at: string
+          discount_amount: number | null
           id: string
           payment_method: string | null
           payment_provider: string | null
@@ -212,7 +271,9 @@ export type Database = {
         }
         Insert: {
           affiliate_code?: string | null
+          applied_discount_code?: string | null
           created_at?: string
+          discount_amount?: number | null
           id?: string
           payment_method?: string | null
           payment_provider?: string | null
@@ -227,7 +288,9 @@ export type Database = {
         }
         Update: {
           affiliate_code?: string | null
+          applied_discount_code?: string | null
           created_at?: string
+          discount_amount?: number | null
           id?: string
           payment_method?: string | null
           payment_provider?: string | null
@@ -346,8 +409,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      discount_type: "percentage" | "fixed_amount"
       trading_account_status: "active" | "passed" | "failed" | "inactive"
       trading_platform: "MT4" | "MT5" | "HT5"
+      user_segment_type:
+        | "all"
+        | "new_users"
+        | "returning_users"
+        | "specific_users"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -463,8 +532,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      discount_type: ["percentage", "fixed_amount"],
       trading_account_status: ["active", "passed", "failed", "inactive"],
       trading_platform: ["MT4", "MT5", "HT5"],
+      user_segment_type: [
+        "all",
+        "new_users",
+        "returning_users",
+        "specific_users",
+      ],
     },
   },
 } as const
