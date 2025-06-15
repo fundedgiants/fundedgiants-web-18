@@ -1,3 +1,4 @@
+
 import { useAffiliate } from '@/hooks/useAffiliate';
 import { Loader2, DollarSign, Users, MousePointerClick, Percent, AlertCircle, Award } from 'lucide-react';
 import StatCard from '@/components/affiliate/StatCard';
@@ -85,7 +86,18 @@ const AffiliatePortal = () => {
   }
   
   if (affiliate.status !== 'approved') {
-      return null;
+    console.warn("Unhandled affiliate status:", affiliate.status);
+    return (
+       <div className="container mx-auto max-w-2xl py-8">
+        <Alert variant="default">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Application Status: {affiliate.status.charAt(0).toUpperCase() + affiliate.status.slice(1)}</AlertTitle>
+          <AlertDescription>
+            Your affiliate account status is currently being processed. If you believe this is an error, please contact support.
+          </AlertDescription>
+        </Alert>
+      </div>
+    )
   }
 
   return (

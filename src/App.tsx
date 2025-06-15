@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom"
@@ -44,8 +45,8 @@ function App() {
                   <Route path="/programs/:programId" element={<ProgramDetails />} />
                   <Route path="/trading-account/:id" element={<ProtectedRoute><TradingAccount /></ProtectedRoute>} />
                   <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                  <Route path="/affiliate-portal" element={<ProtectedRoute><AffiliatePortal /></ProtectedRoute>} />
-                  <Route path="/become-affiliate" element={<ProtectedRoute><BecomeAffiliate /></ProtectedRoute>} />
+                  <Route path="/affiliate-portal" element={<AffiliatePortal />} />
+                  <Route path="/become-affiliate" element={<BecomeAffiliate />} />
                   <Route path="/affiliate-program" element={<AffiliateProgram />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
