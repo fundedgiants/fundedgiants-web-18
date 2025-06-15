@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,13 +11,11 @@ import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AFFILIATE_CODE_STORAGE_KEY } from '@/hooks/useAffiliateTracking';
-import { useKlashaPayment } from 'klasha-pay';
 
 declare global {
   interface Window {
     PaystackPop?: any;
     Startbutton?: any;
-    Klasha?: any; // Kept for type safety, but not actively used for initialization
   }
 }
 
@@ -68,7 +65,6 @@ const Checkout = () => {
     affiliateToCredit: string | null;
     message: string;
   } | null>(null);
-  const [klashaPaymentConfig, setKlashaPaymentConfig] = useState<any>(null);
   
   const [checkoutData, setCheckoutData] = useState<CheckoutState>({
     program: searchParams.get('program') || 'heracles',
@@ -90,12 +86,8 @@ const Checkout = () => {
       password: '',
       confirmPassword: ''
     },
-    paymentMethod: 'klasha'
+    paymentMethod: 'card'
   });
-
-  // Paystack script is no longer used
-  // Klasha script is no longer loaded from the frontend
-  // const klashaScript = useScript('https://js.klasha.com/v2/inline.js');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -217,42 +209,6 @@ const Checkout = () => {
   const addOnsPrice = selectedAddOns.reduce((sum, addon) => sum + (basePrice * (addon.pricePercent / 100)), 0);
   const totalPrice = discountedBasePrice + addOnsPrice;
 
-  const { data: ngnRateData } = useQuery({
-    queryKey: ['exchange_rate', 'USD_NGN'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('exchange_rates')
-        .select('rate')
-        .eq('currency_pair', 'USD_NGN')
-        .single();
-      
-      if (error) {
-        console.error("Failed to fetch NGN exchange rate:", error.message);
-        toast.error("Could not fetch NGN exchange rate.");
-        return null;
-      }
-      return data;
-    },
-    enabled: checkoutData.paymentMethod === 'klasha',
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-  const ngnRate = ngnRateData?.rate;
-
-  const { data: klashaConfig, isLoading: isLoadingKlashaConfig } = useQuery({
-    queryKey: ['klashaConfig'],
-    queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke('get-klasha-config');
-      if (error) {
-        toast.error('Could not fetch Klasha configuration.');
-        throw new Error('Could not fetch Klasha configuration.');
-      }
-      return data;
-    },
-    enabled: checkoutData.paymentMethod === 'klasha',
-    staleTime: Infinity,
-    retry: false,
-  });
-
   const handleApplyCodes = async () => {
     if (!discountCode && !affiliateCodeInput) {
         toast.info("Please enter a discount or affiliate code.");
@@ -317,30 +273,6 @@ const Checkout = () => {
       billingInfo: { ...prev.billingInfo, [field]: value }
     }));
   };
-
-  const handleKlashaSuccess = (response: any) => {
-    console.log('Klasha payment successful', response);
-    toast.success('Payment successful! Redirecting...');
-    // The webhook will handle order status update.
-    // Just redirect user to a success page with the transaction reference.
-    navigate(`/payment-success?reference=${response.tx_ref}`);
-  };
-
-  const handleKlashaClose = () => {
-    console.log('Klasha payment closed by user.');
-    toast.info('Payment process was cancelled.');
-    setIsProcessing(false);
-    setKlashaPaymentConfig(null); // Reset config
-  };
-
-  const { initializePayment, loaded: klashaScriptLoaded } = useKlashaPayment(klashaPaymentConfig);
-
-  useEffect(() => {
-    // initializePayment can be undefined if config is null
-    if (klashaPaymentConfig && klashaScriptLoaded && initializePayment) {
-        initializePayment();
-    }
-  }, [klashaPaymentConfig, initializePayment, klashaScriptLoaded]);
 
   const handleCompletePurchase = async () => {
     setIsProcessing(true);
@@ -433,7 +365,7 @@ const Checkout = () => {
     }
 
     const payment_provider = checkoutData.paymentMethod === 'crypto' ? 'nowpayments' 
-                           : checkoutData.paymentMethod === 'klasha' ? 'klasha'
+                           : checkoutData.paymentMethod === 'card' ? 'coming_soon'
                            : null;
 
     const trackedAffiliateCode = localStorage.getItem(AFFILIATE_CODE_STORAGE_KEY);
@@ -500,29 +432,6 @@ const Checkout = () => {
       toast.warning("This payment method is coming soon!");
       await supabase.from('orders').update({ payment_status: 'cancelled' }).eq('id', orderId);
       setIsProcessing(false);
-    } else if (checkoutData.paymentMethod === 'klasha') {
-        if (!klashaConfig?.publicKey || !ngnRate) {
-            toast.error("Klasha payment gateway is not ready. Please wait or try again.");
-            setIsProcessing(false);
-            return;
-        }
-
-        setKlashaPaymentConfig({
-            publicKey: klashaConfig.publicKey,
-            isTestMode: false, // Live mode
-            email: checkoutData.billingInfo.email,
-            phone_number: fullPhoneNumber,
-            firstname: checkoutData.billingInfo.firstName,
-            lastname: checkoutData.billingInfo.lastName,
-            amount: Math.ceil(totalPrice * ngnRate) * 100, // amount in kobo
-            currency: "NGN",
-            tx_ref: orderId,
-            onSuccess: handleKlashaSuccess,
-            onClose: handleKlashaClose,
-            narration: `Payment for order ${orderId}`
-        });
-        // The useEffect will trigger the payment modal.
-        return;
     } else {
       toast.error("Please select a payment method.");
       setIsProcessing(false);
@@ -761,7 +670,6 @@ const Checkout = () => {
         const paymentMethods = [
             { value: 'card', label: 'Credit/Debit Card', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> },
             { value: 'crypto', label: 'Cryptocurrency', subtitle: 'via NowPayments', icon: <Bitcoin className="h-8 w-8 text-primary mb-2" /> },
-            { value: 'klasha', label: 'NGN Bank Transfer', subtitle: 'via Klasha', icon: <div className="h-8 w-8 text-primary mb-2 flex items-center justify-center text-3xl font-bold">₦</div> },
         ];
         return (
           <div className="space-y-6">
@@ -780,11 +688,6 @@ const Checkout = () => {
                   {method.icon}
                   <div className="font-medium text-white mt-1">{method.label}</div>
                    {method.subtitle && <div className="text-sm text-primary">{method.subtitle}</div>}
-                  {method.value === 'klasha' && checkoutData.paymentMethod === method.value && ngnRate && (
-                    <div className="text-xs text-muted-foreground mt-1">
-                      (≈ ₦{Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')})
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
@@ -797,11 +700,7 @@ const Checkout = () => {
   };
   
   const purchaseButtonText = () => {
-    const baseText = `Complete Purchase - $${totalPrice.toFixed(2)}`;
-    if (checkoutData.paymentMethod === 'klasha' && ngnRate) {
-      return `${baseText} / ~₦${Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')}`;
-    }
-    return baseText;
+    return `Complete Purchase - $${totalPrice.toFixed(2)}`;
   }
 
   if (authLoading) {
@@ -813,19 +712,12 @@ const Checkout = () => {
   }
 
   let buttonDisabledReason = '';
-  const isKlashaSelected = checkoutData.paymentMethod === 'klasha';
 
   if (isProcessing) {
     buttonDisabledReason = 'Processing your request...';
-  } else if (isKlashaSelected && isLoadingKlashaConfig) {
-    buttonDisabledReason = 'Initializing Klasha...';
-  } else if (isKlashaSelected && !klashaConfig) {
-    buttonDisabledReason = 'Klasha is unavailable.';
-  } else if (isKlashaSelected && !ngnRate) {
-    buttonDisabledReason = 'Loading exchange rate...';
   }
   
-  const isButtonDisabled = isProcessing || (isKlashaSelected && (isLoadingKlashaConfig || !klashaConfig || !ngnRate || !klashaScriptLoaded));
+  const isButtonDisabled = isProcessing;
 
   return (
     <div className="min-h-screen bg-background pt-20 pb-10">
@@ -917,7 +809,6 @@ const Checkout = () => {
                                 disabled={isButtonDisabled}
                               >
                                 {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {isKlashaSelected && !klashaScriptLoaded && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 {purchaseButtonText()}
                               </Button>
                             </div>

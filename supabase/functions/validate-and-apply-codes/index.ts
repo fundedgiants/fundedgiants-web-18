@@ -80,7 +80,8 @@ serve(async (req) => {
     let appliedCode = null;
 
     if (discountFromCode > 0 && discountFromAffiliate > 0) {
-      if (discountFromCode <= discountFromAffiliate) {
+      // Apply the code that gives the highest discount
+      if (discountFromCode >= discountFromAffiliate) {
         finalDiscountAmount = discountFromCode;
         appliedCode = discountCode;
       } else {

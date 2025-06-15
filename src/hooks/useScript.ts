@@ -5,7 +5,7 @@ declare global {
   interface Window {
     PaystackPop?: any;
     Startbutton?: any;
-    Klasha?: any;
+    // Klasha type removed
   }
 }
 
