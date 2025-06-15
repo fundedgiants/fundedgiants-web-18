@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Table,
@@ -26,6 +26,15 @@ import {
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Order {
     id: string;
@@ -50,6 +59,18 @@ const fetchOrders = async (): Promise<Order[]> => {
   return (data as Order[]) || [];
 };
 
+const updateOrderStatus = async ({ orderId, status }: { orderId: string, status: string }) => {
+  const { error } = await supabase.rpc('update_order_payment_status', {
+    target_order_id: orderId,
+    new_status: status,
+  });
+
+  if (error) {
+    console.error('Error updating order status:', error);
+    throw new Error(error.message);
+  }
+};
+
 const getStatusBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (status?.toLowerCase()) {
         case 'completed': return 'default';
@@ -62,9 +83,22 @@ const getStatusBadgeVariant = (status: string): "default" | "secondary" | "destr
 }
 
 const OrdersPage: React.FC = () => {
+  const queryClient = useQueryClient();
   const { data: orders, isLoading, error } = useQuery<Order[]>({
     queryKey: ['allOrders'],
     queryFn: fetchOrders,
+  });
+
+  const updateStatusMutation = useMutation({
+    mutationFn: updateOrderStatus,
+    onSuccess: () => {
+      toast.success("Order status updated successfully!");
+      queryClient.invalidateQueries({ queryKey: ['allOrders'] });
+      queryClient.invalidateQueries({ queryKey: ['orderAnalytics'] }); // Also refresh dashboard analytics
+    },
+    onError: (err: Error) => {
+      toast.error(`Failed to update status: ${err.message}`);
+    },
   });
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -164,6 +198,7 @@ const OrdersPage: React.FC = () => {
                 <TableHead>Status</TableHead>
                 <TableHead>Payment</TableHead>
                 <TableHead>Date</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -181,6 +216,48 @@ const OrdersPage: React.FC = () => {
                   </TableCell>
                   <TableCell>{order.payment_provider || 'N/A'}</TableCell>
                   <TableCell>{format(new Date(order.created_at), 'PPP')}</TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'completed' })}
+                          disabled={order.payment_status === 'completed' || updateStatusMutation.isPending}
+                        >
+                          Mark as Completed
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'pending' })}
+                          disabled={order.payment_status === 'pending' || updateStatusMutation.isPending}
+                        >
+                          Mark as Pending
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'failed' })}
+                          disabled={order.payment_status === 'failed' || updateStatusMutation.isPending}
+                        >
+                          Mark as Failed
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'refunded' })}
+                          disabled={order.payment_status === 'refunded' || updateStatusMutation.isPending}
+                        >
+                          Mark as Refunded
+                        </DropdownMenuItem>
+                         <DropdownMenuItem
+                          onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'cancelled' })}
+                          disabled={order.payment_status === 'cancelled' || updateStatusMutation.isPending}
+                        >
+                          Mark as Cancelled
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
