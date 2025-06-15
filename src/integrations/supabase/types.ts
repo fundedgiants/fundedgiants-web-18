@@ -440,11 +440,16 @@ export type Database = {
           last_name: string
           phone: string
           country: string
+          is_admin: boolean
         }[]
       }
       get_total_users_count: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      grant_admin_role: {
+        Args: { target_user_id: string }
+        Returns: undefined
       }
       has_role: {
         Args: {
@@ -456,6 +461,10 @@ export type Database = {
       is_current_user_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      revoke_admin_role: {
+        Args: { target_user_id: string }
+        Returns: undefined
       }
     }
     Enums: {

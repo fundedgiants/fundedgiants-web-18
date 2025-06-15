@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Table,
@@ -12,7 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, ShieldOff } from 'lucide-react';
 import { format } from 'date-fns';
 import {
   Pagination,
@@ -24,6 +23,9 @@ import {
   PaginationEllipsis
 } from '@/components/ui/pagination';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 
 interface UserProfile {
   user_id: string;
@@ -33,6 +35,7 @@ interface UserProfile {
   last_name: string | null;
   phone: string | null;
   country: string | null;
+  is_admin: boolean;
 }
 
 const fetchUsers = async (): Promise<UserProfile[]> => {
@@ -46,10 +49,48 @@ const fetchUsers = async (): Promise<UserProfile[]> => {
 };
 
 const UsersPage: React.FC = () => {
+  const queryClient = useQueryClient();
+  const { user: currentUser } = useAuth();
   const { data: users, isLoading, error } = useQuery<UserProfile[]>({
     queryKey: ['allUsers'],
     queryFn: fetchUsers,
   });
+
+  const grantAdminMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const { error } = await supabase.rpc('grant_admin_role', { target_user_id: userId });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success('Admin role granted successfully.');
+      queryClient.invalidateQueries({ queryKey: ['allUsers'] });
+    },
+    onError: (err: Error) => {
+      toast.error(`Failed to grant admin role: ${err.message}`);
+    },
+  });
+
+  const revokeAdminMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const { error } = await supabase.rpc('revoke_admin_role', { target_user_id: userId });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success('Admin role revoked successfully.');
+      queryClient.invalidateQueries({ queryKey: ['allUsers'] });
+    },
+    onError: (err: Error) => {
+      toast.error(`Failed to revoke admin role: ${err.message}`);
+    },
+  });
+
+  const handleRoleChange = (user: UserProfile, isChecked: boolean) => {
+    if (isChecked) {
+      grantAdminMutation.mutate(user.user_id);
+    } else {
+      revokeAdminMutation.mutate(user.user_id);
+    }
+  };
 
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 10;
@@ -156,8 +197,9 @@ const UsersPage: React.FC = () => {
                 <TableHead>Email</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Country</TableHead>
-                <TableHead>Phone</TableHead>
                 <TableHead>Joined</TableHead>
+                <TableHead>Admin</TableHead>
+                <TableHead className="text-right">Manage Role</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -166,8 +208,22 @@ const UsersPage: React.FC = () => {
                   <TableCell className="font-medium">{user.email}</TableCell>
                   <TableCell>{user.first_name || ''} {user.last_name || ''}</TableCell>
                   <TableCell>{user.country || 'N/A'}</TableCell>
-                  <TableCell>{user.phone || 'N/A'}</TableCell>
                   <TableCell>{format(new Date(user.created_at), 'PPP')}</TableCell>
+                  <TableCell>
+                    {user.is_admin ? (
+                      <ShieldCheck className="h-5 w-5 text-green-500" />
+                    ) : (
+                      <ShieldOff className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Switch
+                      checked={user.is_admin}
+                      onCheckedChange={(isChecked) => handleRoleChange(user, isChecked)}
+                      disabled={user.user_id === currentUser?.id || grantAdminMutation.isPending || revokeAdminMutation.isPending}
+                      aria-label={`Toggle admin role for ${user.email}`}
+                    />
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
