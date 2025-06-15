@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AFFILIATE_CODE_STORAGE_KEY } from '@/hooks/useAffiliateTracking';
+import { useKlashaPayment } from 'klasha-pay';
 
 declare global {
   interface Window {
@@ -74,10 +75,18 @@ const Checkout = () => {
     priceFeed: 'real',
     addOns: [],
     billingInfo: {
-      firstName: '', lastName: '', email: '', phone: '',
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
       countryCode: '+234',
-      country: '', state: '', city: '', address: '', zipCode: '',
-      password: '', confirmPassword: ''
+      country: '',
+      state: '',
+      city: '',
+      address: '',
+      zipCode: '',
+      password: '',
+      confirmPassword: ''
     },
     paymentMethod: 'klasha'
   });
@@ -227,6 +236,21 @@ const Checkout = () => {
   });
   const ngnRate = ngnRateData?.rate;
 
+  const { data: klashaConfig, isLoading: isLoadingKlashaConfig } = useQuery({
+    queryKey: ['klashaConfig'],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke('get-klasha-config');
+      if (error) {
+        toast.error('Could not fetch Klasha configuration.');
+        throw new Error('Could not fetch Klasha configuration.');
+      }
+      return data;
+    },
+    enabled: checkoutData.paymentMethod === 'klasha',
+    staleTime: Infinity,
+    retry: false,
+  });
+
   const handleApplyCodes = async () => {
     if (!discountCode && !affiliateCodeInput) {
         toast.info("Please enter a discount or affiliate code.");
@@ -291,6 +315,30 @@ const Checkout = () => {
       billingInfo: { ...prev.billingInfo, [field]: value }
     }));
   };
+
+  const handleKlashaSuccess = (response: any) => {
+    console.log('Klasha payment successful', response);
+    toast.success('Payment successful! Redirecting...');
+    // The webhook will handle order status update.
+    // Just redirect user to a success page with the transaction reference.
+    navigate(`/payment-success?reference=${response.tx_ref}`);
+  };
+
+  const handleKlashaClose = () => {
+    console.log('Klasha payment closed by user.');
+    toast.info('Payment process was cancelled.');
+    setIsProcessing(false);
+    setKlashaPaymentConfig(null); // Reset config
+  };
+
+  const { initializePayment, loaded: klashaScriptLoaded } = useKlashaPayment(klashaPaymentConfig);
+
+  useEffect(() => {
+    // initializePayment can be undefined if config is null
+    if (klashaPaymentConfig && klashaScriptLoaded && initializePayment) {
+        initializePayment();
+    }
+  }, [klashaPaymentConfig, initializePayment, klashaScriptLoaded]);
 
   const handleCompletePurchase = async () => {
     setIsProcessing(true);
@@ -451,35 +499,28 @@ const Checkout = () => {
       await supabase.from('orders').update({ payment_status: 'cancelled' }).eq('id', orderId);
       setIsProcessing(false);
     } else if (checkoutData.paymentMethod === 'klasha') {
-      setIsProcessing(true);
-      try {
-        const { data: checkoutSessionData, error: checkoutSessionError } = await supabase.functions.invoke('create-klasha-checkout-session', {
-            body: {
-              orderId,
-              totalPrice,
-              email: email,
-              redirectBaseUrl: window.location.origin,
-              firstName: firstName,
-              lastName: lastName,
-              phone: fullPhoneNumber
-            },
+        if (!klashaConfig?.publicKey || !ngnRate) {
+            toast.error("Klasha payment gateway is not ready. Please wait or try again.");
+            setIsProcessing(false);
+            return;
+        }
+
+        setKlashaPaymentConfig({
+            publicKey: klashaConfig.publicKey,
+            isTestMode: false, // Live mode
+            email: checkoutData.billingInfo.email,
+            phone_number: fullPhoneNumber,
+            firstname: checkoutData.billingInfo.firstName,
+            lastname: checkoutData.billingInfo.lastName,
+            amount: Math.ceil(totalPrice * ngnRate) * 100, // amount in kobo
+            currency: "NGN",
+            tx_ref: orderId,
+            onSuccess: handleKlashaSuccess,
+            onClose: handleKlashaClose,
+            narration: `Payment for order ${orderId}`
         });
-
-        if (checkoutSessionError) {
-            throw new Error(checkoutSessionError.message);
-        }
-
-        if (checkoutSessionData.redirectUrl) {
-            window.location.href = checkoutSessionData.redirectUrl;
-        } else {
-            throw new Error('Could not retrieve payment URL.');
-        }
-      } catch (error: any) {
-          toast.error(`Payment initialization failed: ${error.message}`);
-          await supabase.from('orders').update({ payment_status: 'failed' }).eq('id', orderId);
-          setIsProcessing(false);
-      }
-      return; // Return to prevent further execution
+        // The useEffect will trigger the payment modal.
+        return;
     } else {
       toast.error("Please select a payment method.");
       setIsProcessing(false);
@@ -774,10 +815,15 @@ const Checkout = () => {
 
   if (isProcessing) {
     buttonDisabledReason = 'Processing your request...';
+  } else if (isKlashaSelected && isLoadingKlashaConfig) {
+    buttonDisabledReason = 'Initializing Klasha...';
+  } else if (isKlashaSelected && !klashaConfig) {
+    buttonDisabledReason = 'Klasha is unavailable.';
+  } else if (isKlashaSelected && !ngnRate) {
+    buttonDisabledReason = 'Loading exchange rate...';
   }
   
-  // We can simplify this now
-  const isButtonDisabled = isProcessing;
+  const isButtonDisabled = isProcessing || (isKlashaSelected && (isLoadingKlashaConfig || !klashaConfig || !ngnRate || !klashaScriptLoaded));
 
   return (
     <div className="min-h-screen bg-background pt-20 pb-10">
@@ -869,6 +915,7 @@ const Checkout = () => {
                                 disabled={isButtonDisabled}
                               >
                                 {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {isKlashaSelected && !klashaScriptLoaded && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 {purchaseButtonText()}
                               </Button>
                             </div>
