@@ -36,7 +36,8 @@ export const useScript = (src: string): { loading: boolean; error: boolean } => 
     }
 
     const handleLoad = () => setLoading(false);
-    const handleError = () => {
+    const handleError = (event: Event | string) => {
+      console.error('Script loading failed:', { src, event });
       setError(true);
       setLoading(false);
     };
