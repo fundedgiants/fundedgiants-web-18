@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -23,7 +22,11 @@ import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   affiliate_code: z.string().min(4, "Code must be at least 4 characters.").max(20, "Code must be at most 20 characters.").regex(/^[a-zA-Z0-9_]+$/, "Only letters, numbers, and underscores are allowed."),
-  social_media_urls: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
+  x_url: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
+  tiktok_url: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
+  instagram_url: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
+  facebook_url: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
+  youtube_url: z.string().url("Please enter a valid URL.").optional().or(z.literal('')),
   promotion_methods: z.string().min(10, "Please describe your promotion methods in at least 10 characters."),
 });
 
@@ -36,7 +39,11 @@ const AffiliateApplicationForm = () => {
         resolver: zodResolver(formSchema),
         defaultValues: {
             affiliate_code: "",
-            social_media_urls: "",
+            x_url: "",
+            tiktok_url: "",
+            instagram_url: "",
+            facebook_url: "",
+            youtube_url: "",
             promotion_methods: "",
         },
     });
@@ -47,15 +54,29 @@ const AffiliateApplicationForm = () => {
             return;
         }
 
+        const social_media_urls = {
+            x: values.x_url,
+            tiktok: values.tiktok_url,
+            instagram: values.instagram_url,
+            facebook: values.facebook_url,
+            youtube: values.youtube_url,
+        };
+        
+        const filtered_social_media_urls = Object.fromEntries(Object.entries(social_media_urls).filter(([_, v]) => v && v.length > 0));
+
         const { error } = await supabase.from("affiliates").insert({
             user_id: user.id,
             affiliate_code: values.affiliate_code,
-            social_media_urls: values.social_media_urls ? [values.social_media_urls] : null,
+            social_media_urls: Object.keys(filtered_social_media_urls).length > 0 ? filtered_social_media_urls : null,
             promotion_methods: values.promotion_methods,
         });
 
         if (error) {
-            toast.error(error.message);
+            if (error.code === '23505') { // unique constraint violation
+                 toast.error("This affiliate code is already taken. Please choose another one.");
+            } else {
+                 toast.error(error.message);
+            }
         } else {
             toast.success("Application submitted successfully! We will review it shortly.");
             await queryClient.invalidateQueries({ queryKey: ['affiliateData', user.id] });
@@ -82,22 +103,77 @@ const AffiliateApplicationForm = () => {
                         </FormItem>
                     )}
                 />
-                <FormField
-                    control={form.control}
-                    name="social_media_urls"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Website or Social Media URL</FormLabel>
-                            <FormControl>
-                                <Input placeholder="https://yourwebsite.com" {...field} />
-                            </FormControl>
-                             <FormDescription>
-                                Where you plan to promote us (e.g., blog, YouTube channel).
-                            </FormDescription>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                <div className="space-y-4 rounded-lg border p-4 bg-background/50">
+                    <h3 className="text-lg font-medium">Social Media Presence</h3>
+                    <p className="text-sm text-muted-foreground">
+                        Provide links to your social media profiles where you plan to promote us.
+                    </p>
+                    <FormField
+                        control={form.control}
+                        name="x_url"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>X (Twitter) Profile URL</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="https://x.com/yourprofile" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="tiktok_url"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>TikTok Profile URL</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="https://tiktok.com/@yourprofile" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="instagram_url"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Instagram Profile URL</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="https://instagram.com/yourprofile" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="facebook_url"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Facebook Profile URL</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="https://facebook.com/yourprofile" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="youtube_url"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>YouTube Channel URL</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="https://youtube.com/c/yourchannel" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
                 <FormField
                     control={form.control}
                     name="promotion_methods"

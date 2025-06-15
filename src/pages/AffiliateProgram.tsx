@@ -1,8 +1,8 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { CheckCircle, Award, TrendingUp, Rocket, Star, DollarSign, Ban } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const tiers = [
   {
@@ -49,6 +49,7 @@ const exclusivePerks = [
 ];
 
 const AffiliateProgram = () => {
+  const { user } = useAuth();
   return (
     <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8 bg-background text-foreground">
       <div className="text-center mb-16">
@@ -134,9 +135,14 @@ const AffiliateProgram = () => {
       <div className="text-center">
         <h2 className="text-3xl font-bold">Ready to Start Earning?</h2>
         <p className="mt-2 text-lg text-muted-foreground">Join our community of partners today and turn your influence into income.</p>
-        <Button asChild size="lg" className="mt-6 bg-primary hover:bg-primary/90">
-          <Link to="/affiliate-portal">Join The Program Now</Link>
-        </Button>
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
+            <Link to="/affiliate-portal">Affiliate Login</Link>
+          </Button>
+          <Button asChild size="lg" variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">
+            <Link to="/become-affiliate">Become an Affiliate</Link>
+          </Button>
+        </div>
       </div>
     </div>
   );
