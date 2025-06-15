@@ -22,6 +22,7 @@ import AdminRoute from "./layouts/AdminRoute";
 import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
 import UsersPage from "./pages/admin/Users";
+import OrdersPage from "./pages/admin/Orders";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ const App = () => (
               <Route path="/faith" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
                 <Route path="users" element={<UsersPage />} />
+                <Route path="orders" element={<OrdersPage />} />
               </Route>
             </Route>
 

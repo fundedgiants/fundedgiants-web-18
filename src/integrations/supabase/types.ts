@@ -430,6 +430,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_all_orders_with_details: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          user_id: string
+          user_email: string
+          program_name: string
+          total_price: number
+          payment_status: string
+          payment_method: string
+          payment_provider: string
+          created_at: string
+          affiliate_code: string
+          applied_discount_code: string
+        }[]
+      }
       get_all_users_with_profiles: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -442,6 +458,10 @@ export type Database = {
           country: string
           is_admin: boolean
         }[]
+      }
+      get_order_analytics: {
+        Args: Record<PropertyKey, never>
+        Returns: Database["public"]["CompositeTypes"]["order_analytics"]
       }
       get_total_users_count: {
         Args: Record<PropertyKey, never>
@@ -466,6 +486,10 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: undefined
       }
+      update_order_payment_status: {
+        Args: { target_order_id: string; new_status: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"
@@ -479,7 +503,15 @@ export type Database = {
         | "specific_users"
     }
     CompositeTypes: {
-      [_ in never]: never
+      order_analytics: {
+        total_revenue: number | null
+        total_orders: number | null
+        pending_orders: number | null
+        completed_orders: number | null
+        failed_orders: number | null
+        refunded_orders: number | null
+        cancelled_orders: number | null
+      }
     }
   }
 }

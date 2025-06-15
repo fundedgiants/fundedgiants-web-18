@@ -28,6 +28,16 @@ const AdminLayout: React.FC = () => {
           >
             Users
           </NavLink>
+          <NavLink
+            to="/faith/orders"
+            className={({ isActive }) =>
+              `text-sm font-medium transition-colors hover:text-primary ${
+                isActive ? 'text-primary' : 'text-muted-foreground'
+              }`
+            }
+          >
+            Orders
+          </NavLink>
         </nav>
       </header>
       <main className="container mx-auto flex-1 p-6 lg:p-10">
