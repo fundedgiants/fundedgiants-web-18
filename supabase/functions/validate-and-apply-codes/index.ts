@@ -18,7 +18,7 @@ serve(async (req: Request) => {
     let discountFromDiscountCode = 0;
     let discountFromAffiliate = 0;
     let appliedDiscountCode = null;
-    let affiliateForAttribution = affiliateCode || null;
+    let affiliateForAttribution = null;
 
     // 1. Validate Discount Code
     if (discountCode) {
@@ -47,11 +47,14 @@ serve(async (req: Request) => {
         .eq('status', 'approved')
         .single();
       
-      if (af && af.has_discount && af.affiliate_discount_value) {
-        if (af.affiliate_discount_type === 'percentage') {
-          discountFromAffiliate = totalInitialPrice * (af.affiliate_discount_value / 100);
-        } else {
-          discountFromAffiliate = af.affiliate_discount_value;
+      if (af) {
+        affiliateForAttribution = affiliateCode;
+        if (af.has_discount && af.affiliate_discount_value) {
+          if (af.affiliate_discount_type === 'percentage') {
+            discountFromAffiliate = totalInitialPrice * (af.affiliate_discount_value / 100);
+          } else {
+            discountFromAffiliate = af.affiliate_discount_value;
+          }
         }
       }
     }
@@ -71,12 +74,19 @@ serve(async (req: Request) => {
     
     const finalPrice = totalInitialPrice - finalDiscountAmount;
 
+    let message = 'No valid code entered.';
+    if(appliedDiscountCode) {
+        message = `Code ${appliedDiscountCode} applied.`;
+    } else if (affiliateForAttribution) {
+        message = 'Affiliate code accepted.';
+    }
+
     return new Response(JSON.stringify({
       discountAmount: finalDiscountAmount,
       finalPrice: finalPrice,
       appliedDiscountCode: appliedDiscountCode,
       affiliateCodeToTie: affiliateForAttribution,
-      message: appliedDiscountCode ? `Code ${appliedDiscountCode} applied.` : (affiliateCode ? 'Affiliate code accepted.' : 'No valid code entered.')
+      message: message
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
