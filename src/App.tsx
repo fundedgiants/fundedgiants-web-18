@@ -18,6 +18,9 @@ import AffiliatePortal from "./pages/AffiliatePortal";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import BecomeAffiliate from "./pages/BecomeAffiliate";
 import AffiliateProgram from "./pages/AffiliateProgram";
+import AdminRoute from "./layouts/AdminRoute";
+import AdminLayout from "./layouts/AdminLayout";
+import AdminDashboard from "./pages/admin/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +46,12 @@ const App = () => (
             
             <Route element={<ProtectedRoute />}>
               <Route path="/affiliate-portal" element={<AffiliatePortal />} />
+            </Route>
+
+            <Route element={<AdminRoute />}>
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+              </Route>
             </Route>
 
             <Route path="*" element={<NotFound />} />

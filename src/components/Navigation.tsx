@@ -12,10 +12,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from 'sonner';
 
 const Navigation = () => {
-    const { user } = useAuth();
+    const { user, isAdmin } = useAuth();
     
+    const handleSignOut = async () => {
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+            toast.error(error.message);
+        } else {
+            toast.success("You have been logged out.");
+        }
+    }
+
     return (
         <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm">
             <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -46,12 +56,22 @@ const Navigation = () => {
                             <DropdownMenuItem asChild className="cursor-pointer focus:bg-accent/50">
                                 <Link to={user ? "/affiliate-portal" : "/auth"}>Affiliate Portal</Link>
                             </DropdownMenuItem>
+                            {isAdmin && (
+                                <DropdownMenuItem asChild className="cursor-pointer focus:bg-accent/50">
+                                    <Link to="/admin">Admin Panel</Link>
+                                </DropdownMenuItem>
+                            )}
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    {user && (
-                        <Button onClick={() => supabase.auth.signOut()} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">Logout</Button>
+                    {user ? (
+                        <Button onClick={handleSignOut} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">Logout</Button>
+                    ) : (
+                        <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">
+                            <Link to="/auth">Client Login</Link>
+                        </Button>
                     )}
+
 
                     <Button asChild className="bg-primary hover:bg-primary/90">
                         <Link to="/checkout">Get Funded</Link>
@@ -77,10 +97,14 @@ const Navigation = () => {
                             <span className="text-muted-foreground cursor-not-allowed">Trading Dashboard</span>
                             <Link to={user ? "/affiliate-portal" : "/auth"} className="text-muted-foreground hover:text-white transition-colors">Affiliate Portal</Link>
                             
+                            {isAdmin && (
+                                <Link to="/admin" className="text-muted-foreground hover:text-white transition-colors">Admin Panel</Link>
+                            )}
+                            
                             <Separator className="my-2 bg-primary/20" />
 
                             {user ? (
-                                <Button onClick={() => supabase.auth.signOut()} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white w-full">Logout</Button>
+                                <Button onClick={handleSignOut} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white w-full">Logout</Button>
                             ) : (
                                  <Button asChild className="bg-primary hover:bg-primary/90 w-full">
                                     <Link to="/auth">Client Login</Link>

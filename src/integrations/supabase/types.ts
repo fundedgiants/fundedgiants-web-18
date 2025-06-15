@@ -404,14 +404,46 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          user_id_to_check: string
+          role_to_check: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
+      is_current_user_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role: "admin" | "user"
       discount_type: "percentage" | "fixed_amount"
       trading_account_status: "active" | "passed" | "failed" | "inactive"
       trading_platform: "MT4" | "MT5" | "HT5"
@@ -535,6 +567,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "user"],
       discount_type: ["percentage", "fixed_amount"],
       trading_account_status: ["active", "passed", "failed", "inactive"],
       trading_platform: ["MT4", "MT5", "HT5"],
