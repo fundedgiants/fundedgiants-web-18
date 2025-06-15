@@ -1,26 +1,28 @@
+
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom"
-import Navigation from "./components/Navigation"
-import { ThemeProvider } from "./contexts/theme-provider"
-import { AffiliateProvider } from "./contexts/AffiliateContext" // Import the new provider
-import Index from "./pages/Index"
-import About from "./pages/About"
-import NotFound from "./pages/NotFound"
-import Pricing from "./pages/Pricing"
-import Contact from "./pages/Contact"
-import Terms from "./pages/Terms"
-import Privacy from "./pages/Privacy"
-import FAQ from "./pages/FAQ"
-import ProtectedRoute from "./components/ProtectedRoute"
-import Footer from "./components/Footer"
-import Programs from "./pages/Programs"
-import ProgramDetails from "./pages/ProgramDetails"
-import TradingAccount from "./pages/TradingAccount"
-import Profile from "./pages/Profile"
-import AffiliatePortal from "./pages/AffiliatePortal"
-import BecomeAffiliate from "./pages/BecomeAffiliate"
-import AffiliateProgram from "./pages/AffiliateProgram"
+import Navigation from "@/components/Navigation"
+import { ThemeProvider } from "@/contexts/theme-provider"
+import { AffiliateProvider } from "@/contexts/AffiliateContext"
+import Index from "@/pages/Index"
+import About from "@/pages/About"
+import NotFound from "@/pages/NotFound"
+import Pricing from "@/pages/Pricing"
+import Contact from "@/pages/Contact"
+import Terms from "@/pages/Terms"
+import Privacy from "@/pages/Privacy"
+import FAQ from "@/pages/FAQ"
+import ProtectedRoute from "@/layouts/ProtectedRoute"
+import Footer from "@/components/Footer"
+import Programs from "@/pages/Programs"
+import ProgramDetails from "@/pages/ProgramDetails"
+import TradingAccount from "@/pages/TradingAccount"
+import Profile from "@/pages/Profile"
+import AffiliatePortal from "@/pages/AffiliatePortal"
+import BecomeAffiliate from "@/pages/BecomeAffiliate"
+import AffiliateProgram from "@/pages/AffiliateProgram"
+import AuthPage from "@/pages/AuthPage"
 
 function App() {
   return (
@@ -42,10 +44,13 @@ function App() {
                   <Route path="/faq" element={<FAQ />} />
                   <Route path="/programs" element={<Programs />} />
                   <Route path="/programs/:programId" element={<ProgramDetails />} />
-                  <Route path="/trading-account/:id" element={<ProtectedRoute><TradingAccount /></ProtectedRoute>} />
-                  <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                  <Route path="/affiliate-portal" element={<ProtectedRoute><AffiliatePortal /></ProtectedRoute>} />
-                  <Route path="/become-affiliate" element={<ProtectedRoute><BecomeAffiliate /></ProtectedRoute>} />
+                  <Route path="/auth" element={<AuthPage />} />
+                  <Route element={<ProtectedRoute />}>
+                    <Route path="/trading-account/:id" element={<TradingAccount />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/affiliate-portal" element={<AffiliatePortal />} />
+                    <Route path="/become-affiliate" element={<BecomeAffiliate />} />
+                  </Route>
                   <Route path="/affiliate-program" element={<AffiliateProgram />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
