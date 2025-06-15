@@ -10,12 +10,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import KlashaPaymentButton from './KlashaPaymentButton';
+import StartButtonPaymentButton from './StartButtonPaymentButton';
 import { useScript } from '@/hooks/useScript';
 
 declare global {
   interface Window {
     KlashaClient?: any;
     PaystackPop?: any;
+    Startbutton?: any;
   }
 }
 
@@ -50,6 +52,8 @@ const Checkout = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showKlashaButton, setShowKlashaButton] = useState(false);
   const [klashaConfig, setKlashaConfig] = useState<any>(null);
+  const [showStartButton, setShowStartButton] = useState(false);
+  const [startButtonConfig, setStartButtonConfig] = useState<any>(null);
   
   const [checkoutData, setCheckoutData] = useState<CheckoutState>({
     program: searchParams.get('program') || 'heracles',
@@ -69,12 +73,13 @@ const Checkout = () => {
   // Use the new hook to manage payment scripts
   const klashaScript = useScript('https://js.klasha.com/v2/klasha-inline.js');
   const paystackScript = useScript('https://js.paystack.co/v1/inline.js');
+  const startbuttonScript = useScript('https://js.startbutton.tech/v1/startbutton.js');
 
   useEffect(() => {
-    if (klashaScript.error) {
-      toast.error("Payment provider script failed to load. Please refresh and try again.");
+    if (klashaScript.error || startbuttonScript.error) {
+      toast.error("A payment provider script failed to load. Please refresh and try again.");
     }
-  }, [klashaScript.error]);
+  }, [klashaScript.error, startbuttonScript.error]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -208,7 +213,7 @@ const Checkout = () => {
       }
       return data;
     },
-    enabled: checkoutData.paymentMethod === 'klasha',
+    enabled: checkoutData.paymentMethod === 'klasha' || checkoutData.paymentMethod === 'startbutton',
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
   const ngnRate = ngnRateData?.rate;
@@ -229,6 +234,22 @@ const Checkout = () => {
     retry: false,
   });
 
+  const { data: startButtonConfigData, isLoading: isLoadingStartButtonConfig } = useQuery({
+    queryKey: ['startButtonConfig'],
+    queryFn: async () => {
+        const { data, error } = await supabase.functions.invoke('get-startbutton-config');
+        if (error) {
+            toast.error("Could not fetch payment configuration.");
+            console.error("StartButton config fetch error:", error);
+            return null;
+        }
+        return data;
+    },
+    enabled: checkoutData.paymentMethod === 'startbutton',
+    staleTime: Infinity,
+    retry: false,
+  });
+
   const handleNext = () => {
     if (currentStep < 5) setCurrentStep(currentStep + 1);
   };
@@ -237,6 +258,8 @@ const Checkout = () => {
     if (currentStep > 1) {
       setShowKlashaButton(false);
       setKlashaConfig(null);
+      setShowStartButton(false);
+      setStartButtonConfig(null);
       setCurrentStep(currentStep - 1);
     }
   };
@@ -347,6 +370,11 @@ const Checkout = () => {
       toast.warning(`Could not save billing info: ${profileError.message}`);
     }
 
+    const payment_provider = checkoutData.paymentMethod === 'crypto' ? 'nowpayments' 
+                           : checkoutData.paymentMethod === 'klasha' ? 'klasha' 
+                           : checkoutData.paymentMethod === 'startbutton' ? 'startbutton' 
+                           : null;
+
     const { data: orderData, error: orderError } = await supabase.from('orders').insert({
       user_id: sessionUser.id,
       program_id: checkoutData.accountSize,
@@ -355,7 +383,7 @@ const Checkout = () => {
       selected_addons: selectedAddOns,
       total_price: totalPrice,
       payment_method: checkoutData.paymentMethod,
-      payment_provider: checkoutData.paymentMethod === 'crypto' ? 'nowpayments' : checkoutData.paymentMethod === 'klasha' ? 'klasha' : null,
+      payment_provider: payment_provider,
       payment_status: 'pending',
     }).select().single();
 
@@ -448,6 +476,47 @@ const Checkout = () => {
       
       setKlashaConfig(config);
       setShowKlashaButton(true);
+      setIsProcessing(false);
+      return;
+    } else if (checkoutData.paymentMethod === 'startbutton') {
+      if (startbuttonScript.loading) {
+        toast.info("Payment provider is still initializing. Please wait a moment.");
+        setIsProcessing(false);
+        return;
+      }
+
+      if (startbuttonScript.error || !window.Startbutton) {
+        toast.error("Payment provider script could not be loaded. Please refresh the page and try again.");
+        setIsProcessing(false);
+        return;
+      }
+
+      if (!ngnRate || !startButtonConfigData?.publicKey) {
+          toast.error("Payment provider not ready. Please wait a moment and try again.");
+          setIsProcessing(false);
+          return;
+      }
+
+      const amountInKobo = Math.round(totalPrice * ngnRate * 100);
+
+      const config = {
+        publicKey: startButtonConfigData.publicKey,
+        amount: amountInKobo,
+        email: checkoutData.billingInfo.email,
+        reference: orderId,
+        onSuccess: (response: any) => {
+          console.log("StartButton success callback:", response);
+          navigate(`/payment-success?reference=${orderId}`);
+        },
+        onClose: () => {
+          toast.info("Payment window closed.");
+          setShowStartButton(false);
+          setIsProcessing(false);
+        },
+      };
+      
+      setStartButtonConfig(config);
+      setShowStartButton(true);
       setIsProcessing(false);
       return;
     } else {
@@ -678,12 +747,13 @@ const Checkout = () => {
         const paymentMethods = [
             { value: 'card', label: 'Credit/Debit Card', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> },
             { value: 'crypto', label: 'Cryptocurrency', subtitle: 'via NowPayments', icon: <Bitcoin className="h-8 w-8 text-primary mb-2" /> },
-            { value: 'klasha', label: 'Nigerian Naira', subtitle: 'via Klasha', icon: <span className="text-primary text-3xl font-bold mb-1">₦</span> }
+            { value: 'klasha', label: 'Nigerian Naira', subtitle: 'via Klasha', icon: <span className="text-primary text-3xl font-bold mb-1">₦</span> },
+            { value: 'startbutton', label: 'Bank Transfer (NGN)', subtitle: 'via StartButton', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> }
         ];
         return (
           <div className="space-y-6">
             <h3 className="text-lg font-semibold mb-4 text-white">Payment Method</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {paymentMethods.map((method) => (
                 <div
                   key={method.value}
@@ -697,7 +767,7 @@ const Checkout = () => {
                   {method.icon}
                   <div className="font-medium text-white mt-1">{method.label}</div>
                    {method.subtitle && <div className="text-sm text-primary">{method.subtitle}</div>}
-                  {method.value === 'klasha' && checkoutData.paymentMethod === 'klasha' && ngnRate && (
+                  {(method.value === 'klasha' || method.value === 'startbutton') && checkoutData.paymentMethod === method.value && ngnRate && (
                     <div className="text-xs text-muted-foreground mt-1">
                       (≈ ₦{Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')})
                     </div>
@@ -712,6 +782,22 @@ const Checkout = () => {
         return null;
     }
   };
+
+  const isPaymentProviderBusy =
+    (checkoutData.paymentMethod === 'klasha' && (isLoadingKlashaConfig || klashaScript.loading || klashaScript.error)) ||
+    (checkoutData.paymentMethod === 'startbutton' && (isLoadingStartButtonConfig || startbuttonScript.loading || startbuttonScript.error));
+  
+  const purchaseButtonText = () => {
+    if (checkoutData.paymentMethod === 'klasha' && klashaScript.loading) return 'Initializing Klasha...';
+    if (checkoutData.paymentMethod === 'startbutton' && startbuttonScript.loading) return 'Initializing StartButton...';
+    if (isPaymentProviderBusy) return 'Payment Provider Error';
+
+    const baseText = `Complete Purchase - $${totalPrice.toFixed(2)}`;
+    if ((checkoutData.paymentMethod === 'klasha' || checkoutData.paymentMethod === 'startbutton') && ngnRate) {
+      return `${baseText} / ~₦${Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')}`;
+    }
+    return baseText;
+  }
 
   if (authLoading) {
     return (
@@ -802,32 +888,30 @@ const Checkout = () => {
                       </Button>
                     ) : (
                       <>
-                        {!showKlashaButton ? (
+                        {!showKlashaButton && !showStartButton ? (
                           <Button
                             onClick={handleCompletePurchase}
                             className="bg-primary hover:bg-primary/90"
-                            disabled={
-                              isProcessing ||
-                              (checkoutData.paymentMethod === 'klasha' && (isLoadingKlashaConfig || klashaScript.loading || klashaScript.error))
-                            }
+                            disabled={isProcessing || isPaymentProviderBusy}
                           >
                             {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {checkoutData.paymentMethod === 'klasha' && klashaScript.loading
-                              ? 'Initializing Payment...'
-                              : checkoutData.paymentMethod === 'klasha' && klashaScript.error
-                              ? 'Payment Error'
-                              : `Complete Purchase - $${totalPrice.toFixed(2)}`}
-                            {checkoutData.paymentMethod === 'klasha' && !klashaScript.loading && !klashaScript.error && ngnRate &&
-                              ` / ~₦${Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')}`}
+                            {purchaseButtonText()}
                           </Button>
-                        ) : (
+                        ) : showKlashaButton ? (
                           klashaConfig && (
                             <KlashaPaymentButton 
                               config={klashaConfig}
                               isProcessing={isProcessing}
                             />
                           )
-                        )}
+                        ) : showStartButton ? (
+                           startButtonConfig && (
+                            <StartButtonPaymentButton 
+                              config={startButtonConfig}
+                              isProcessing={isProcessing}
+                            />
+                           )
+                        ) : null}
                       </>
                     )}
                   </div>

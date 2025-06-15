@@ -1,40 +1,19 @@
-# This is a TOML config file, used to configure the Supabase CLI.
-# You can find more information about the Supabase CLI on https://supabase.com/docs/reference/cli/
 
-name = "supabase"
-anon_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54aW56eWd0a3Ftb3BsamR3Z2V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTk4NzQ0NzksImV4cCI6MjAxNTQ1MDQ3OX0.Dr-wS_Zn-3QJyvJpNGD_QT9Qt3wB3E-Sj9GvJ2j64Og"
-service_role_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54aW56eWd0a3Ftb3BsamR3Z2V4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY5OTg3NDQ3OSwiZXhwIjoyMDE1NDUwNDc5fQ.HnS4cU-UsEgtizwSq3e6x_lJYYK-8B9BNiJmWcQNFgE"
-
-[api]
-  port = 54321
-  debug = false
-
-[database]
-  port = 54322
-  # Use '1' for logical replication, and '2' for logical replication with pgoutput
-  replication = 1
-
-[storage]
-  port = 54323
-
-[functions]
-  port = 54324
-  debug = false
-  verify_jwt = true
-
-[functions._shared]
-  verify_jwt = false
-
-[functions.get-paystack-public-key]
-  verify_jwt = false
-
-[functions.create-paystack-payment]
-  verify_jwt = false
-
+# supabase/config.toml
 [functions.create-nowpayments-invoice]
-  verify_jwt = false
-[functions.get-klasha-config]
+verify_jwt = true
+
+[functions.nowpayments-ipn]
 verify_jwt = false
 
 [functions.klasha-webhook]
 verify_jwt = false
+
+[functions.get-klasha-config]
+verify_jwt = true
+
+[functions.startbutton-webhook]
+verify_jwt = false
+
+[functions.get-startbutton-config]
+verify_jwt = true
