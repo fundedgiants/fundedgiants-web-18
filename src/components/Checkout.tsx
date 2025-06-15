@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import KlashaPaymentButton from './KlashaPaymentButton';
+import { useScript } from '@/hooks/useScript';
 
 declare global {
   interface Window {
@@ -49,7 +50,6 @@ const Checkout = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showKlashaButton, setShowKlashaButton] = useState(false);
   const [klashaConfig, setKlashaConfig] = useState<any>(null);
-  const [, forceUpdate] = useReducer(x => x + 1, 0);
   
   const [checkoutData, setCheckoutData] = useState<CheckoutState>({
     program: searchParams.get('program') || 'heracles',
@@ -66,33 +66,15 @@ const Checkout = () => {
     paymentMethod: 'card'
   });
 
+  // Use the new hook to manage payment scripts
+  const klashaScript = useScript('https://js.klasha.com/v2/klasha-inline.js');
+  const paystackScript = useScript('https://js.paystack.co/v1/inline.js');
+
   useEffect(() => {
-    const paystackScript = document.createElement('script');
-    paystackScript.src = 'https://js.paystack.co/v1/inline.js';
-    paystackScript.async = true;
-    document.body.appendChild(paystackScript);
-
-    const klashaScript = document.createElement('script');
-    klashaScript.src = 'https://js.klasha.com/v2/klasha-inline.js';
-    klashaScript.async = true;
-    klashaScript.onload = () => {
-      console.log("Klasha script loaded.");
-      forceUpdate();
-    };
-    klashaScript.onerror = () => {
-      toast.error("Failed to load payment provider script. Please refresh and try again.");
-    };
-    document.body.appendChild(klashaScript);
-
-    return () => {
-        if (document.body.contains(paystackScript)) {
-            document.body.removeChild(paystackScript);
-        }
-        if (document.body.contains(klashaScript)) {
-            document.body.removeChild(klashaScript);
-        }
+    if (klashaScript.error) {
+      toast.error("Payment provider script failed to load. Please refresh and try again.");
     }
-  }, []);
+  }, [klashaScript.error]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -423,8 +405,14 @@ const Checkout = () => {
       await supabase.from('orders').update({ payment_status: 'cancelled' }).eq('id', orderId);
       setIsProcessing(false);
     } else if (checkoutData.paymentMethod === 'klasha') {
-      if (!window.KlashaClient) {
-        toast.error("Payment provider script is still loading. Please wait a moment and try again.");
+      if (klashaScript.loading) {
+        toast.info("Payment provider is still initializing. Please wait a moment.");
+        setIsProcessing(false);
+        return;
+      }
+
+      if (klashaScript.error || !window.KlashaClient) {
+        toast.error("Payment provider script could not be loaded. Please refresh the page and try again.");
         setIsProcessing(false);
         return;
       }
@@ -820,16 +808,16 @@ const Checkout = () => {
                             className="bg-primary hover:bg-primary/90"
                             disabled={
                               isProcessing ||
-                              (checkoutData.paymentMethod === 'klasha' && (isLoadingKlashaConfig || !window.KlashaClient))
+                              (checkoutData.paymentMethod === 'klasha' && (isLoadingKlashaConfig || klashaScript.loading || klashaScript.error))
                             }
                           >
                             {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {checkoutData.paymentMethod === 'klasha' && !window.KlashaClient
+                            {checkoutData.paymentMethod === 'klasha' && klashaScript.loading
                               ? 'Initializing Payment...'
+                              : checkoutData.paymentMethod === 'klasha' && klashaScript.error
+                              ? 'Payment Error'
                               : `Complete Purchase - $${totalPrice.toFixed(2)}`}
-                            {checkoutData.paymentMethod === 'klasha' &&
-                              window.KlashaClient &&
-                              ngnRate &&
+                            {checkoutData.paymentMethod === 'klasha' && !klashaScript.loading && !klashaScript.error && ngnRate &&
                               ` / ~₦${Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')}`}
                           </Button>
                         ) : (
