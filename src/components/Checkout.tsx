@@ -815,10 +815,22 @@ const Checkout = () => {
                     ) : (
                       <>
                         {!showKlashaButton ? (
-                          <Button onClick={handleCompletePurchase} className="bg-primary hover:bg-primary/90" disabled={isProcessing || (checkoutData.paymentMethod === 'klasha' && isLoadingKlashaConfig)}>
+                          <Button
+                            onClick={handleCompletePurchase}
+                            className="bg-primary hover:bg-primary/90"
+                            disabled={
+                              isProcessing ||
+                              (checkoutData.paymentMethod === 'klasha' && (isLoadingKlashaConfig || !klashaScriptLoaded))
+                            }
+                          >
                             {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Complete Purchase - ${totalPrice.toFixed(2)}
-                            {checkoutData.paymentMethod === 'klasha' && ngnRate && ` / ~₦${Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')}`}
+                            {checkoutData.paymentMethod === 'klasha' && !klashaScriptLoaded
+                              ? 'Initializing Payment...'
+                              : `Complete Purchase - $${totalPrice.toFixed(2)}`}
+                            {checkoutData.paymentMethod === 'klasha' &&
+                              klashaScriptLoaded &&
+                              ngnRate &&
+                              ` / ~₦${Math.ceil(totalPrice * ngnRate).toLocaleString('en-NG')}`}
                           </Button>
                         ) : (
                           klashaConfig && (
