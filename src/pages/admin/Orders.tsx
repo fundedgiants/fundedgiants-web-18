@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -104,7 +105,7 @@ const OrdersPage: React.FC = () => {
     onSuccess: () => {
       toast.success("Order status updated successfully!");
       queryClient.invalidateQueries({ queryKey: ['allOrders'] });
-      queryClient.invalidateQueries({ queryKey: ['orderAnalytics'] }); // Also refresh dashboard analytics
+      queryClient.invalidateQueries({ queryKey: ['orderAnalytics'] });
     },
     onError: (err: Error) => {
       toast.error(`Failed to update status: ${err.message}`);

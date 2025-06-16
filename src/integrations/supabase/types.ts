@@ -430,6 +430,67 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_discount_code: {
+        Args: {
+          p_code: string
+          p_discount_type: string
+          p_discount_value: number
+          p_usage_limit?: number
+          p_user_segment?: string
+          p_expires_at?: string
+          p_specific_user_ids?: string[]
+        }
+        Returns: string
+      }
+      get_affiliate_payouts: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          affiliate_id: string
+          affiliate_code: string
+          user_email: string
+          amount: number
+          status: string
+          requested_at: string
+          processed_at: string
+        }[]
+      }
+      get_all_affiliates_with_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          user_id: string
+          user_email: string
+          affiliate_code: string
+          status: string
+          tier: string
+          commission_rate: number
+          total_clicks: number
+          total_referrals: number
+          total_earnings: number
+          pending_earnings: number
+          created_at: string
+          personal_info: Json
+          social_media_urls: Json
+          promotion_methods: string
+        }[]
+      }
+      get_all_discount_codes_with_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          code: string
+          discount_type: string
+          discount_value: number
+          is_active: boolean
+          usage_limit: number
+          times_used: number
+          user_segment: string
+          expires_at: string
+          created_at: string
+          total_revenue_impact: number
+        }[]
+      }
       get_all_orders_with_details: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -444,6 +505,25 @@ export type Database = {
           created_at: string
           affiliate_code: string
           applied_discount_code: string
+        }[]
+      }
+      get_all_trading_accounts_with_details: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          user_id: string
+          user_email: string
+          user_name: string
+          login_id: string
+          program_name: string
+          platform: string
+          starting_balance: number
+          status: string
+          is_visible: boolean
+          profit_protect: boolean
+          bi_weekly_payout: boolean
+          order_id: string
+          created_at: string
         }[]
       }
       get_all_users_with_profiles: {
@@ -486,8 +566,33 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: undefined
       }
+      update_affiliate_commission_rate: {
+        Args: { target_affiliate_id: string; new_rate: number }
+        Returns: undefined
+      }
+      update_affiliate_status: {
+        Args: { target_affiliate_id: string; new_status: string }
+        Returns: undefined
+      }
+      update_discount_code: {
+        Args: {
+          p_id: string
+          p_is_active?: boolean
+          p_usage_limit?: number
+          p_expires_at?: string
+        }
+        Returns: undefined
+      }
       update_order_payment_status: {
         Args: { target_order_id: string; new_status: string }
+        Returns: undefined
+      }
+      update_payout_status: {
+        Args: { target_payout_id: string; new_status: string }
+        Returns: undefined
+      }
+      update_trading_account_status: {
+        Args: { target_account_id: string; new_status: string }
         Returns: undefined
       }
     }

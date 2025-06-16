@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -110,7 +111,6 @@ const UsersPage: React.FC = () => {
     if (totalPages <= 1) return null;
 
     const pageNumbers = [];
-    // Always show first page
     pageNumbers.push(1);
 
     if (currentPage > 3) {
@@ -128,12 +128,10 @@ const UsersPage: React.FC = () => {
       pageNumbers.push('...');
     }
 
-    // Always show last page
     if (totalPages > 1) {
         pageNumbers.push(totalPages);
     }
     
-    // Remove duplicates that may occur from the logic above
     const uniquePageNumbers = [...new Set(pageNumbers)];
 
     return (

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Table,
@@ -14,8 +14,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle, Percent, Users, DollarSign, Calendar } from 'lucide-react';
+import { AlertTriangle, Percent, Users, DollarSign, Calendar, Plus, Edit2, ToggleLeft, ToggleRight } from 'lucide-react';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 import {
   Select,
   SelectContent,
@@ -23,6 +24,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
 
 interface DiscountCodeWithStats {
   id: string;
@@ -39,45 +57,136 @@ interface DiscountCodeWithStats {
 }
 
 const fetchDiscountCodes = async (): Promise<DiscountCodeWithStats[]> => {
-  // Get all discount codes
-  const { data: codesData, error: codesError } = await supabase
-    .from('discount_codes')
-    .select('*');
-
-  if (codesError) {
-    console.error('Error fetching discount codes:', codesError);
-    throw new Error(codesError.message);
+  const { data, error } = await supabase.rpc('get_all_discount_codes_with_stats');
+  if (error) {
+    console.error('Error fetching discount codes:', error);
+    throw new Error(error.message);
   }
-
-  // Get usage statistics from orders
-  const { data: ordersData } = await supabase
-    .from('orders')
-    .select('applied_discount_code, discount_amount')
-    .not('applied_discount_code', 'is', null);
-
-  // Calculate revenue impact for each code
-  const revenueMap = new Map();
-  ordersData?.forEach(order => {
-    if (order.applied_discount_code) {
-      const current = revenueMap.get(order.applied_discount_code) || 0;
-      revenueMap.set(order.applied_discount_code, current + Number(order.discount_amount || 0));
-    }
-  });
-
-  return codesData?.map(code => ({
-    ...code,
-    total_revenue_impact: revenueMap.get(code.code) || 0
-  })) || [];
+  return data || [];
 };
 
 const DiscountsPage: React.FC = () => {
+  const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedCode, setSelectedCode] = useState<DiscountCodeWithStats | null>(null);
+
+  // Create discount form state
+  const [newCode, setNewCode] = useState('');
+  const [discountType, setDiscountType] = useState('percentage');
+  const [discountValue, setDiscountValue] = useState('');
+  const [usageLimit, setUsageLimit] = useState('');
+  const [userSegment, setUserSegment] = useState('all');
+  const [expiresAt, setExpiresAt] = useState('');
+
+  // Edit form state
+  const [editUsageLimit, setEditUsageLimit] = useState('');
+  const [editExpiresAt, setEditExpiresAt] = useState('');
 
   const { data: discountCodes, isLoading, error } = useQuery<DiscountCodeWithStats[]>({
     queryKey: ['allDiscountCodes'],
     queryFn: fetchDiscountCodes,
   });
+
+  const createDiscountMutation = useMutation({
+    mutationFn: async (data: {
+      code: string;
+      discount_type: string;
+      discount_value: number;
+      usage_limit?: number;
+      user_segment: string;
+      expires_at?: string;
+    }) => {
+      const { error } = await supabase.rpc('create_discount_code', {
+        p_code: data.code,
+        p_discount_type: data.discount_type,
+        p_discount_value: data.discount_value,
+        p_usage_limit: data.usage_limit || null,
+        p_user_segment: data.user_segment,
+        p_expires_at: data.expires_at || null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success('Discount code created successfully');
+      queryClient.invalidateQueries({ queryKey: ['allDiscountCodes'] });
+      setIsCreateDialogOpen(false);
+      resetCreateForm();
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to create discount code: ${error.message}`);
+    },
+  });
+
+  const updateDiscountMutation = useMutation({
+    mutationFn: async (data: {
+      id: string;
+      is_active?: boolean;
+      usage_limit?: number;
+      expires_at?: string;
+    }) => {
+      const { error } = await supabase.rpc('update_discount_code', {
+        p_id: data.id,
+        p_is_active: data.is_active,
+        p_usage_limit: data.usage_limit,
+        p_expires_at: data.expires_at,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success('Discount code updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['allDiscountCodes'] });
+      setIsEditDialogOpen(false);
+      setSelectedCode(null);
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to update discount code: ${error.message}`);
+    },
+  });
+
+  const resetCreateForm = () => {
+    setNewCode('');
+    setDiscountType('percentage');
+    setDiscountValue('');
+    setUsageLimit('');
+    setUserSegment('all');
+    setExpiresAt('');
+  };
+
+  const handleCreateDiscount = () => {
+    if (!newCode || !discountValue) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    createDiscountMutation.mutate({
+      code: newCode.toUpperCase(),
+      discount_type: discountType,
+      discount_value: parseFloat(discountValue),
+      usage_limit: usageLimit ? parseInt(usageLimit) : undefined,
+      user_segment: userSegment,
+      expires_at: expiresAt || undefined,
+    });
+  };
+
+  const handleToggleActive = (code: DiscountCodeWithStats) => {
+    updateDiscountMutation.mutate({
+      id: code.id,
+      is_active: !code.is_active,
+    });
+  };
+
+  const handleEditDiscount = () => {
+    if (!selectedCode) return;
+
+    updateDiscountMutation.mutate({
+      id: selectedCode.id,
+      usage_limit: editUsageLimit ? parseInt(editUsageLimit) : undefined,
+      expires_at: editExpiresAt || undefined,
+    });
+  };
 
   const filteredCodes = discountCodes?.filter(code => {
     const statusMatch = statusFilter === 'all' || 
@@ -150,7 +259,99 @@ const DiscountsPage: React.FC = () => {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">Discount Codes Management</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Discount Codes Management</h1>
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Discount Code
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Discount Code</DialogTitle>
+              <DialogDescription>
+                Create a new discount code for your customers
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="code">Discount Code *</Label>
+                <Input
+                  id="code"
+                  value={newCode}
+                  onChange={(e) => setNewCode(e.target.value.toUpperCase())}
+                  placeholder="e.g., SAVE20"
+                />
+              </div>
+              <div>
+                <Label htmlFor="type">Discount Type *</Label>
+                <Select value={discountType} onValueChange={setDiscountType}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="percentage">Percentage</SelectItem>
+                    <SelectItem value="fixed_amount">Fixed Amount</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="value">
+                  Discount Value * {discountType === 'percentage' ? '(%)' : '($)'}
+                </Label>
+                <Input
+                  id="value"
+                  type="number"
+                  value={discountValue}
+                  onChange={(e) => setDiscountValue(e.target.value)}
+                  placeholder={discountType === 'percentage' ? '20' : '50'}
+                />
+              </div>
+              <div>
+                <Label htmlFor="segment">User Segment</Label>
+                <Select value={userSegment} onValueChange={setUserSegment}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Users</SelectItem>
+                    <SelectItem value="new_users">New Users</SelectItem>
+                    <SelectItem value="returning_users">Returning Users</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="limit">Usage Limit (optional)</Label>
+                <Input
+                  id="limit"
+                  type="number"
+                  value={usageLimit}
+                  onChange={(e) => setUsageLimit(e.target.value)}
+                  placeholder="Leave empty for unlimited"
+                />
+              </div>
+              <div>
+                <Label htmlFor="expires">Expires At (optional)</Label>
+                <Input
+                  id="expires"
+                  type="datetime-local"
+                  value={expiresAt}
+                  onChange={(e) => setExpiresAt(e.target.value)}
+                />
+              </div>
+              <Button
+                onClick={handleCreateDiscount}
+                disabled={createDiscountMutation.isPending}
+                className="w-full"
+              >
+                Create Discount Code
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
       
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4 mb-6">
@@ -231,6 +432,7 @@ const DiscountsPage: React.FC = () => {
                 <TableHead>Revenue Impact</TableHead>
                 <TableHead>Expires</TableHead>
                 <TableHead>Created</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -266,6 +468,75 @@ const DiscountsPage: React.FC = () => {
                     }
                   </TableCell>
                   <TableCell>{format(new Date(code.created_at), 'MMM d, yyyy')}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleToggleActive(code)}
+                        disabled={updateDiscountMutation.isPending}
+                      >
+                        {code.is_active ? (
+                          <ToggleRight className="h-3 w-3 mr-1" />
+                        ) : (
+                          <ToggleLeft className="h-3 w-3 mr-1" />
+                        )}
+                        {code.is_active ? 'Deactivate' : 'Activate'}
+                      </Button>
+                      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedCode(code);
+                              setEditUsageLimit(code.usage_limit?.toString() || '');
+                              setEditExpiresAt(code.expires_at ? new Date(code.expires_at).toISOString().slice(0, 16) : '');
+                            }}
+                          >
+                            <Edit2 className="h-3 w-3 mr-1" />
+                            Edit
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Edit Discount Code</DialogTitle>
+                            <DialogDescription>
+                              Update settings for {selectedCode?.code}
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div>
+                              <Label htmlFor="edit-limit">Usage Limit</Label>
+                              <Input
+                                id="edit-limit"
+                                type="number"
+                                value={editUsageLimit}
+                                onChange={(e) => setEditUsageLimit(e.target.value)}
+                                placeholder="Leave empty for unlimited"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="edit-expires">Expires At</Label>
+                              <Input
+                                id="edit-expires"
+                                type="datetime-local"
+                                value={editExpiresAt}
+                                onChange={(e) => setEditExpiresAt(e.target.value)}
+                              />
+                            </div>
+                            <Button
+                              onClick={handleEditDiscount}
+                              disabled={updateDiscountMutation.isPending}
+                              className="w-full"
+                            >
+                              Update Discount Code
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

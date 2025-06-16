@@ -43,57 +43,12 @@ interface TradingAccountWithDetails {
 }
 
 const fetchTradingAccounts = async (): Promise<TradingAccountWithDetails[]> => {
-  // Get trading accounts with user profiles
-  const { data: accountsData, error: accountsError } = await supabase
-    .from('trading_accounts')
-    .select(`
-      id,
-      user_id,
-      login_id,
-      program_name,
-      platform,
-      starting_balance,
-      status,
-      is_visible,
-      profit_protect,
-      bi_weekly_payout,
-      order_id,
-      created_at
-    `);
-
-  if (accountsError) {
-    console.error('Error fetching trading accounts:', accountsError);
-    throw new Error(accountsError.message);
+  const { data, error } = await supabase.rpc('get_all_trading_accounts_with_details');
+  if (error) {
+    console.error('Error fetching trading accounts:', error);
+    throw new Error(error.message);
   }
-
-  // Get user profiles and emails
-  const userIds = accountsData?.map(a => a.user_id) || [];
-  
-  const { data: profilesData } = await supabase
-    .from('profiles')
-    .select('id, first_name, last_name')
-    .in('id', userIds);
-
-  const { data: usersData } = await supabase.auth.admin.listUsers();
-  
-  // Create maps for quick lookups
-  const profilesMap = new Map<string, string>();
-  profilesData?.forEach(profile => {
-    profilesMap.set(profile.id, `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown');
-  });
-
-  const usersMap = new Map<string, string>();
-  if (usersData.users) {
-    usersData.users.forEach((user: any) => {
-      usersMap.set(user.id, user.email || 'Unknown');
-    });
-  }
-
-  return accountsData?.map(account => ({
-    ...account,
-    user_email: usersMap.get(account.user_id) || 'Unknown',
-    user_name: profilesMap.get(account.user_id) || 'Unknown'
-  })) || [];
+  return data || [];
 };
 
 const TradingAccountsPage: React.FC = () => {
@@ -108,10 +63,10 @@ const TradingAccountsPage: React.FC = () => {
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ accountId, status }: { accountId: string; status: 'active' | 'passed' | 'failed' | 'inactive' }) => {
-      const { error } = await supabase
-        .from('trading_accounts')
-        .update({ status })
-        .eq('id', accountId);
+      const { error } = await supabase.rpc('update_trading_account_status', {
+        target_account_id: accountId,
+        new_status: status
+      });
       if (error) throw error;
     },
     onSuccess: () => {
