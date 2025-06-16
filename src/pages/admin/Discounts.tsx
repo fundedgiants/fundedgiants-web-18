@@ -39,12 +39,35 @@ interface DiscountCodeWithStats {
 }
 
 const fetchDiscountCodes = async (): Promise<DiscountCodeWithStats[]> => {
-  const { data, error } = await supabase.rpc('get_all_discount_codes_with_stats');
-  if (error) {
-    console.error('Error fetching discount codes:', error);
-    throw new Error(error.message);
+  // Get all discount codes
+  const { data: codesData, error: codesError } = await supabase
+    .from('discount_codes')
+    .select('*');
+
+  if (codesError) {
+    console.error('Error fetching discount codes:', codesError);
+    throw new Error(codesError.message);
   }
-  return data || [];
+
+  // Get usage statistics from orders
+  const { data: ordersData } = await supabase
+    .from('orders')
+    .select('applied_discount_code, discount_amount')
+    .not('applied_discount_code', 'is', null);
+
+  // Calculate revenue impact for each code
+  const revenueMap = new Map();
+  ordersData?.forEach(order => {
+    if (order.applied_discount_code) {
+      const current = revenueMap.get(order.applied_discount_code) || 0;
+      revenueMap.set(order.applied_discount_code, current + Number(order.discount_amount || 0));
+    }
+  });
+
+  return codesData?.map(code => ({
+    ...code,
+    total_revenue_impact: revenueMap.get(code.code) || 0
+  })) || [];
 };
 
 const DiscountsPage: React.FC = () => {

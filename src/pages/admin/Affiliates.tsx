@@ -55,12 +55,68 @@ interface AffiliateWithStats {
 }
 
 const fetchAffiliates = async (): Promise<AffiliateWithStats[]> => {
-  const { data, error } = await supabase.rpc('get_all_affiliates_with_stats');
-  if (error) {
-    console.error('Error fetching affiliates:', error);
-    throw new Error(error.message);
+  // First get all affiliates
+  const { data: affiliatesData, error: affiliatesError } = await supabase
+    .from('affiliates')
+    .select(`
+      id,
+      user_id,
+      affiliate_code,
+      status,
+      tier,
+      commission_rate,
+      created_at,
+      personal_info,
+      social_media_urls,
+      promotion_methods
+    `);
+
+  if (affiliatesError) {
+    console.error('Error fetching affiliates:', affiliatesError);
+    throw new Error(affiliatesError.message);
   }
-  return data || [];
+
+  // Get user emails
+  const userIds = affiliatesData?.map(a => a.user_id) || [];
+  const { data: usersData } = await supabase.auth.admin.listUsers();
+  
+  // Create a map for quick email lookup
+  const userEmailMap = new Map();
+  usersData.users?.forEach(user => {
+    userEmailMap.set(user.id, user.email);
+  });
+
+  // Get affiliate clicks stats
+  const { data: clicksData } = await supabase
+    .from('affiliate_clicks')
+    .select('affiliate_id')
+    .in('affiliate_id', affiliatesData?.map(a => a.id) || []);
+
+  // Get referrals stats
+  const { data: referralsData } = await supabase
+    .from('affiliate_referrals')
+    .select('affiliate_id, commission_amount, status')
+    .in('affiliate_id', affiliatesData?.map(a => a.id) || []);
+
+  // Process the data
+  return affiliatesData?.map(affiliate => {
+    const clicks = clicksData?.filter(c => c.affiliate_id === affiliate.id).length || 0;
+    const referrals = referralsData?.filter(r => r.affiliate_id === affiliate.id) || [];
+    const totalReferrals = referrals.length;
+    const completedReferrals = referrals.filter(r => r.status === 'completed');
+    const pendingReferrals = referrals.filter(r => r.status === 'pending');
+    const totalEarnings = completedReferrals.reduce((sum, r) => sum + Number(r.commission_amount), 0);
+    const pendingEarnings = pendingReferrals.reduce((sum, r) => sum + Number(r.commission_amount), 0);
+
+    return {
+      ...affiliate,
+      user_email: userEmailMap.get(affiliate.user_id) || 'Unknown',
+      total_clicks: clicks,
+      total_referrals: totalReferrals,
+      total_earnings: totalEarnings,
+      pending_earnings: pendingEarnings
+    };
+  }) || [];
 };
 
 const AffiliatesPage: React.FC = () => {
@@ -76,10 +132,10 @@ const AffiliatesPage: React.FC = () => {
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ affiliateId, status }: { affiliateId: string; status: string }) => {
-      const { error } = await supabase.rpc('update_affiliate_status', {
-        target_affiliate_id: affiliateId,
-        new_status: status
-      });
+      const { error } = await supabase
+        .from('affiliates')
+        .update({ status })
+        .eq('id', affiliateId);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -93,10 +149,10 @@ const AffiliatesPage: React.FC = () => {
 
   const updateCommissionMutation = useMutation({
     mutationFn: async ({ affiliateId, rate }: { affiliateId: string; rate: number }) => {
-      const { error } = await supabase.rpc('update_affiliate_commission_rate', {
-        target_affiliate_id: affiliateId,
-        new_commission_rate: rate
-      });
+      const { error } = await supabase
+        .from('affiliates')
+        .update({ commission_rate: rate })
+        .eq('id', affiliateId);
       if (error) throw error;
     },
     onSuccess: () => {
