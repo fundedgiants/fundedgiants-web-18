@@ -81,10 +81,12 @@ const fetchAffiliates = async (): Promise<AffiliateWithStats[]> => {
   const { data: usersData } = await supabase.auth.admin.listUsers();
   
   // Create a map for quick email lookup
-  const userEmailMap = new Map();
-  usersData.users?.forEach(user => {
-    userEmailMap.set(user.id, user.email);
-  });
+  const userEmailMap = new Map<string, string>();
+  if (usersData.users) {
+    usersData.users.forEach((user: any) => {
+      userEmailMap.set(user.id, user.email || 'Unknown');
+    });
+  }
 
   // Get affiliate clicks stats
   const { data: clicksData } = await supabase

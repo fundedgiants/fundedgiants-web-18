@@ -77,15 +77,17 @@ const fetchTradingAccounts = async (): Promise<TradingAccountWithDetails[]> => {
   const { data: usersData } = await supabase.auth.admin.listUsers();
   
   // Create maps for quick lookups
-  const profilesMap = new Map();
+  const profilesMap = new Map<string, string>();
   profilesData?.forEach(profile => {
     profilesMap.set(profile.id, `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown');
   });
 
-  const usersMap = new Map();
-  usersData.users?.forEach(user => {
-    usersMap.set(user.id, user.email);
-  });
+  const usersMap = new Map<string, string>();
+  if (usersData.users) {
+    usersData.users.forEach((user: any) => {
+      usersMap.set(user.id, user.email || 'Unknown');
+    });
+  }
 
   return accountsData?.map(account => ({
     ...account,
@@ -105,7 +107,7 @@ const TradingAccountsPage: React.FC = () => {
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ accountId, status }: { accountId: string; status: string }) => {
+    mutationFn: async ({ accountId, status }: { accountId: string; status: 'active' | 'passed' | 'failed' | 'inactive' }) => {
       const { error } = await supabase
         .from('trading_accounts')
         .update({ status })
@@ -122,7 +124,9 @@ const TradingAccountsPage: React.FC = () => {
   });
 
   const handleStatusUpdate = (accountId: string, status: string) => {
-    updateStatusMutation.mutate({ accountId, status });
+    if (['active', 'passed', 'failed', 'inactive'].includes(status)) {
+      updateStatusMutation.mutate({ accountId, status: status as 'active' | 'passed' | 'failed' | 'inactive' });
+    }
   };
 
   const filteredAccounts = accounts?.filter(account => {
