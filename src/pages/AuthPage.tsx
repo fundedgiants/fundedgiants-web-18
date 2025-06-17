@@ -10,11 +10,11 @@ const AuthPage = () => {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Affiliate Portal</CardTitle>
           <CardDescription>
-            Login or create an account to access your affiliate dashboard.
+            Login to access your affiliate dashboard and track your earnings.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Auth />
+          <Auth embedded={true} />
         </CardContent>
       </Card>
     </div>

@@ -38,7 +38,7 @@ const Auth: React.FC<AuthProps> = ({ embedded = false }) => {
         password: formData.password,
       });
       authError = error;
-      if (!error) successMessage = 'Logged in successfully!';
+      if (!error) successMessage = 'Welcome back to your affiliate dashboard!';
     } else {
       if (formData.password !== formData.confirmPassword) {
         toast.error("Passwords do not match.");
@@ -49,7 +49,7 @@ const Auth: React.FC<AuthProps> = ({ embedded = false }) => {
         email: formData.email,
         password: formData.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `${window.location.origin}/affiliate-portal`,
           data: {
             first_name: formData.firstName,
             last_name: formData.lastName,
@@ -67,7 +67,7 @@ const Auth: React.FC<AuthProps> = ({ embedded = false }) => {
     } else {
       toast.success(successMessage);
       if (!embedded) {
-        navigate('/');
+        navigate('/affiliate-portal');
       }
     }
   };
@@ -75,12 +75,12 @@ const Auth: React.FC<AuthProps> = ({ embedded = false }) => {
   return (
     <Card className="w-full max-w-md bg-card/20 backdrop-blur-sm border-primary/30 shadow-2xl relative z-10">
       <CardHeader className="text-center pb-8">
-        <div className="text-4xl mb-4">⚡</div>
+        <div className="text-4xl mb-4">💰</div>
         <CardTitle className="text-2xl text-primary">
-          {isLogin ? 'Enter the Divine Realm' : 'Join the Cosmic Giants'}
+          {isLogin ? 'Access Affiliate Portal' : 'Join Our Affiliate Program'}
         </CardTitle>
         <p className="text-muted-foreground">
-          {isLogin ? 'Welcome back, divine trader' : 'Begin your ascension to trading godhood'}
+          {isLogin ? 'Login to track your earnings and referrals' : 'Start earning commissions today'}
         </p>
       </CardHeader>
       
@@ -172,14 +172,14 @@ const Auth: React.FC<AuthProps> = ({ embedded = false }) => {
           )}
           
           <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 group" disabled={loading}>
-            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : (isLogin ? '⚡ Enter Divine Realm' : '🚀 Begin Ascension')}
+            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : (isLogin ? '💰 Access Dashboard' : '🚀 Join Program')}
             {!loading && <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />}
           </Button>
           
           {isLogin && (
             <div className="text-center">
               <button type="button" className="text-sm text-primary hover:underline">
-                Forgot your divine password?
+                Forgot your password?
               </button>
             </div>
           )}
@@ -187,13 +187,13 @@ const Auth: React.FC<AuthProps> = ({ embedded = false }) => {
         
         <div className="mt-8 text-center">
           <p className="text-muted-foreground">
-            {isLogin ? "New to the cosmic realm?" : "Already a divine trader?"}
+            {isLogin ? "New to our affiliate program?" : "Already have an account?"}
           </p>
           <button
             onClick={() => setIsLogin(!isLogin)}
             className="text-primary hover:underline font-semibold mt-2"
           >
-            {isLogin ? 'Join the Giants' : 'Enter the Realm'}
+            {isLogin ? 'Join the Program' : 'Login to Dashboard'}
           </button>
         </div>
       </CardContent>

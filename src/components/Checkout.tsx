@@ -5,10 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, ArrowRight, Check, CreditCard, Loader2, Bitcoin } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useQuery } from '@tanstack/react-query';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AFFILIATE_CODE_STORAGE_KEY } from '@/hooks/useAffiliateTracking';
 
@@ -36,25 +34,14 @@ interface CheckoutState {
     city: string;
     address: string;
     zipCode: string;
-    password?: string;
-    confirmPassword?: string;
   };
   paymentMethod: string;
-}
-
-interface AlatPayTransactionDetails {
-  account_name: string;
-  account_number: string;
-  bank_name: string;
-  amount_expected: number;
-  reference: string;
 }
 
 const Checkout = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
-  const { user, loading: authLoading } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isApplyingCode, setIsApplyingCode] = useState(false);
   const [discountCode, setDiscountCode] = useState('');
@@ -82,71 +69,10 @@ const Checkout = () => {
       state: '',
       city: '',
       address: '',
-      zipCode: '',
-      password: '',
-      confirmPassword: ''
+      zipCode: ''
     },
     paymentMethod: 'card'
   });
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (user) {
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-
-        if (error && error.code !== 'PGRST116') { // Ignore error when no profile found
-          toast.error("Could not fetch your profile data.");
-          console.error("Profile fetch error:", error);
-        } else if (profile) {
-          let loadedCountryCode = '';
-          let loadedPhone = profile.phone || '';
-
-          if (profile.phone) {
-            const prefixes = [{code: '+234'}, {code: '+1'}, {code: '+44'}, {code: '+27'}, {code: '+233'}];
-            const matchedPrefix = prefixes.find(p => profile.phone.startsWith(p.code));
-            if (matchedPrefix) {
-                loadedCountryCode = matchedPrefix.code;
-                loadedPhone = profile.phone.substring(matchedPrefix.code.length);
-            }
-          }
-
-          setCheckoutData(prev => ({
-            ...prev,
-            billingInfo: {
-              ...prev.billingInfo,
-              firstName: profile.first_name || '',
-              lastName: profile.last_name || '',
-              email: user.email || '',
-              phone: loadedPhone,
-              countryCode: loadedCountryCode || prev.billingInfo.countryCode,
-              country: profile.country || '',
-              state: profile.state || '',
-              city: profile.city || '',
-              address: profile.address || '',
-              zipCode: profile.zip_code || '',
-            }
-          }));
-        } else {
-            // User exists but has no profile yet, just set email
-            setCheckoutData(prev => ({
-                ...prev,
-                billingInfo: {
-                    ...prev.billingInfo,
-                    email: user.email || '',
-                }
-            }))
-        }
-      }
-    };
-
-    if (!authLoading) {
-      fetchProfile();
-    }
-  }, [user, authLoading]);
 
   useEffect(() => {
     const program = checkoutData.program;
@@ -178,18 +104,6 @@ const Checkout = () => {
     { id: 'no_profit_target', name: 'Remove Profit Target from 1st, 2nd, and 3rd Withdrawals', description: 'Removes profit targets and minimum trading days for your first 3 payouts.', pricePercent: 30 },
     { id: 'profit_split', name: 'Increase Profit Split (80:20 from onset)', description: 'Enjoy an 80:20 profit split from the very beginning.', pricePercent: 50 }
   ];
-  
-  useEffect(() => {
-    if (!authLoading && user) {
-        setCheckoutData(prev => ({
-          ...prev,
-          billingInfo: {
-            ...prev.billingInfo,
-            email: user.email || '',
-          }
-        }))
-    }
-  }, [user, authLoading]);
 
   const steps = [
     { number: 1, title: 'Account Selection', completed: currentStep > 1 },
@@ -221,7 +135,7 @@ const Checkout = () => {
                 discountCode: discountCode || undefined, 
                 affiliateCode: affiliateCodeInput || undefined,
                 basePrice,
-                userId: user?.id
+                userId: null // Guest checkout - no user ID
             },
         });
 
@@ -276,93 +190,19 @@ const Checkout = () => {
 
   const handleCompletePurchase = async () => {
     setIsProcessing(true);
-    let sessionUser = user;
 
-    if (!sessionUser) {
-      const { email, password, confirmPassword, firstName, lastName, phone, countryCode } = checkoutData.billingInfo;
-
-      if (currentStep !== 5) {
-        handleNext();
-        setIsProcessing(false);
-        return;
-      }
-      
-      if (!password || password !== confirmPassword) {
-        toast.error("Passwords do not match or are missing.");
-        setCurrentStep(4);
-        setIsProcessing(false);
-        return;
-      }
-      if (!email || !firstName || !lastName || !phone) {
-        toast.error("Please fill in all required billing details, including your phone number.");
-        setCurrentStep(4);
-        setIsProcessing(false);
-        return;
-      }
-
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { first_name: firstName, last_name: lastName },
-        },
-      });
-
-      if (signUpError) {
-        if (signUpError.message.includes("User already registered")) {
-          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-          });
-
-          if (signInError) {
-            toast.error(`Login failed: ${signInError.message}`);
-            setIsProcessing(false);
-            return;
-          }
-          if (signInData.user) {
-            toast.success("Logged in successfully!");
-            sessionUser = signInData.user;
-          }
-        } else {
-          toast.error(`Sign up failed: ${signUpError.message}`);
-          setIsProcessing(false);
-          return;
-        }
-      } else if (signUpData.user) {
-        toast.success("Account created successfully!");
-        sessionUser = signUpData.user;
-      }
-    }
-
-    if (!sessionUser) {
-      toast.error("Authentication is required to complete the purchase.");
+    const { email, firstName, lastName, phone, countryCode } = checkoutData.billingInfo;
+    
+    if (!email || !firstName || !lastName || !phone) {
+      toast.error("Please fill in all required billing details.");
+      setCurrentStep(4);
       setIsProcessing(false);
       return;
     }
 
-    // Combine phone number parts and update profile
-    const { phone, countryCode, firstName, lastName, email } = checkoutData.billingInfo;
+    // Combine phone number parts
     const numberPart = phone.replace(/^0+/, '');
     const fullPhoneNumber = `${countryCode}${numberPart}`;
-
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .update({
-        first_name: checkoutData.billingInfo.firstName,
-        last_name: checkoutData.billingInfo.lastName,
-        phone: fullPhoneNumber,
-        country: checkoutData.billingInfo.country,
-        state: checkoutData.billingInfo.state,
-        city: checkoutData.billingInfo.city,
-        address: checkoutData.billingInfo.address,
-        zip_code: checkoutData.billingInfo.zipCode,
-      })
-      .eq('id', sessionUser.id);
-
-    if (profileError) {
-      toast.warning(`Could not save billing info: ${profileError.message}`);
-    }
 
     const payment_provider = checkoutData.paymentMethod === 'crypto' ? 'nowpayments' 
                            : checkoutData.paymentMethod === 'card' ? 'coming_soon'
@@ -371,8 +211,9 @@ const Checkout = () => {
     const trackedAffiliateCode = localStorage.getItem(AFFILIATE_CODE_STORAGE_KEY);
     const finalAffiliateToCredit = appliedDiscount?.affiliateToCredit || trackedAffiliateCode;
 
+    // Create order without requiring authentication
     const { data: orderData, error: orderError } = await supabase.from('orders').insert({
-      user_id: sessionUser.id,
+      user_id: null, // Guest order - no user ID required
       program_id: checkoutData.accountSize,
       program_name: programs[checkoutData.program as keyof typeof programs].name,
       platform: checkoutData.platform,
@@ -400,6 +241,42 @@ const Checkout = () => {
     }
 
     const orderId = orderData.id;
+
+    // Send customer data to CRM immediately
+    const crmPayload = {
+      user: {
+        email: checkoutData.billingInfo.email,
+        firstName: checkoutData.billingInfo.firstName,
+        lastName: checkoutData.billingInfo.lastName,
+        phone: fullPhoneNumber,
+        country: checkoutData.billingInfo.country,
+        address: checkoutData.billingInfo.address,
+        city: checkoutData.billingInfo.city,
+        state: checkoutData.billingInfo.state,
+        zipCode: checkoutData.billingInfo.zipCode,
+      },
+      purchase: {
+        orderId: orderId,
+        programName: checkoutData.program,
+        accountSize: checkoutData.accountSize,
+        platform: checkoutData.platform,
+        totalPrice: totalPrice,
+        addOns: selectedAddOns,
+        paymentMethod: checkoutData.paymentMethod,
+        purchaseDate: new Date().toISOString()
+      }
+    };
+
+    // Send to CRM function
+    try {
+      await supabase.functions.invoke('send-purchase-to-crm', {
+        body: { orderId }
+      });
+      console.log('Customer data sent to CRM:', crmPayload);
+    } catch (crmError) {
+      console.error('Failed to send data to CRM:', crmError);
+      // Don't block the purchase process for CRM errors
+    }
 
     if (checkoutData.paymentMethod === 'crypto') {
       try {
@@ -573,7 +450,6 @@ const Checkout = () => {
                   onChange={(e) => handleBillingChange('email', e.target.value)}
                   className="bg-card/50 border-muted md:col-span-4"
                   required
-                  disabled={!!user}
                 />
                 <select
                   value={checkoutData.billingInfo.countryCode}
@@ -634,35 +510,6 @@ const Checkout = () => {
                 />
               </div>
             </div>
-            {!user && (
-              <>
-                <Separator className="my-2 bg-primary/20" />
-                <div>
-                  <h4 className="text-md font-semibold text-white">Account Password</h4>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Create an account to save your progress. If you have an account, enter your password to log in.
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input
-                      placeholder="Password"
-                      type="password"
-                      value={checkoutData.billingInfo.password}
-                      onChange={(e) => handleBillingChange('password', e.target.value)}
-                      className="bg-card/50 border-muted"
-                      required
-                    />
-                    <Input
-                      placeholder="Confirm Password"
-                      type="password"
-                      value={checkoutData.billingInfo.confirmPassword}
-                      onChange={(e) => handleBillingChange('confirmPassword', e.target.value)}
-                      className="bg-card/50 border-muted"
-                      required
-                    />
-                  </div>
-                </div>
-              </>
-            )}
           </div>
         );
 
@@ -703,14 +550,6 @@ const Checkout = () => {
     return `Complete Purchase - $${totalPrice.toFixed(2)}`;
   }
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   let buttonDisabledReason = '';
 
   if (isProcessing) {
@@ -732,12 +571,9 @@ const Checkout = () => {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Home
             </Button>
-            {user && (
-              <div className="flex items-center gap-4">
-                <span className="text-muted-foreground">Logged in as {user.email}</span>
-                <Button variant="outline" size="sm" onClick={() => supabase.auth.signOut()}>Logout</Button>
-              </div>
-            )}
+            <div className="text-muted-foreground text-sm">
+              No account required - Complete your purchase as a guest
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

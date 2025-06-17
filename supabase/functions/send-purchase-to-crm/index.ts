@@ -1,3 +1,4 @@
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
 
@@ -30,18 +31,31 @@ Deno.serve(async (req) => {
     if (orderError) throw orderError;
     if (!order) throw new Error(`Order with id ${order_id} not found.`);
     
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .select('*')
-      .eq('id', order.user_id)
-      .single();
-
-    if (profileError) {
-        console.warn(`Could not fetch profile for user ${order.user_id}: ${profileError.message}`);
-    }
+    // Handle guest orders (user_id can be null)
+    let profile = null;
+    let authUser = null;
     
-    const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.getUserById(order.user_id);
-    if(authError) throw authError;
+    if (order.user_id) {
+      // Try to get profile for authenticated users
+      const { data: profileData, error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .select('*')
+        .eq('id', order.user_id)
+        .single();
+
+      if (profileError) {
+          console.warn(`Could not fetch profile for user ${order.user_id}: ${profileError.message}`);
+      } else {
+          profile = profileData;
+      }
+      
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.getUserById(order.user_id);
+      if(authError) {
+          console.warn(`Could not fetch auth user for ${order.user_id}: ${authError.message}`);
+      } else {
+          authUser = authData;
+      }
+    }
     
     // --- Commission Alert Logic ---
     if (order.payment_status === 'completed' && order.affiliate_code) {
@@ -93,17 +107,19 @@ Deno.serve(async (req) => {
     }
     // --- End Commission Alert Logic ---
 
+    // Construct CRM payload - handle both guest and authenticated users
     const crmPayload = {
       user: {
-        email: authUser.user.email,
-        firstName: profile?.first_name,
-        lastName: profile?.last_name,
-        phone: profile?.phone,
-        country: profile?.country,
-        address: profile?.address,
-        city: profile?.city,
-        state: profile?.state,
-        zipCode: profile?.zip_code,
+        email: authUser?.user?.email || 'guest@example.com',
+        firstName: profile?.first_name || 'Guest',
+        lastName: profile?.last_name || 'Customer',
+        phone: profile?.phone || null,
+        country: profile?.country || null,
+        address: profile?.address || null,
+        city: profile?.city || null,
+        state: profile?.state || null,
+        zipCode: profile?.zip_code || null,
+        isGuest: !order.user_id
       },
       purchase: {
         orderId: order.id,
@@ -113,7 +129,10 @@ Deno.serve(async (req) => {
         totalPrice: order.total_price,
         addOns: order.selected_addons,
         paymentMethod: order.payment_method,
-        purchaseDate: order.created_at
+        purchaseDate: order.created_at,
+        affiliateCode: order.affiliate_code,
+        discountCode: order.applied_discount_code,
+        discountAmount: order.discount_amount
       }
     };
     

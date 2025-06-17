@@ -1,3 +1,4 @@
+
 import { useAffiliate } from '@/hooks/useAffiliate';
 import { Loader2, DollarSign, Users, MousePointerClick, Percent, AlertCircle, Award } from 'lucide-react';
 import StatCard from '@/components/affiliate/StatCard';
@@ -25,9 +26,9 @@ const AffiliatePortal = () => {
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
+        <AlertTitle>Access Required</AlertTitle>
         <AlertDescription>
-          Failed to load affiliate data: {error.message}
+          Please log in to access your affiliate portal. <Link to="/auth" className="underline text-primary">Login here</Link>
         </AlertDescription>
       </Alert>
     );
@@ -40,13 +41,16 @@ const AffiliatePortal = () => {
                 <CardHeader>
                     <CardTitle className="text-2xl">Join our Affiliate Program</CardTitle>
                     <CardDescription>
-                        Ready to earn by promoting us? Click the button below to start your application.
+                        Ready to earn by promoting our trading programs? Click the button below to start your application.
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
                     <Button asChild>
                         <Link to="/become-affiliate">Become an Affiliate</Link>
                     </Button>
+                    <p className="text-sm text-muted-foreground">
+                        Already applied? <Link to="/auth" className="text-primary hover:underline">Login to your dashboard</Link>
+                    </p>
                 </CardContent>
             </Card>
         </div>
