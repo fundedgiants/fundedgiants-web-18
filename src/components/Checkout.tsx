@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, ArrowRight, Check, CreditCard, Loader2, Bitcoin } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, CreditCard, Loader2, Bitcoin, Building2 } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -206,12 +206,13 @@ const Checkout = () => {
 
     const payment_provider = checkoutData.paymentMethod === 'crypto' ? 'nowpayments' 
                            : checkoutData.paymentMethod === 'card' ? 'coming_soon'
+                           : checkoutData.paymentMethod === 'klasha' ? 'klasha'
                            : null;
 
     const trackedAffiliateCode = localStorage.getItem(AFFILIATE_CODE_STORAGE_KEY);
     const finalAffiliateToCredit = appliedDiscount?.affiliateToCredit || trackedAffiliateCode;
 
-    // Create order without requiring authentication
+    // Create order without requiring authentication, but include customer data
     const { data: orderData, error: orderError } = await supabase.from('orders').insert({
       user_id: null, // Guest order - no user ID required
       program_id: checkoutData.accountSize,
@@ -226,6 +227,16 @@ const Checkout = () => {
       applied_discount_code: appliedDiscount?.code,
       discount_amount: discountAmount,
       affiliate_code: finalAffiliateToCredit,
+      // Store customer data directly in the order
+      customer_email: email,
+      customer_first_name: firstName,
+      customer_last_name: lastName,
+      customer_phone: fullPhoneNumber,
+      customer_country: checkoutData.billingInfo.country,
+      customer_address: checkoutData.billingInfo.address,
+      customer_city: checkoutData.billingInfo.city,
+      customer_state: checkoutData.billingInfo.state,
+      customer_zip_code: checkoutData.billingInfo.zipCode,
     }).select().single();
 
     if (orderError) {
@@ -243,42 +254,45 @@ const Checkout = () => {
     const orderId = orderData.id;
 
     // Send customer data to CRM immediately
-    const crmPayload = {
-      user: {
-        email: checkoutData.billingInfo.email,
-        firstName: checkoutData.billingInfo.firstName,
-        lastName: checkoutData.billingInfo.lastName,
-        phone: fullPhoneNumber,
-        country: checkoutData.billingInfo.country,
-        address: checkoutData.billingInfo.address,
-        city: checkoutData.billingInfo.city,
-        state: checkoutData.billingInfo.state,
-        zipCode: checkoutData.billingInfo.zipCode,
-      },
-      purchase: {
-        orderId: orderId,
-        programName: checkoutData.program,
-        accountSize: checkoutData.accountSize,
-        platform: checkoutData.platform,
-        totalPrice: totalPrice,
-        addOns: selectedAddOns,
-        paymentMethod: checkoutData.paymentMethod,
-        purchaseDate: new Date().toISOString()
-      }
-    };
-
-    // Send to CRM function
     try {
       await supabase.functions.invoke('send-purchase-to-crm', {
         body: { orderId }
       });
-      console.log('Customer data sent to CRM:', crmPayload);
+      console.log('Customer data sent to CRM for order:', orderId);
     } catch (crmError) {
       console.error('Failed to send data to CRM:', crmError);
       // Don't block the purchase process for CRM errors
     }
 
-    if (checkoutData.paymentMethod === 'crypto') {
+    if (checkoutData.paymentMethod === 'klasha') {
+      try {
+        const { data: paymentData, error: paymentError } = await supabase.functions.invoke('create-klasha-payment', {
+          body: { orderId, totalPrice },
+        });
+
+        if (paymentError) {
+          throw new Error(paymentError.message);
+        }
+
+        if (paymentData.payment_url) {
+          // Redirect to Klasha payment page
+          window.location.href = paymentData.payment_url;
+        } else {
+          throw new Error('Could not retrieve payment URL from Klasha.');
+        }
+      } catch (error: any) {
+        let errorMessage = 'Payment initialization failed. Please try again later.';
+        if (error.message && (error.message.includes('error sending request') || error.message.includes('Failed to connect'))) {
+          errorMessage = 'We are having trouble connecting to the payment provider. Please contact support if this issue persists.';
+        } else if (error.message) {
+          errorMessage = `Payment initialization failed: ${error.message}`;
+        }
+        
+        toast.error(errorMessage);
+        await supabase.from('orders').update({ payment_status: 'failed' }).eq('id', orderId);
+        setIsProcessing(false);
+      }
+    } else if (checkoutData.paymentMethod === 'crypto') {
       try {
         const { data: invoiceData, error: invoiceError } = await supabase.functions.invoke('create-nowpayments-invoice', {
             body: { orderId, totalPrice },
@@ -515,13 +529,14 @@ const Checkout = () => {
 
       case 5:
         const paymentMethods = [
-            { value: 'card', label: 'Credit/Debit Card', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> },
+            { value: 'klasha', label: 'Nigerian Bank Transfer', subtitle: 'via Klasha', icon: <Building2 className="h-8 w-8 text-primary mb-2" /> },
             { value: 'crypto', label: 'Cryptocurrency', subtitle: 'via NowPayments', icon: <Bitcoin className="h-8 w-8 text-primary mb-2" /> },
+            { value: 'card', label: 'Credit/Debit Card', icon: <CreditCard className="h-8 w-8 text-primary mb-2" /> },
         ];
         return (
           <div className="space-y-6">
             <h3 className="text-lg font-semibold mb-4 text-white">Payment Method</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {paymentMethods.map((method) => (
                 <div
                   key={method.value}
