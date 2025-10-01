@@ -12,11 +12,11 @@ const FAQ = () => {
       questions: [
         {
           question: "What is FundedGiants?",
-          answer: "FundedGiants is a divine proprietary trading firm that provides funding up to $200,000 to skilled traders, with the potential to scale up to $1,000,000. We offer three celestial programs: Heracles (instant funding), Orion (one-step evaluation), and Zeus (two-step evaluation). Our mission is to empower talented traders with the capital they need to achieve their trading goals while maintaining transparent and fair rules."
+          answer: "FundedGiants is a divine proprietary trading firm that provides funding up to $200,000 to skilled traders, with the potential to scale up to $1,000,000. We offer two celestial programs: Rhino Rush (instant funding) and Phoenix Rise (two-step evaluation). Our mission is to empower talented traders with the capital they need to achieve their trading goals while maintaining transparent and fair rules."
         },
         {
           question: "How do I get started with FundedGiants?",
-          answer: "Getting started is simple:\n1. Choose your divine path from our three programs (Heracles, Orion, or Zeus)\n2. Select your preferred account size ($2,500 to $200,000)\n3. Complete the registration and payment process\n4. Receive your trading credentials within 24 hours\n5. Begin trading according to your program's rules\n6. Start earning profits and request withdrawals\n\nOur cosmic support team will guide you through each step of the journey."
+          answer: "Getting started is simple:\n1. Choose your divine path from our two programs (Rhino Rush or Phoenix Rise)\n2. Select your preferred account size ($2,500 to $200,000)\n3. Complete the registration and payment process\n4. Receive your trading credentials within 24 hours\n5. Begin trading according to your program's rules\n6. Start earning profits and request withdrawals\n\nOur cosmic support team will guide you through each step of the journey."
         },
         {
           question: "What trading platforms do you support?",
@@ -32,8 +32,8 @@ const FAQ = () => {
       category: "Account Types & Programs",
       questions: [
         {
-          question: "What's the difference between Heracles, Orion, and Zeus programs?",
-          answer: "**Heracles Trader (Instant Funding):**\n- Immediate access to funded account\n- No evaluation phase required\n- Higher entry cost but instant gratification\n- Graduated profit splits: 50% → 60% → 70%\n- Perfect for experienced traders\n\n**Orion Program (1-Step Challenge):**\n- Single evaluation phase\n- 10% profit target to pass\n- 70% profit split from first payout\n- Moderate entry cost\n- Balanced approach for most traders\n\n**Zeus Program (2-Step Challenge):**\n- Two evaluation phases\n- Phase 1: 10% profit target, Phase 2: 5% profit target\n- 70% profit split from first payout\n- Lowest entry cost\n- Ideal for new or budget-conscious traders"
+          question: "What's the difference between Rhino Rush and Phoenix Rise programs?",
+          answer: "**Rhino Rush (Instant Funding):**\n- Immediate access to funded account\n- No evaluation phase required\n- Higher entry cost but instant gratification\n- Graduated profit splits: 50% → 60% → 70%\n- Perfect for experienced traders\n\n**Phoenix Rise (2-Step Challenge):**\n- Two evaluation phases\n- Phase 1: 10% profit target, Phase 2: 5% profit target\n- 70% profit split from first payout\n- Lowest entry cost\n- Ideal for new or budget-conscious traders"
         },
         {
           question: "What account sizes are available?",
@@ -58,7 +58,7 @@ const FAQ = () => {
         },
         {
           question: "How does the maximum drawdown work?",
-          answer: "Maximum drawdown varies by program and is calculated from your highest balance achieved (high-water mark).\n\n**Drawdown Limits:**\n- **Heracles**: 7% for all account sizes\n- **Orion & Zeus**: 8% for all account sizes\n\n**How it works:**\n- Calculated from your highest closed balance\n- Never resets - always from highest point\n- Based on closed equity, not floating P&L\n\n**Example with $10,000 account (8% max drawdown):**\n- Starting balance: $10,000 → Max drawdown line: $9,200\n- Account grows to $12,000 → New max drawdown line: $11,040\n- Account grows to $15,000 → New max drawdown line: $13,800\n\n**Important:** Your closed equity must never fall below the maximum drawdown line."
+          answer: "Maximum drawdown varies by program and is calculated from your highest balance achieved (high-water mark).\n\n**Drawdown Limits:**\n- **Rhino Rush**: 7% for all account sizes\n- **Phoenix Rise**: 8% for all account sizes\n\n**How it works:**\n- Calculated from your highest closed balance\n- Never resets - always from highest point\n- Based on closed equity, not floating P&L\n\n**Example with $10,000 account (8% max drawdown):**\n- Starting balance: $10,000 → Max drawdown line: $9,200\n- Account grows to $12,000 → New max drawdown line: $11,040\n- Account grows to $15,000 → New max drawdown line: $13,800\n\n**Important:** Your closed equity must never fall below the maximum drawdown line."
         },
         {
           question: "What is the Consistency Rule?",
@@ -104,7 +104,7 @@ const FAQ = () => {
         },
         {
           question: "How does the increased drawdown add-on help?",
-          answer: "**Standard Drawdown Limits:**\n- Heracles: 7% maximum drawdown\n- Orion/Zeus: 8% maximum drawdown\n\n**With Increased Drawdown Add-on (+20% fee):**\n- Adds 2% to your maximum drawdown limit\n- Heracles: 7% → 9% maximum drawdown\n- Orion/Zeus: 8% → 10% maximum drawdown\n\n**Practical Impact on $10,000 Account:**\n- Standard 8%: $800 maximum loss allowed\n- Enhanced 10%: $1,000 maximum loss allowed\n- Extra $200 buffer for trade management\n\n**Benefits:**\n- More room for drawdown during volatile periods\n- Reduced risk of account termination\n- Better trade management flexibility\n- Suitable for swing traders\n- Handles market volatility better\n\n**Strategic Advantages:**\n- Hold losing positions longer for recovery\n- Weather temporary market storms\n- More aggressive position sizing possible\n- Greater confidence in trading decisions"
+          answer: "**Standard Drawdown Limits:**\n- Rhino Rush: 7% maximum drawdown\n- Phoenix Rise: 8% maximum drawdown\n\n**With Increased Drawdown Add-on (+20% fee):**\n- Adds 2% to your maximum drawdown limit\n- Rhino Rush: 7% → 9% maximum drawdown\n- Phoenix Rise: 8% → 10% maximum drawdown\n\n**Practical Impact on $10,000 Account:**\n- Standard 8%: $800 maximum loss allowed\n- Enhanced 10%: $1,000 maximum loss allowed\n- Extra $200 buffer for trade management\n\n**Benefits:**\n- More room for drawdown during volatile periods\n- Reduced risk of account termination\n- Better trade management flexibility\n- Suitable for swing traders\n- Handles market volatility better\n\n**Strategic Advantages:**\n- Hold losing positions longer for recovery\n- Weather temporary market storms\n- More aggressive position sizing possible\n- Greater confidence in trading decisions"
         }
       ]
     },
@@ -121,7 +121,7 @@ const FAQ = () => {
         },
         {
           question: "How do profit splits work in practice?",
-          answer: "**Standard Profit Splits:**\n\n**Heracles Program:**\n- 1st payout: 50% to trader, 50% to firm\n- 2nd payout: 60% to trader, 40% to firm\n- 3rd+ payouts: 70% to trader, 30% to firm\n\n**Orion & Zeus Programs:**\n- All payouts: 70% to trader, 30% to firm\n- Consistent from first withdrawal\n\n**With 80:20 Add-on (+50% fee):**\n- All payouts: 80% to trader, 20% to firm\n- Applies from very first withdrawal\n- Significant earning enhancement\n\n**Practical Examples:**\n\n**$1,000 Profit on Orion Program:**\n- Standard split: You receive $700, firm keeps $300\n- With 80:20 add-on: You receive $800, firm keeps $200\n\n**$5,000 Profit on Heracles Program:**\n- 1st payout: You receive $2,500, firm keeps $2,500\n- 2nd payout: You receive $3,000, firm keeps $2,000\n- 3rd+ payout: You receive $3,500, firm keeps $1,500\n\n**Calculation Method:**\n- Based on net profits after covering losses\n- Applied to each individual withdrawal\n- Transparent calculation provided"
+          answer: "**Standard Profit Splits:**\n\n**Rhino Rush Program:**\n- 1st payout: 50% to trader, 50% to firm\n- 2nd payout: 60% to trader, 40% to firm\n- 3rd+ payouts: 70% to trader, 30% to firm\n\n**Phoenix Rise Program:**\n- All payouts: 70% to trader, 30% to firm\n- Consistent from first withdrawal\n\n**With 80:20 Add-on (+50% fee):**\n- All payouts: 80% to trader, 20% to firm\n- Applies from very first withdrawal\n- Significant earning enhancement\n\n**Practical Examples:**\n\n**$1,000 Profit on Phoenix Rise Program:**\n- Standard split: You receive $700, firm keeps $300\n- With 80:20 add-on: You receive $800, firm keeps $200\n\n**$5,000 Profit on Rhino Rush Program:**\n- 1st payout: You receive $2,500, firm keeps $2,500\n- 2nd payout: You receive $3,000, firm keeps $2,000\n- 3rd+ payout: You receive $3,500, firm keeps $1,500\n\n**Calculation Method:**\n- Based on net profits after covering losses\n- Applied to each individual withdrawal\n- Transparent calculation provided"
         },
         {
           question: "Are there any hidden fees or charges?",

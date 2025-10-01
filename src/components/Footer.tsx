@@ -34,7 +34,7 @@ const Footer = () => {
   ];
 
   const programs = [
-    "Heracles Trader", "Orion Program", "Zeus Program", "Account Scaling", "Risk Management"
+    "Rhino Rush", "Phoenix Rise", "Account Scaling", "Risk Management"
   ];
 
   return (

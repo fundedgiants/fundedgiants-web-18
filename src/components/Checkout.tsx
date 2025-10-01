@@ -84,18 +84,17 @@ const Checkout = () => {
   }, [checkoutData.program]);
 
   const programs = {
-    heracles: { name: 'Heracles Trader', subtitle: 'Instant Funding' },
-    orion: { name: 'Orion Program', subtitle: '1 Step Challenge' },
-    zeus: { name: 'Zeus Program', subtitle: '2 Step Challenge' }
+    heracles: { name: 'Rhino Rush (Instant Funding)', subtitle: 'Instant Funding' },
+    zeus: { name: 'Phoenix Rise (2 Step Challenge)', subtitle: '2 Step Challenge' }
   };
 
   const accountSizes = [
-    { value: '2500', label: '$2,500', price: checkoutData.program === 'heracles' ? 129 : checkoutData.program === 'orion' ? 59 : 27 },
-    { value: '5000', label: '$5,000', price: checkoutData.program === 'heracles' ? 239 : checkoutData.program === 'orion' ? 89 : 47 },
-    { value: '10000', label: '$10,000', price: checkoutData.program === 'heracles' ? 449 : checkoutData.program === 'orion' ? 149 : 87 },
-    { value: '25000', label: '$25,000', price: checkoutData.program === 'heracles' ? 1149 : checkoutData.program === 'orion' ? 249 : 187 },
-    { value: '50000', label: '$50,000', price: checkoutData.program === 'heracles' ? 2299 : checkoutData.program === 'orion' ? 449 : 367 },
-    { value: '100000', label: '$100,000', price: checkoutData.program === 'heracles' ? 4599 : checkoutData.program === 'orion' ? 749 : 567 }
+    { value: '2500', label: '$2,500', price: checkoutData.program === 'heracles' ? 129 : 27 },
+    { value: '5000', label: '$5,000', price: checkoutData.program === 'heracles' ? 239 : 47 },
+    { value: '10000', label: '$10,000', price: checkoutData.program === 'heracles' ? 449 : 87 },
+    { value: '25000', label: '$25,000', price: checkoutData.program === 'heracles' ? 1149 : 187 },
+    { value: '50000', label: '$50,000', price: checkoutData.program === 'heracles' ? 2299 : 367 },
+    { value: '100000', label: '$100,000', price: checkoutData.program === 'heracles' ? 4599 : 567 }
   ];
 
   const addOns = [
