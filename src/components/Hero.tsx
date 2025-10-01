@@ -19,9 +19,9 @@ const Hero = () => {
           </h1>
           
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
-            Ascend to the pantheon of elite traders with our divine funding programs. 
-            Harness the power of the giants with funding up to $200,000 and scale up to $1,000,000. 
-            Keep up to 70% of your cosmic profits with no hidden fees, transparent divine rules, and instant payouts from the realm of giants.
+            Trade without limitations, Get Funded with Us today. 
+            Harness the power of the Giants with funding up to $100,000 and scale up to $1,000,000. 
+            Keep up to 70% of your profits with no hidden fees, transparent rules and Daily Payouts.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
