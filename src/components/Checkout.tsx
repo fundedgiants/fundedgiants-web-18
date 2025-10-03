@@ -22,7 +22,6 @@ interface CheckoutState {
   accountSize: string;
   platform: string;
   priceFeed: string;
-  addOns: string[];
   billingInfo: {
     firstName: string;
     lastName: string;
@@ -58,7 +57,6 @@ const Checkout = () => {
     accountSize: searchParams.get('size') || '2500',
     platform: 'MT5',
     priceFeed: 'real',
-    addOns: [],
     billingInfo: {
       firstName: '',
       lastName: '',
@@ -89,27 +87,19 @@ const Checkout = () => {
   };
 
   const accountSizes = [
-    { value: '2500', label: '$2,500', price: checkoutData.program === 'heracles' ? 129 : 27 },
-    { value: '5000', label: '$5,000', price: checkoutData.program === 'heracles' ? 239 : 47 },
-    { value: '10000', label: '$10,000', price: checkoutData.program === 'heracles' ? 449 : 87 },
-    { value: '25000', label: '$25,000', price: checkoutData.program === 'heracles' ? 1149 : 187 },
-    { value: '50000', label: '$50,000', price: checkoutData.program === 'heracles' ? 2299 : 367 },
-    { value: '100000', label: '$100,000', price: checkoutData.program === 'heracles' ? 4599 : 567 }
-  ];
-
-  const addOns = [
-    { id: 'leverage', name: 'Increase Leverage to 1:50', description: 'Boost your trading power with higher leverage.', pricePercent: 20 },
-    { id: 'drawdown', name: 'Increase DrawDown by 2%', description: 'Get more room for your trades to breathe.', pricePercent: 20 },
-    { id: 'no_profit_target', name: 'Remove Profit Target from 1st, 2nd, and 3rd Withdrawals', description: 'Removes profit targets and minimum trading days for your first 3 payouts.', pricePercent: 30 },
-    { id: 'profit_split', name: 'Increase Profit Split (80:20 from onset)', description: 'Enjoy an 80:20 profit split from the very beginning.', pricePercent: 50 }
+    { value: '2500', label: '$2,500', price: checkoutData.program === 'heracles' ? 109 : 27 },
+    { value: '5000', label: '$5,000', price: checkoutData.program === 'heracles' ? 209 : 47 },
+    { value: '10000', label: '$10,000', price: checkoutData.program === 'heracles' ? 399 : 87 },
+    { value: '25000', label: '$25,000', price: checkoutData.program === 'heracles' ? 999 : 187 },
+    { value: '50000', label: '$50,000', price: checkoutData.program === 'heracles' ? 1989 : 367 },
+    { value: '100000', label: '$100,000', price: checkoutData.program === 'heracles' ? 3989 : 567 }
   ];
 
   const steps = [
     { number: 1, title: 'Account Selection', completed: currentStep > 1 },
     { number: 2, title: 'Platform', completed: currentStep > 2 },
-    { number: 3, title: 'Add-ons', completed: currentStep > 3 },
-    { number: 4, title: 'Billing Information', completed: currentStep > 4 },
-    { number: 5, title: 'Payment', completed: false }
+    { number: 3, title: 'Billing Information', completed: currentStep > 3 },
+    { number: 4, title: 'Payment', completed: false }
   ];
 
   const selectedAccount = accountSizes.find(size => size.value === checkoutData.accountSize);
@@ -118,9 +108,7 @@ const Checkout = () => {
   const discountAmount = appliedDiscount?.discountAmount || 0;
   const discountedBasePrice = basePrice > discountAmount ? basePrice - discountAmount : 0;
 
-  const selectedAddOns = addOns.filter(addon => checkoutData.addOns.includes(addon.id));
-  const addOnsPrice = selectedAddOns.reduce((sum, addon) => sum + (basePrice * (addon.pricePercent / 100)), 0);
-  const totalPrice = discountedBasePrice + addOnsPrice;
+  const totalPrice = discountedBasePrice;
 
   const handleApplyCodes = async () => {
     if (!discountCode && !affiliateCodeInput) {
@@ -162,7 +150,7 @@ const Checkout = () => {
   };
 
   const handleNext = () => {
-    if (currentStep < 5) setCurrentStep(currentStep + 1);
+    if (currentStep < 4) setCurrentStep(currentStep + 1);
   };
 
   const handlePrevious = () => {
@@ -171,14 +159,6 @@ const Checkout = () => {
     }
   };
 
-  const handleAddOnToggle = (addonId: string) => {
-    setCheckoutData(prev => ({
-      ...prev,
-      addOns: prev.addOns.includes(addonId)
-        ? prev.addOns.filter(id => id !== addonId)
-        : [...prev.addOns, addonId]
-    }));
-  };
 
   const handleBillingChange = (field: string, value: string) => {
     setCheckoutData(prev => ({
@@ -218,7 +198,7 @@ const Checkout = () => {
       program_name: programs[checkoutData.program as keyof typeof programs].name,
       platform: checkoutData.platform,
       program_price: basePrice,
-      selected_addons: selectedAddOns,
+      selected_addons: [],
       total_price: totalPrice,
       payment_method: checkoutData.paymentMethod,
       payment_provider: payment_provider,
@@ -410,32 +390,6 @@ const Checkout = () => {
       case 3:
         return (
           <div className="space-y-6">
-            <h3 className="text-lg font-semibold mb-4 text-white">Select Add-ons (Optional)</h3>
-            {addOns.map((addon) => (
-              <div
-                key={addon.id}
-                className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                  checkoutData.addOns.includes(addon.id)
-                    ? 'border-primary bg-primary/10'
-                    : 'border-muted hover:border-primary/40'
-                }`}
-                onClick={() => handleAddOnToggle(addon.id)}
-              >
-                <div className="flex justify-between items-center">
-                  <div>
-                    <div className="font-medium text-white">{addon.name}</div>
-                    <div className="text-sm text-muted-foreground">{addon.description}</div>
-                  </div>
-                  <div className="text-primary font-bold">+{addon.pricePercent}%</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        );
-
-      case 4:
-        return (
-          <div className="space-y-6">
             <h3 className="text-lg font-semibold mb-4 text-white">Billing Information</h3>
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -526,7 +480,7 @@ const Checkout = () => {
           </div>
         );
 
-      case 5:
+      case 4:
         const paymentMethods = [
             { value: 'klasha', label: 'Nigerian Bank Transfer', subtitle: 'via Klasha', icon: <Building2 className="h-8 w-8 text-primary mb-2" /> },
             { value: 'crypto', label: 'Cryptocurrency', subtitle: 'via NowPayments', icon: <Bitcoin className="h-8 w-8 text-primary mb-2" /> },
@@ -643,7 +597,7 @@ const Checkout = () => {
                       Previous
                     </Button>
                     
-                    {currentStep < 5 ? (
+                    {currentStep < 4 ? (
                       <Button onClick={handleNext} className="bg-primary hover:bg-primary/90">
                         Next
                         <ArrowRight className="h-4 w-4 ml-2" />
@@ -744,16 +698,6 @@ const Checkout = () => {
                     {appliedDiscount?.message && <p className="text-xs text-green-400 text-center px-2">{appliedDiscount.message}</p>}
                   </div>
 
-                  <Separator className="bg-primary/20" />
-                  
-                  {selectedAddOns.map((addon) => (
-                    <div key={addon.id} className="flex justify-between items-center">
-                      <span className="text-muted-foreground text-sm">{addon.name} ({addon.pricePercent}%):</span>
-                      <span className="text-white">+${(basePrice * (addon.pricePercent / 100)).toFixed(2)}</span>
-                    </div>
-                  ))}
-                  
-                  <Separator className="bg-primary/20" />
                   
                   <div className="flex justify-between items-center text-lg font-bold">
                     <span className="text-white">Total:</span>

@@ -18,7 +18,7 @@ const TradingPrograms = () => {
       description: "Prove your divine trading prowess with our instant funding program.",
       accountSizes: ["$2,500", "$5,000", "$10,000", "$25,000", "$50,000", "$100,000"],
       accountValues: ["2500", "5000", "10000", "25000", "50000", "100000"],
-      prices: ["$129", "$239", "$449", "$1149", "$2299", "$4599"],
+      prices: ["$109", "$209", "$399", "$999", "$1989", "$3989"],
       programKey: "heracles",
       tableData: [
         {
@@ -30,27 +30,16 @@ const TradingPrograms = () => {
           values: ["$175 (7%)", "$350 (7%)", "$700 (7%)", "$1,750 (7%)", "$3,500 (7%)", "$7,000 (7%)"]
         },
         {
-          label: "1st Payout Target",
-          subtitle: "3 Min Trading Days",
-          values: ["$250(10%)", "$500(10%)", "$1,000(10%)", "$2,500(10%)", "$5,000(10%)", "$10,000(10%)"],
-          profitSplit: "50:50 Profit Split"
-        },
-        {
-          label: "2nd Payout Target", 
-          subtitle: "3 Min Trading Days",
-          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5,000 (5%)"],
-          profitSplit: "60:40 Profit Split"
-        },
-        {
-          label: "3rd Payout Target",
-          subtitle: "3 Min Trading Days", 
-          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5,000 (5%)"],
+          label: "1st Withdrawal",
+          subtitle: "5 Min Trading Days",
+          values: ["$250 (10%)", "$500 (10%)", "$1,000 (10%)", "$2,500 (10%)", "$5,000 (10%)", "$10,000 (10%)"],
           profitSplit: "70:30 Profit Split"
         },
         {
-          label: "Subsequent Payouts",
-          values: ["Minimum 2% and On-Demand Daily Payouts at 70:30 Profit Split", "", "", "", "", ""],
-          isSpanned: true
+          label: "2nd Withdrawal & All Subsequent",
+          subtitle: "Daily withdrawal if 5% hit OR 5 Min Trading Days",
+          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1,250 (5%)", "$2,500 (5%)", "$5,000 (5%)"],
+          profitSplit: "70:30 Profit Split"
         },
         {
           label: "Max Trading Days",
@@ -85,11 +74,11 @@ const TradingPrograms = () => {
       tableData: [
         {
           label: "Daily Drawdown",
-          values: ["$100 (4%)", "$200 (4%)", "$400 (4%)", "$1,000 (4%)", "$2,000 (4%)", "$4,000 (4%)"]
+          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1,250 (5%)", "$2,500 (5%)", "$5,000 (5%)"]
         },
         {
           label: "Overall Drawdown",
-          values: ["$200 (8%)", "$400 (8%)", "$800 (8%)", "$2000 (8%)", "$4000 (8%)", "$8000 (8%)"]
+          values: ["$250 (10%)", "$500 (10%)", "$1,000 (10%)", "$2,500 (10%)", "$5,000 (10%)", "$10,000 (10%)"]
         },
         {
           label: "Profit Target Phase 1",
@@ -100,15 +89,16 @@ const TradingPrograms = () => {
           values: ["$125 (5%)", "$250 (5%)", "$750 (5%)", "$1,250 (5%)", "$2,500 (5%)", "$5,000 (5%)"]
         },
         {
-          label: "1st Payout Target",
-          subtitle: "3 Min Trading Days",
-          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1250 (5%)", "$2500 (5%)", "$5,000 (5%)"],
+          label: "1st Withdrawal (Funded Stage)",
+          subtitle: "5 Min Trading Days",
+          values: ["$250 (10%)", "$500 (10%)", "$1,000 (10%)", "$2,500 (10%)", "$5,000 (10%)", "$10,000 (10%)"],
           profitSplit: "70:30 Profit Split"
         },
         {
-          label: "Subsequent Payouts",
-          values: ["Minimum 2% and On-Demand Daily Payouts at 70:30 Profit Split", "", "", "", "", ""],
-          isSpanned: true
+          label: "2nd Withdrawal & All Subsequent",
+          subtitle: "Daily withdrawal if 5% hit OR 5 Min Trading Days",
+          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1,250 (5%)", "$2,500 (5%)", "$5,000 (5%)"],
+          profitSplit: "70:30 Profit Split"
         },
         {
           label: "Max Trading Days",
@@ -212,17 +202,11 @@ const TradingPrograms = () => {
                                   )}
                                 </div>
                               </td>
-                              {row.isSpanned ? (
-                                <td colSpan={6} className="text-center p-4 font-semibold text-white">
-                                  {row.values[0]}
+                              {row.values.map((value, valueIndex) => (
+                                <td key={valueIndex} className="text-center p-3 text-white border-r border-cosmic-purple/30 last:border-r-0 text-sm">
+                                  {value}
                                 </td>
-                              ) : (
-                                row.values.map((value, valueIndex) => (
-                                  <td key={valueIndex} className="text-center p-3 text-white border-r border-cosmic-purple/30 last:border-r-0 text-sm">
-                                    {value}
-                                  </td>
-                                ))
-                              )}
+                              ))}
                             </tr>
                             {/* Profit split sub-row */}
                             {row.profitSplit && (
