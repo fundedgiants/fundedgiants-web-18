@@ -110,7 +110,7 @@ const TradingPrograms = () => {
         },
         {
           label: "Fee Refund",
-          values: ["No", "No", "No", "No", "No", "No"]
+          values: ["Yes", "Yes", "Yes", "Yes", "Yes", "Yes"]
         },
         {
           label: "Scaling",

@@ -88,27 +88,6 @@ const FAQ = () => {
       ]
     },
     {
-      category: "Account Add-ons & Enhancements",
-      questions: [
-        {
-          question: "What add-ons are available and how much do they cost?",
-          answer: "**Available Add-ons for All Accounts:**\n\n1. **Increased Leverage (1:50)** - +20% fee\n   - Standard: 1:30 leverage\n   - Enhanced: 1:50 leverage\n   - Better position flexibility\n\n2. **Increased Drawdown (+2%)** - +20% fee\n   - Adds 2% to maximum drawdown limit\n   - More room for trade management\n   - Reduces breach risk\n\n3. **Remove Profit Targets** - +30% fee\n   - Removes profit targets from first 3 withdrawals\n   - Eliminates minimum trading days requirement\n   - Immediate withdrawal access\n\n4. **Enhanced Profit Split (80:20)** - +50% fee\n   - Increases to 80% trader, 20% firm\n   - Applies from first payout\n   - Significantly higher earnings\n\n**Combination Pricing:**\n- Add-ons can be combined\n- Each add-on percentage applies to base price\n- Maximum customization available"
-        },
-        {
-          question: "How does the increased leverage add-on work?",
-          answer: "**Leverage Enhancement Details:**\n\n**Standard Leverage: 1:30**\n- $10,000 account controls $300,000 in trades\n- Conservative risk management\n- Suitable for most trading styles\n\n**Enhanced Leverage: 1:50** (+20% fee)\n- $10,000 account controls $500,000 in trades\n- More position flexibility\n- Smaller position sizes for same dollar risk\n\n**Practical Benefits:**\n- Trade larger positions with same risk\n- Better position sizing granularity\n- More strategic flexibility\n- Suitable for experienced traders\n\n**Example:**\n- Standard: 0.1 lots = $1,000 position\n- Enhanced: 0.06 lots = $1,000 position\n- More precise risk management possible\n\n**Risk Consideration:**\n- Higher leverage requires more discipline\n- Same drawdown rules apply\n- Position sizing becomes more critical"
-        },
-        {
-          question: "What does the Remove Profit Targets add-on do?",
-          answer: "**Standard Requirements:**\n- First 3 withdrawals need profit targets\n- Minimum 3 trading days before withdrawal\n- Specific profit percentages required\n\n**With Remove Profit Targets Add-on (+30% fee):**\n- No profit targets for first 3 withdrawals\n- No minimum trading days requirement\n- Withdraw any amount anytime\n- Complete flexibility from day one\n\n**Benefits:**\n- Immediate access to profits\n- No waiting periods\n- Flexible withdrawal scheduling\n- Perfect for active traders\n- Reduced pressure to hit targets\n\n**Example Scenario:**\n- Standard: Make $500 profit, wait 3 trading days, then withdraw\n- With add-on: Make $100 profit, withdraw immediately\n\n**Who Should Consider:**\n- Traders who prefer frequent smaller withdrawals\n- Those who want immediate access to profits\n- Traders with irregular profit patterns"
-        },
-        {
-          question: "How does the increased drawdown add-on help?",
-          answer: "**Standard Drawdown Limits:**\n- Rhino Rush: 7% maximum drawdown\n- Phoenix Rise: 8% maximum drawdown\n\n**With Increased Drawdown Add-on (+20% fee):**\n- Adds 2% to your maximum drawdown limit\n- Rhino Rush: 7% → 9% maximum drawdown\n- Phoenix Rise: 8% → 10% maximum drawdown\n\n**Practical Impact on $10,000 Account:**\n- Standard 8%: $800 maximum loss allowed\n- Enhanced 10%: $1,000 maximum loss allowed\n- Extra $200 buffer for trade management\n\n**Benefits:**\n- More room for drawdown during volatile periods\n- Reduced risk of account termination\n- Better trade management flexibility\n- Suitable for swing traders\n- Handles market volatility better\n\n**Strategic Advantages:**\n- Hold losing positions longer for recovery\n- Weather temporary market storms\n- More aggressive position sizing possible\n- Greater confidence in trading decisions"
-        }
-      ]
-    },
-    {
       category: "Withdrawals & Profit Sharing",
       questions: [
         {
