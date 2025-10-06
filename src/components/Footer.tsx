@@ -34,7 +34,7 @@ const Footer = () => {
   ];
 
   const programs = [
-    "Rhino Rush", "Phoenix Rise", "Account Scaling", "Risk Management"
+    "Phoenix Rise", "Rhino Rush", "Bull Charge", "Account Scaling", "Risk Management"
   ];
 
   return (

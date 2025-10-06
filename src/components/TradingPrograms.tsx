@@ -13,13 +13,13 @@ const TradingPrograms = () => {
 
   const programs = [
     {
-      name: "Rhino Rush (Instant Funding)",
+      name: "Phoenix Rise (Instant Funding)",
       subtitle: "Instant Funding",
-      description: "Prove your divine trading prowess with our instant funding program.",
+      description: "Get funded instantly and start trading with our most premium program. Full entry fee refund with your first payout!",
       accountSizes: ["$2,500", "$5,000", "$10,000", "$25,000", "$50,000", "$100,000"],
       accountValues: ["2500", "5000", "10000", "25000", "50000", "100000"],
-      prices: ["$109", "$209", "$399", "$999", "$1989", "$3989"],
-      programKey: "heracles",
+      prices: ["$109", "$209", "$399", "$999", "$1,989", "$3,889"],
+      programKey: "phoenix",
       tableData: [
         {
           label: "Daily Drawdown",
@@ -31,13 +31,13 @@ const TradingPrograms = () => {
         },
         {
           label: "1st Withdrawal",
-          subtitle: "5 Min Trading Days",
+          subtitle: "10% Profit Target, 5 Min Trading Days",
           values: ["$250 (10%)", "$500 (10%)", "$1,000 (10%)", "$2,500 (10%)", "$5,000 (10%)", "$10,000 (10%)"],
           profitSplit: "70:30 Profit Split"
         },
         {
           label: "2nd Withdrawal & All Subsequent",
-          subtitle: "Daily withdrawal if 5% hit OR 5 Min Trading Days",
+          subtitle: "5% for Daily Withdrawal OR 5 Min Trading Days",
           values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1,250 (5%)", "$2,500 (5%)", "$5,000 (5%)"],
           profitSplit: "70:30 Profit Split"
         },
@@ -51,7 +51,7 @@ const TradingPrograms = () => {
         },
         {
           label: "Fee Refund", 
-          values: ["No", "No", "No", "No", "No", "No"]
+          values: ["Yes", "Yes", "Yes", "Yes", "Yes", "Yes"]
         },
         {
           label: "Scaling",
@@ -64,39 +64,33 @@ const TradingPrograms = () => {
       ]
     },
     {
-      name: "Phoenix Rise (2 Step Challenge)",
-      subtitle: "2 Step Challenge",
-      description: "Rule the markets like a god with our most prestigious 2-step challenge program.",
+      name: "Rhino Rush (1 Step Challenge)",
+      subtitle: "1 Step Challenge",
+      description: "One evaluation step to prove yourself and get funded quickly. Pass in just 1 day!",
       accountSizes: ["$2,500", "$5,000", "$10,000", "$25,000", "$50,000", "$100,000"],
       accountValues: ["2500", "5000", "10000", "25000", "50000", "100000"],
-      prices: ["$27", "$47", "$87", "$187", "$367", "$567"],
-      programKey: "zeus",
+      prices: ["$59", "$99", "$159", "$299", "$559", "$799"],
+      programKey: "rhino",
       tableData: [
         {
           label: "Daily Drawdown",
-          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1,250 (5%)", "$2,500 (5%)", "$5,000 (5%)"]
+          values: ["$100 (4%)", "$200 (4%)", "$400 (4%)", "$1,000 (4%)", "$2,000 (4%)", "$4,000 (4%)"]
         },
         {
           label: "Overall Drawdown",
+          values: ["$200 (8%)", "$400 (8%)", "$800 (8%)", "$2,000 (8%)", "$4,000 (8%)", "$8,000 (8%)"]
+        },
+        {
+          label: "Challenge Profit Target",
           values: ["$250 (10%)", "$500 (10%)", "$1,000 (10%)", "$2,500 (10%)", "$5,000 (10%)", "$10,000 (10%)"]
         },
         {
-          label: "Profit Target Phase 1",
-          values: ["$250 (10%)", "$500 (10%)", "$1,000 (10%)", "$2,500 (10%)", "$5,000 (10%)", "$10,000 (10%)"]
+          label: "Min Challenge Days",
+          values: ["1 Day", "1 Day", "1 Day", "1 Day", "1 Day", "1 Day"]
         },
         {
-          label: "Profit Target Phase 2",
-          values: ["$125 (5%)", "$250 (5%)", "$750 (5%)", "$1,250 (5%)", "$2,500 (5%)", "$5,000 (5%)"]
-        },
-        {
-          label: "1st Withdrawal (Funded Stage)",
-          subtitle: "5 Min Trading Days",
-          values: ["$250 (10%)", "$500 (10%)", "$1,000 (10%)", "$2,500 (10%)", "$5,000 (10%)", "$10,000 (10%)"],
-          profitSplit: "70:30 Profit Split"
-        },
-        {
-          label: "2nd Withdrawal & All Subsequent",
-          subtitle: "Daily withdrawal if 5% hit OR 5 Min Trading Days",
+          label: "Funded Withdrawals",
+          subtitle: "5% for Daily Withdrawal OR 5 Min Trading Days",
           values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1,250 (5%)", "$2,500 (5%)", "$5,000 (5%)"],
           profitSplit: "70:30 Profit Split"
         },
@@ -110,7 +104,64 @@ const TradingPrograms = () => {
         },
         {
           label: "Fee Refund",
-          values: ["Yes", "Yes", "Yes", "Yes", "Yes", "Yes"]
+          values: ["No", "No", "No", "No", "No", "No"]
+        },
+        {
+          label: "Scaling",
+          values: ["No Scaling", "2x After 10 Payouts", "2.5x After 10 Payouts", "2x After 10 Payouts", "2x After 10 Payouts", "2x After 10 Payouts"]
+        },
+        {
+          label: "Max Scaling",
+          values: ["None", "$50,000", "$100,000", "$250,000", "$500,000", "$1,000,000"]
+        }
+      ]
+    },
+    {
+      name: "Bull Charge (2 Step Challenge)",
+      subtitle: "2 Step Challenge",
+      description: "Master the art of trading with our comprehensive two-step evaluation program. Most affordable entry point!",
+      accountSizes: ["$2,500", "$5,000", "$10,000", "$25,000", "$50,000", "$100,000"],
+      accountValues: ["2500", "5000", "10000", "25000", "50000", "100000"],
+      prices: ["$29", "$49", "$89", "$189", "$369", "$569"],
+      programKey: "bull",
+      tableData: [
+        {
+          label: "Daily Drawdown",
+          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1,250 (5%)", "$2,500 (5%)", "$5,000 (5%)"]
+        },
+        {
+          label: "Overall Drawdown",
+          values: ["$250 (10%)", "$500 (10%)", "$1,000 (10%)", "$2,500 (10%)", "$5,000 (10%)", "$10,000 (10%)"]
+        },
+        {
+          label: "Phase 1 Profit Target",
+          values: ["$250 (10%)", "$500 (10%)", "$1,000 (10%)", "$2,500 (10%)", "$5,000 (10%)", "$10,000 (10%)"]
+        },
+        {
+          label: "Phase 2 Profit Target",
+          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1,250 (5%)", "$2,500 (5%)", "$5,000 (5%)"]
+        },
+        {
+          label: "Min Challenge Days",
+          values: ["1 Day Each", "1 Day Each", "1 Day Each", "1 Day Each", "1 Day Each", "1 Day Each"]
+        },
+        {
+          label: "Funded Withdrawals",
+          subtitle: "5% for Daily Withdrawal OR 5 Min Trading Days",
+          values: ["$125 (5%)", "$250 (5%)", "$500 (5%)", "$1,250 (5%)", "$2,500 (5%)", "$5,000 (5%)"],
+          profitSplit: "70:30 Profit Split"
+        },
+        {
+          label: "Max Trading Days",
+          values: ["Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited", "Unlimited"]
+        },
+        {
+          label: "Available Leverage",
+          values: ["1:30", "1:30", "1:30", "1:30", "1:30", "1:30"]
+        },
+        {
+          label: "Fee Refund",
+          values: ["No", "No", "No", "No", "No", "No"]
         },
         {
           label: "Scaling",
@@ -129,34 +180,40 @@ const TradingPrograms = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-            ⚔️ Choose Your Divine Path ⚔️
+            ⚔️ Choose Your Trading Path ⚔️
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Select your cosmic trading program and begin your ascension to trading godhood
+            Select your trading program and begin your journey with FundedGiants - Your Daily Payout A-Book Prop Trading Firm
           </p>
         </div>
 
         {/* Tabbed Program Selector */}
-        <Tabs defaultValue="heracles" className="max-w-7xl mx-auto">
-          <TabsList className="grid w-full grid-cols-2 mb-12 bg-cosmic-card border border-cosmic-purple/30">
+        <Tabs defaultValue="phoenix" className="max-w-7xl mx-auto">
+          <TabsList className="grid w-full grid-cols-3 mb-12 bg-cosmic-card border border-cosmic-purple/30">
             <TabsTrigger 
-              value="heracles" 
+              value="phoenix" 
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white"
+            >
+              Phoenix Rise
+            </TabsTrigger>
+            <TabsTrigger 
+              value="rhino"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white"
             >
               Rhino Rush
             </TabsTrigger>
             <TabsTrigger 
-              value="zeus"
+              value="bull"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white"
             >
-              Phoenix Rise
+              Bull Charge
             </TabsTrigger>
           </TabsList>
 
-          {programs.map((program, programIndex) => (
+          {programs.map((program) => (
             <TabsContent 
-              key={program.name.toLowerCase().replace(' ', '')} 
-              value={programIndex === 0 ? 'heracles' : 'zeus'}
+              key={program.programKey} 
+              value={program.programKey}
             >
               <Card className="bg-cosmic-card border-cosmic-purple/30 shadow-cosmic backdrop-blur-sm">
                 <CardHeader className="text-center pb-8">

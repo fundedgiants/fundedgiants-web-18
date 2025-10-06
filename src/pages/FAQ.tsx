@@ -12,11 +12,11 @@ const FAQ = () => {
       questions: [
         {
           question: "What is FundedGiants?",
-          answer: "FundedGiants is a divine proprietary trading firm that provides funding up to $200,000 to skilled traders, with the potential to scale up to $1,000,000. We offer two celestial programs: Rhino Rush (instant funding) and Phoenix Rise (two-step evaluation). Our mission is to empower talented traders with the capital they need to achieve their trading goals while maintaining transparent and fair rules."
+          answer: "FundedGiants is a Daily Payout A-Book Proprietary Trading Firm that provides funding up to $100,000 to skilled traders, with the potential to scale up to $1,000,000. We offer three programs: Phoenix Rise (instant funding), Rhino Rush (1-step challenge), and Bull Charge (2-step challenge). Our mission is to empower talented traders with the capital they need to achieve their trading goals while maintaining transparent and fair rules."
         },
         {
           question: "How do I get started with FundedGiants?",
-          answer: "Getting started is simple:\n1. Choose your divine path from our two programs (Rhino Rush or Phoenix Rise)\n2. Select your preferred account size ($2,500 to $200,000)\n3. Complete the registration and payment process\n4. Receive your trading credentials within 24 hours\n5. Begin trading according to your program's rules\n6. Start earning profits and request withdrawals\n\nOur cosmic support team will guide you through each step of the journey."
+          answer: "Getting started is simple:\n1. Choose your program from our three options (Phoenix Rise, Rhino Rush, or Bull Charge)\n2. Select your preferred account size ($2,500 to $100,000)\n3. Complete the registration and payment process\n4. Receive your trading credentials within 24 hours\n5. Begin trading according to your program's rules\n6. Start earning profits and request withdrawals\n\nOur support team will guide you through each step of the journey."
         },
         {
           question: "What trading platforms do you support?",
@@ -32,8 +32,8 @@ const FAQ = () => {
       category: "Account Types & Programs",
       questions: [
         {
-          question: "What's the difference between Rhino Rush and Phoenix Rise programs?",
-          answer: "**Rhino Rush (Instant Funding):**\n- Immediate access to funded account\n- No evaluation phase required\n- Higher entry cost but instant gratification\n- Graduated profit splits: 50% → 60% → 70%\n- Perfect for experienced traders\n\n**Phoenix Rise (2-Step Challenge):**\n- Two evaluation phases\n- Phase 1: 10% profit target, Phase 2: 5% profit target\n- 70% profit split from first payout\n- Lowest entry cost\n- Ideal for new or budget-conscious traders"
+          question: "What's the difference between Phoenix Rise, Rhino Rush, and Bull Charge programs?",
+          answer: "**Phoenix Rise (Instant Funding):**\n- Immediate access to funded account\n- No evaluation phase required\n- Higher entry cost but instant access\n- 70% profit split from first payout\n- Full entry fee refund with first payout\n- Perfect for experienced traders\n\n**Rhino Rush (1-Step Challenge):**\n- One evaluation phase with 10% profit target\n- Can pass in just 1 day\n- Mid-range pricing\n- 70% profit split from first payout\n- Ideal for skilled traders\n\n**Bull Charge (2-Step Challenge):**\n- Two evaluation phases\n- Phase 1: 10% profit target, Phase 2: 5% profit target\n- Can pass each phase in 1 day\n- 70% profit split from first payout\n- Lowest entry cost\n- Perfect for new or budget-conscious traders"
         },
         {
           question: "What account sizes are available?",
@@ -58,7 +58,7 @@ const FAQ = () => {
         },
         {
           question: "How does the maximum drawdown work?",
-          answer: "Maximum drawdown varies by program and is calculated from your highest balance achieved (high-water mark).\n\n**Drawdown Limits:**\n- **Rhino Rush**: 7% for all account sizes\n- **Phoenix Rise**: 8% for all account sizes\n\n**How it works:**\n- Calculated from your highest closed balance\n- Never resets - always from highest point\n- Based on closed equity, not floating P&L\n\n**Example with $10,000 account (8% max drawdown):**\n- Starting balance: $10,000 → Max drawdown line: $9,200\n- Account grows to $12,000 → New max drawdown line: $11,040\n- Account grows to $15,000 → New max drawdown line: $13,800\n\n**Important:** Your closed equity must never fall below the maximum drawdown line."
+          answer: "Maximum drawdown varies by program and is calculated from your highest balance achieved (high-water mark).\n\n**Daily Drawdown Limits:**\n- **Phoenix Rise**: 4% daily, 7% overall\n- **Rhino Rush**: 4% daily, 8% overall\n- **Bull Charge**: 5% daily, 10% overall\n\n**How it works:**\n- Daily drawdown resets each day at market open\n- Overall drawdown calculated from your highest closed balance\n- Never resets - always from highest point\n- Based on closed equity, not floating P&L\n\n**Example with $10,000 account (5% daily, 10% overall):**\n- Starting balance: $10,000 → Overall drawdown line: $9,000\n- Daily drawdown: Cannot lose more than $500 in a single day\n- Account grows to $12,000 → New overall drawdown line: $10,800\n- Account grows to $15,000 → New overall drawdown line: $13,500\n\n**Important:** Your closed equity must never fall below the maximum drawdown line."
         },
         {
           question: "What is the Consistency Rule?",
@@ -100,7 +100,7 @@ const FAQ = () => {
         },
         {
           question: "How do profit splits work in practice?",
-          answer: "**Standard Profit Splits:**\n\n**Rhino Rush Program:**\n- 1st payout: 50% to trader, 50% to firm\n- 2nd payout: 60% to trader, 40% to firm\n- 3rd+ payouts: 70% to trader, 30% to firm\n\n**Phoenix Rise Program:**\n- All payouts: 70% to trader, 30% to firm\n- Consistent from first withdrawal\n\n**With 80:20 Add-on (+50% fee):**\n- All payouts: 80% to trader, 20% to firm\n- Applies from very first withdrawal\n- Significant earning enhancement\n\n**Practical Examples:**\n\n**$1,000 Profit on Phoenix Rise Program:**\n- Standard split: You receive $700, firm keeps $300\n- With 80:20 add-on: You receive $800, firm keeps $200\n\n**$5,000 Profit on Rhino Rush Program:**\n- 1st payout: You receive $2,500, firm keeps $2,500\n- 2nd payout: You receive $3,000, firm keeps $2,000\n- 3rd+ payout: You receive $3,500, firm keeps $1,500\n\n**Calculation Method:**\n- Based on net profits after covering losses\n- Applied to each individual withdrawal\n- Transparent calculation provided"
+          answer: "**Profit Split (All Programs):**\n- All payouts: 70% to trader, 30% to firm\n- Consistent across all three programs\n- Applied from very first withdrawal\n\n**Withdrawal Conditions:**\n\n**Phoenix Rise (Instant Funding):**\n- 1st withdrawal: Must hit 10% profit, minimum 5 trading days\n- 2nd+ withdrawals: Must hit 5% profit for daily withdrawal OR withdraw every 5 trading days\n\n**Rhino Rush & Bull Charge (Challenge Programs):**\n- Funded stage: Must hit 5% profit for daily withdrawal OR withdraw every 5 trading days\n- Can withdraw multiple times daily if you keep hitting 5% profit\n\n**Practical Examples:**\n\n**$1,000 Profit:**\n- You receive $700, firm keeps $300\n\n**$5,000 Profit:**\n- You receive $3,500, firm keeps $1,500\n\n**Daily Payout Example:**\n- Hit 5% on Monday morning → Request payout → Get funded same day\n- Hit another 5% Monday afternoon → Request another payout → Get funded same day\n- Continue as long as you keep hitting the 5% threshold\n\n**Calculation Method:**\n- Based on net profits after covering losses\n- Applied to each individual withdrawal\n- Transparent calculation provided"
         },
         {
           question: "Are there any hidden fees or charges?",

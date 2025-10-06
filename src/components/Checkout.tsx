@@ -53,7 +53,7 @@ const Checkout = () => {
   } | null>(null);
   
   const [checkoutData, setCheckoutData] = useState<CheckoutState>({
-    program: searchParams.get('program') || 'heracles',
+    program: searchParams.get('program') || 'phoenix',
     accountSize: searchParams.get('size') || '2500',
     platform: 'MT5',
     priceFeed: 'real',
@@ -74,7 +74,7 @@ const Checkout = () => {
 
   useEffect(() => {
     const program = checkoutData.program;
-    if (program === 'heracles') {
+    if (program === 'phoenix') {
         setCheckoutData(prev => ({ ...prev, priceFeed: 'real' }));
     } else {
         setCheckoutData(prev => ({ ...prev, priceFeed: 'simulated' }));
@@ -82,17 +82,27 @@ const Checkout = () => {
   }, [checkoutData.program]);
 
   const programs = {
-    heracles: { name: 'Rhino Rush (Instant Funding)', subtitle: 'Instant Funding' },
-    zeus: { name: 'Phoenix Rise (2 Step Challenge)', subtitle: '2 Step Challenge' }
+    phoenix: { name: 'Phoenix Rise (Instant Funding)', subtitle: 'Instant Funding' },
+    rhino: { name: 'Rhino Rush (1 Step Challenge)', subtitle: '1 Step Challenge' },
+    bull: { name: 'Bull Charge (2 Step Challenge)', subtitle: '2 Step Challenge' }
+  };
+
+  const getPriceForAccount = (program: string, size: string): number => {
+    const prices: Record<string, Record<string, number>> = {
+      phoenix: { '2500': 109, '5000': 209, '10000': 399, '25000': 999, '50000': 1989, '100000': 3889 },
+      rhino: { '2500': 59, '5000': 99, '10000': 159, '25000': 299, '50000': 559, '100000': 799 },
+      bull: { '2500': 29, '5000': 49, '10000': 89, '25000': 189, '50000': 369, '100000': 569 }
+    };
+    return prices[program]?.[size] || 0;
   };
 
   const accountSizes = [
-    { value: '2500', label: '$2,500', price: checkoutData.program === 'heracles' ? 109 : 27 },
-    { value: '5000', label: '$5,000', price: checkoutData.program === 'heracles' ? 209 : 47 },
-    { value: '10000', label: '$10,000', price: checkoutData.program === 'heracles' ? 399 : 87 },
-    { value: '25000', label: '$25,000', price: checkoutData.program === 'heracles' ? 999 : 187 },
-    { value: '50000', label: '$50,000', price: checkoutData.program === 'heracles' ? 1989 : 367 },
-    { value: '100000', label: '$100,000', price: checkoutData.program === 'heracles' ? 3989 : 567 }
+    { value: '2500', label: '$2,500', price: getPriceForAccount(checkoutData.program, '2500') },
+    { value: '5000', label: '$5,000', price: getPriceForAccount(checkoutData.program, '5000') },
+    { value: '10000', label: '$10,000', price: getPriceForAccount(checkoutData.program, '10000') },
+    { value: '25000', label: '$25,000', price: getPriceForAccount(checkoutData.program, '25000') },
+    { value: '50000', label: '$50,000', price: getPriceForAccount(checkoutData.program, '50000') },
+    { value: '100000', label: '$100,000', price: getPriceForAccount(checkoutData.program, '100000') }
   ];
 
   const steps = [
@@ -362,7 +372,8 @@ const Checkout = () => {
       case 2:
         const platforms = [
           { value: 'MT5', label: 'MetaTrader 5' },
-          { value: 'MatchTrader', label: 'MatchTrader' }
+          { value: 'cTrader', label: 'cTrader' },
+          { value: 'Match-Trader', label: 'Match-Trader' }
         ];
         return (
           <div className="space-y-6">

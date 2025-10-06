@@ -9,7 +9,7 @@ const Testimonials = () => {
     {
       name: "Marcus Johnson",
       role: "Professional Trader",
-      content: "FundedGiants transformed my trading career. The instant funding program allowed me to scale quickly without the stress of lengthy evaluations.",
+      content: "FundedGiants transformed my trading career. The Phoenix Rise program allowed me to scale quickly and receive daily payouts.",
       rating: 5,
       avatar: "MJ"
     },

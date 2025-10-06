@@ -41,7 +41,7 @@ const Hero = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             <div className="flex flex-col items-center p-6 bg-card/20 backdrop-blur-sm rounded-lg border border-primary/20">
               <TrendingUp className="h-12 w-12 text-primary mb-4" />
-              <h3 className="text-xl font-semibold mb-2 text-foreground">Instant Funding</h3>
+              <h3 className="text-xl font-semibold mb-2 text-foreground">Daily Payouts</h3>
               <p className="text-muted-foreground text-center">Get trading capital immediately with our Heracles program</p>
             </div>
             

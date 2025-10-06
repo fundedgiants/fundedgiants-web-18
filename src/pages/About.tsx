@@ -62,7 +62,7 @@ const About = () => {
               {
                 icon: Zap,
                 title: "Speed",
-                description: "Lightning-fast evaluations, instant funding, and 24-hour maximum payout processing."
+                description: "Lightning-fast evaluations, daily payouts, and 24-hour maximum payout processing."
               },
               {
                 icon: Trophy,
